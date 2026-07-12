@@ -10,7 +10,7 @@ content:
     path: blog              # Storing articles in the existing blog folder
     extension: html
     format: raw
-    filename: "{year}-{month}-{day}-{slug}" 
+    filename: "{year}-{month}-{day}-{slug}.html" 
 
     fields:
       - name: title

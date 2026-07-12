@@ -60,11 +60,54 @@
                     <p>Read reflections on mindfulness, spiritual practices, and critiques of modern life.</p>
                 </div>
 
-                <div class="grid grid-2" id="blog-grid" style="max-width: 900px; margin: 2rem auto 0 auto;">
-                    <!-- Dynamically populated from blog/index.json -->
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
-                        <p style="color: var(--text-light);">Loading reflections...</p>
+                <div class="blog-layout">
+                    <!-- Left Column: Blog Feed -->
+                    <div class="blog-feed-column">
+                        <div class="grid grid-2" id="blog-grid" style="margin: 0;">
+                            <!-- Dynamically populated from blog/index.json -->
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
+                                <p style="color: var(--text-light);">Loading reflections...</p>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- Right Column: Sidebar -->
+                    <aside class="blog-sidebar">
+                        <!-- Filter Status Widget -->
+                        <div id="filter-status-container"
+                            style="display: none; background-color: var(--accent-sage-light); border: 1px solid var(--border-color); padding: 1.25rem; border-radius: 12px; margin-bottom: 2rem;">
+                            <p
+                                style="font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--text-primary); font-weight: 500;">
+                                Topic: <span id="active-filter-type"
+                                    style="font-weight: 700; color: var(--accent-sage);"></span>
+                            </p>
+                            <button id="clear-filter-btn" class="btn btn-secondary"
+                                style="padding: 0.4rem 1rem; font-size: 0.8rem; width: 100%;">Clear Filter</button>
+                        </div>
+
+                        <!-- Sidebar Widget: Recent Reflections -->
+                        <div class="sidebar-widget recent-widget"
+                            style="background-color: var(--white); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px; margin-bottom: 2.5rem;">
+                            <h3
+                                style="font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--accent-sage-light); padding-bottom: 0.75rem;">
+                                Recent Reflections</h3>
+                            <ul id="sidebar-recent-posts"
+                                style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.25rem;">
+                                <!-- Dynamically populated -->
+                            </ul>
+                        </div>
+
+                        <!-- Sidebar Widget: Explore Topics -->
+                        <div class="sidebar-widget tags-widget"
+                            style="background-color: var(--white); border: 1px solid var(--border-color); padding: 2rem; border-radius: 12px;">
+                            <h3
+                                style="font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--accent-sage-light); padding-bottom: 0.75rem;">
+                                Explore Topics</h3>
+                            <div id="sidebar-tags" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </div>
         </section>
@@ -287,6 +330,91 @@
                 detailSection.style.display = 'none';
 
                 const gridContainer = document.getElementById('blog-grid');
+                const recentContainer = document.getElementById('sidebar-recent-posts');
+                const tagsContainer = document.getElementById('sidebar-tags');
+                const filterContainer = document.getElementById('filter-status-container');
+                const filterText = document.getElementById('active-filter-type');
+                const clearFilterBtn = document.getElementById('clear-filter-btn');
+
+                let allPosts = [];
+                let activeTag = null;
+
+                function renderCards(postsList) {
+                    gridContainer.innerHTML = '';
+                    if (postsList.length === 0) {
+                        gridContainer.innerHTML = `
+                            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
+                                <p style="color: var(--text-light);">No articles match the selected topic.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    postsList.forEach(post => {
+                        let displayDate = post.date;
+                        if (post.date) {
+                            const dateParts = post.date.split('-');
+                            if (dateParts.length === 3) {
+                                const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                                displayDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                            }
+                        }
+
+                        const primaryCategory = post.tags && post.tags.length > 0 ? post.tags[0] : 'Reflection';
+
+                        const card = document.createElement('article');
+                        card.className = 'article-card';
+                        card.innerHTML = `
+                            <div class="article-image-box">
+                                <img src="${post.image}" alt="${post.title}" class="article-img">
+                            </div>
+                            <div class="article-content">
+                                <span class="article-cat">${primaryCategory}</span>
+                                <h3><a href="blog.html?post=${post.slug}">${post.title}</a></h3>
+                                <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
+                                    ${post.excerpt}
+                                </p>
+                                <div class="article-footer">
+                                    <span>${displayDate}</span>
+                                    <a href="blog.html?post=${post.slug}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                </div>
+                            </div>
+                        `;
+                        gridContainer.appendChild(card);
+                    });
+                }
+
+                function applyFilter(tag) {
+                    activeTag = tag;
+                    if (tag) {
+                        filterContainer.style.display = 'block';
+                        filterText.textContent = tag;
+                        const filtered = allPosts.filter(p => p.tags && p.tags.some(t => t.toLowerCase() === tag.toLowerCase()));
+                        renderCards(filtered);
+
+                        // Highlight active tag pill
+                        document.querySelectorAll('.tags-widget .post-tag-pill').forEach(pill => {
+                            if (pill.dataset.tag === tag) {
+                                pill.style.backgroundColor = 'var(--accent-sage)';
+                                pill.style.color = 'var(--white)';
+                                pill.style.borderColor = 'var(--accent-sage)';
+                            } else {
+                                pill.style.backgroundColor = 'var(--accent-sage-light)';
+                                pill.style.color = 'var(--accent-sage)';
+                                pill.style.borderColor = 'var(--border-color)';
+                            }
+                        });
+                    } else {
+                        filterContainer.style.display = 'none';
+                        renderCards(allPosts);
+
+                        document.querySelectorAll('.tags-widget .post-tag-pill').forEach(pill => {
+                            pill.style.backgroundColor = 'var(--accent-sage-light)';
+                            pill.style.color = 'var(--accent-sage)';
+                            pill.style.borderColor = 'var(--border-color)';
+                        });
+                    }
+                }
 
                 // Fetch index with cache-busting query parameter
                 fetch(`blog/index.json?_t=${new Date().getTime()}`)
@@ -297,48 +425,66 @@
                         return response.json();
                     })
                     .then(posts => {
-                        gridContainer.innerHTML = '';
-                        if (posts.length === 0) {
-                            gridContainer.innerHTML = `
-                                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
-                                    <p style="color: var(--text-light);">No articles posted yet.</p>
-                                </div>
-                            `;
-                            return;
-                        }
+                        allPosts = posts;
 
-                        posts.forEach(post => {
+                        // 1. Render Main Cards
+                        renderCards(allPosts);
+
+                        // 2. Populate Recent Reflections Sidebar Widget (up to 5 posts)
+                        recentContainer.innerHTML = '';
+                        const recentPosts = allPosts.slice(0, 5);
+                        recentPosts.forEach(post => {
                             let displayDate = post.date;
                             if (post.date) {
                                 const dateParts = post.date.split('-');
                                 if (dateParts.length === 3) {
                                     const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                                    displayDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                                    displayDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                                 }
                             }
-
-                            const primaryCategory = post.tags && post.tags.length > 0 ? post.tags[0] : 'Reflection';
-
-                            const card = document.createElement('article');
-                            card.className = 'article-card';
-                            card.innerHTML = `
-                                <div class="article-image-box">
-                                    <img src="${post.image}" alt="${post.title}" class="article-img">
-                                </div>
-                                <div class="article-content">
-                                    <span class="article-cat">${primaryCategory}</span>
-                                    <h3><a href="blog.html?post=${post.slug}">${post.title}</a></h3>
-                                    <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
-                                        ${post.excerpt}
-                                    </p>
-                                    <div class="article-footer">
-                                        <span>${displayDate}</span>
-                                        <a href="blog.html?post=${post.slug}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
-                                    </div>
-                                </div>
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <a href="blog.html?post=${post.slug}" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; display: block; margin-bottom: 0.25rem;">
+                                    ${post.title}
+                                </a>
+                                <span style="font-size: 0.8rem; color: var(--text-light);">${displayDate}</span>
                             `;
-                            gridContainer.appendChild(card);
+                            recentContainer.appendChild(li);
                         });
+
+                        // 3. Populate Unique Tags Explore Topics Widget
+                        tagsContainer.innerHTML = '';
+                        const uniqueTags = new Set();
+                        allPosts.forEach(post => {
+                            if (post.tags) {
+                                post.tags.forEach(t => uniqueTags.add(t));
+                            }
+                        });
+
+                        if (uniqueTags.size > 0) {
+                            uniqueTags.forEach(tag => {
+                                const pill = document.createElement('button');
+                                pill.className = 'post-tag-pill';
+                                pill.dataset.tag = tag;
+                                pill.textContent = tag;
+                                pill.style.cursor = 'pointer';
+                                pill.style.fontSize = '0.75rem';
+                                pill.style.padding = '0.3rem 0.9rem';
+                                pill.addEventListener('click', () => {
+                                    if (activeTag === tag) {
+                                        applyFilter(null); // toggle off
+                                    } else {
+                                        applyFilter(tag);
+                                    }
+                                });
+                                tagsContainer.appendChild(pill);
+                            });
+                        } else {
+                            tagsContainer.innerHTML = '<span style="font-size: 0.85rem; color: var(--text-light);">No topics listed.</span>';
+                        }
+
+                        // Attach clear button listener
+                        clearFilterBtn.addEventListener('click', () => applyFilter(null));
                     })
                     .catch(err => {
                         console.error('Failed to load JSON index, falling back to static markup: ', err);

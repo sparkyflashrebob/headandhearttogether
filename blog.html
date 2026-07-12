@@ -172,8 +172,8 @@
                 listSection.style.display = 'none';
                 detailSection.style.display = 'block';
 
-                // Fetch the HTML content
-                fetch(`blog/${postSlug}.html`)
+                // Fetch the HTML content with cache-busting query parameter
+                fetch(`blog/${postSlug}.html?_t=${new Date().getTime()}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Post not found');
@@ -288,7 +288,8 @@
 
                 const gridContainer = document.getElementById('blog-grid');
 
-                fetch('blog/index.json')
+                // Fetch index with cache-busting query parameter
+                fetch(`blog/index.json?_t=${new Date().getTime()}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Index not found');

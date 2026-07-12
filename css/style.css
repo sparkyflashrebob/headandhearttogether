@@ -1046,3 +1046,24 @@ footer a:hover {
     max-height: 300px;
   }
 }
+
+.post-tag-pill {
+  display: inline-block;
+  background-color: var(--accent-sage-light);
+  color: var(--accent-sage);
+  padding: 0.4rem 1.15rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+  transition: var(--transition-fast);
+  cursor: default;
+}
+
+.post-tag-pill:hover {
+  background-color: var(--accent-sage);
+  color: var(--white);
+  border-color: var(--accent-sage);
+}

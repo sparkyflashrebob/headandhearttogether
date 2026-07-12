@@ -9,7 +9,8 @@ content:
     type: collection
     path: blog              # Storing articles in the existing blog folder
     extension: html
-    format: raw
+    format: yaml-frontmatter
+    delimiters: ["<!--", "-->"]
     filename: "{year}-{month}-{day}-{slug}.html" 
 
     fields:
@@ -17,6 +18,16 @@ content:
         label: Post Title
         type: string
         required: true
+
+      - name: date
+        label: Publish Date
+        type: date
+        required: true
+
+      - name: tags
+        label: Tags (comma-separated)
+        type: string
+        required: false
 
       - name: body
         label: Visual Post Editor

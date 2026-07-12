@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar of Events - Head & Heart Together</title>
+    <meta name="description"
+        content="Join our weekly online mindful council gatherings. Thursdays 5pm - 6pm PST. Learn about our schedule and RSVP today.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="images/icon.jpeg" type="image/x-icon">
+</head>
+
+<body>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="container Navbar-wrapper">
+            <nav class="navbar">
+                <a href="index.html" class="brand">
+                    <img src="images/logo_black.png" alt="Head & Heart Together Logo" class="brand-logo">
+                    <span class="brand-text">Head & Heart Together</span>
+                </a>
+                <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="events.html" class="active">Calendar of Events</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Subpage Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Calendar of Events</h1>
+            <div class="breadcrumbs">
+                <a href="index.html">Home</a>
+                <span class="separator"></span>
+                <span class="current">Calendar of Events</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Calendar Section -->
+        <section class="section" style="padding: 5rem 0;">
+            <div class="container text-center">
+                <div
+                    style="background-color: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-subtle);">
+                    <div style="position: relative; padding-bottom: 60%; height: 0; overflow: hidden; max-width: 100%;">
+                        <iframe
+                            src="https://calendar.google.com/calendar/embed?src=headandhearttogether%40gmail.com&ctz=America%2FLos_Angeles"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                            frameborder="0" scrolling="no"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP Form Section -->
+        <section class="section section-bg" style="border-top: 1px solid var(--border-color); padding: 5rem 0;">
+            <div class="container" style="max-width: 650px; margin: 0 auto;">
+                <!-- RSVP Form -->
+                <div class="contact-info" style="padding: 3.5rem; box-shadow: var(--shadow-medium);">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 1.6rem; text-align: center;">RSVP for Next Session</h3>
+                    <p style="font-size: 0.95rem; margin-bottom: 2.5rem; color: var(--text-light); text-align: center;">
+                        Sign up below to secure your spot and receive the private online Google Meet details.</p>
+
+                    <form id="contactForm">
+                        <!-- Uses contactForm ID to tap into main.js simulated validation/success flow -->
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="session">Select Date</label>
+                            <select id="session" class="form-control">
+                                <option>Next Thursday at 5:00 PM PST</option>
+                                <option>Following Thursday at 5:00 PM PST</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Anything you'd like to share? (Optional)</label>
+                            <textarea id="message" class="form-control"
+                                placeholder="Any topics you're interested in exploring?"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">RSVP & Get Link</button>
+
+                        <div id="formFeedback" class="form-feedback"></div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="grid footer-top">
+                <div class="footer-brand">
+                    <h2>Head & Heart</h2>
+                    <p>Explorations of mindfulness, spirituality, and modern life to cultivate empathy and resilience.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h3>Explore</h3>
+                    <ul class="nav-links footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="events.html">Calendar of Events</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Get In Touch</h3>
+                    <p style="color: #8D9892; margin-bottom: 1rem;">Weekly gatherings are hosted online via Zoom.</p>
+                    <p style="color: #CDD4D0; font-weight: 500;">Phone: <a href="tel:+14156370348">+1 (415) 637-0348</a>
+                    </p>
+                    <p style="color: #CDD4D0; font-weight: 500;">Email: <a
+                            href="mailto:info@headhearttogether.com">info@headhearttogether.com</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Head & Heart Together. All Rights Reserved.</p>
+                <div class="footer-legal-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

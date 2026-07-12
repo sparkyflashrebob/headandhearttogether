@@ -61,27 +61,10 @@
                 </div>
 
                 <div class="grid grid-2" id="blog-grid" style="max-width: 900px; margin: 2rem auto 0 auto;">
-                    <!-- Blog Card 1 -->
-                    <article class="article-card">
-                        <div class="article-image-box">
-                            <img src="images/blog/image-1.png" alt="Silent Mind Meditation" class="article-img">
-                        </div>
-                        <div class="article-content">
-                            <span class="article-cat">Mindfulness</span>
-                            <h3><a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind">The Myth of the Quiet
-                                    Mind</a></h3>
-                            <p
-                                style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
-                                True meditation isn't about stopping thoughts. It's about changing how you relate to
-                                them...
-                            </p>
-                            <div class="article-footer">
-                                <span>July 12, 2026</span>
-                                <a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind"
-                                    style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
-                            </div>
-                        </div>
-                    </article>
+                    <!-- Dynamically populated from blog/index.json -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
+                        <p style="color: var(--text-light);">Loading reflections...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -296,6 +279,101 @@
                                 <p style="color: var(--text-light); margin-bottom: 2rem;">We couldn't load the article you are looking for.</p>
                                 <a href="blog.html" class="btn btn-primary">Return to Blog</a>
                             </div>
+                        `;
+                    });
+            } else {
+                // Show list, hide detail
+                listSection.style.display = 'block';
+                detailSection.style.display = 'none';
+
+                const gridContainer = document.getElementById('blog-grid');
+
+                fetch('blog/index.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Index not found');
+                        }
+                        return response.json();
+                    })
+                    .then(posts => {
+                        gridContainer.innerHTML = '';
+                        if (posts.length === 0) {
+                            gridContainer.innerHTML = `
+                                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 0;">
+                                    <p style="color: var(--text-light);">No articles posted yet.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        posts.forEach(post => {
+                            let displayDate = post.date;
+                            if (post.date) {
+                                const dateParts = post.date.split('-');
+                                if (dateParts.length === 3) {
+                                    const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                                    displayDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                                }
+                            }
+
+                            const primaryCategory = post.tags && post.tags.length > 0 ? post.tags[0] : 'Reflection';
+
+                            const card = document.createElement('article');
+                            card.className = 'article-card';
+                            card.innerHTML = `
+                                <div class="article-image-box">
+                                    <img src="${post.image}" alt="${post.title}" class="article-img">
+                                </div>
+                                <div class="article-content">
+                                    <span class="article-cat">${primaryCategory}</span>
+                                    <h3><a href="blog.html?post=${post.slug}">${post.title}</a></h3>
+                                    <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
+                                        ${post.excerpt}
+                                    </p>
+                                    <div class="article-footer">
+                                        <span>${displayDate}</span>
+                                        <a href="blog.html?post=${post.slug}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                    </div>
+                                </div>
+                            `;
+                            gridContainer.appendChild(card);
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Failed to load JSON index, falling back to static markup: ', err);
+                        gridContainer.innerHTML = `
+                            <article class="article-card">
+                                <div class="article-image-box">
+                                    <img src="images/blog/image-1.png" alt="Silent Mind Meditation" class="article-img">
+                                </div>
+                                <div class="article-content">
+                                    <span class="article-cat">Mindfulness</span>
+                                    <h3><a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind">The Myth of the Quiet Mind</a></h3>
+                                    <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
+                                        True meditation isn't about stopping thoughts. It's about changing how you relate to them...
+                                    </p>
+                                    <div class="article-footer">
+                                        <span>July 12, 2026</span>
+                                        <a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                    </div>
+                                </div>
+                            </article>
+                            <article class="article-card">
+                                <div class="article-image-box">
+                                    <img src="images/blog/image-1.png" alt="The Last Act of Care" class="article-img">
+                                </div>
+                                <div class="article-content">
+                                    <span class="article-cat">Reflection</span>
+                                    <h3><a href="blog.html?post=2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light">The Last Act of Care</a></h3>
+                                    <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
+                                        A deep reflection on care, presence, and holding light in moments of transition...
+                                    </p>
+                                    <div class="article-footer">
+                                        <span>July 12, 2026</span>
+                                        <a href="blog.html?post=2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                    </div>
+                                </div>
+                            </article>
                         `;
                     });
             }

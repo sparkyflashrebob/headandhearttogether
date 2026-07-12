@@ -1,0 +1,25 @@
+media:
+  input: images/blog
+  output: /images/blog
+
+content:
+  - name: blog
+    label: Blog Posts
+    type: collection
+    path: blog
+    extension: html
+    format: raw
+    filename: "{year}-{month}-{day}-{slug}" 
+
+    fields:
+      - name: title
+        label: Post Title
+        type: string
+        required: true
+
+      - name: body
+        label: Visual Post Editor
+        type: rich-text    # Activates the WYSIWYG editor interface
+        options:
+          format: html     # <--- Forces the visual editor to output raw HTML instead of Markdown
+        required: true

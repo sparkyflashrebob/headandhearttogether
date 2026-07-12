@@ -260,7 +260,7 @@
 
     <script src="js/main.js"></script>
     <script>
-                document.addEventListener('DOMContentLoaded', function () {
+                        document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(window.location.search);
             const postSlug = params.get('post');
 
@@ -278,6 +278,9 @@
 
             let allPosts = [];
             let activeTag = null;
+
+            // Detect if running locally via file:// protocol
+            const isFileProtocol = window.location.protocol === 'file:';
 
             function renderCards(postsList) {
                 gridContainer.innerHTML = '';
@@ -302,6 +305,9 @@
 
                     const primaryCategory = post.tags && post.tags.length > 0 ? post.tags[0] : 'Reflection';
 
+                    // Adapt link based on protocol (offline file:// points directly to HTML)
+                    const postLink = isFileProtocol ? `blog/${post.slug}.html` : `blog.html?post=${post.slug}`;
+
                     const card = document.createElement('article');
                     card.className = 'article-card';
                     card.innerHTML = `
@@ -310,13 +316,13 @@
                         </div>
                         <div class="article-content">
                             <span class="article-cat">${primaryCategory}</span>
-                            <h3><a href="blog.html?post=${post.slug}">${post.title}</a></h3>
+                            <h3><a href="${postLink}">${post.title}</a></h3>
                             <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
                                 ${post.excerpt}
                             </p>
                             <div class="article-footer">
                                 <span>${displayDate}</span>
-                                <a href="blog.html?post=${post.slug}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                <a href="${postLink}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
                             </div>
                         </div>
                     `;
@@ -387,9 +393,12 @@
                                 displayDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                             }
                         }
+
+                        const postLink = isFileProtocol ? `blog/${post.slug}.html` : `blog.html?post=${post.slug}`;
+
                         const li = document.createElement('li');
                         li.innerHTML = `
-                            <a href="blog.html?post=${post.slug}" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; display: block; margin-bottom: 0.25rem;">
+                            <a href="${postLink}" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; display: block; margin-bottom: 0.25rem;">
                                 ${post.title}
                             </a>
                             <span style="font-size: 0.8rem; color: var(--text-light);">${displayDate}</span>
@@ -612,6 +621,10 @@
                 })
                 .catch(err => {
                     console.error('Failed to load JSON index, falling back to static markup: ', err);
+
+                    const localLink1 = isFileProtocol ? 'blog/2026-07-12-the-myth-of-the-quiet-mind.html' : 'blog.html?post=2026-07-12-the-myth-of-the-quiet-mind';
+                    const localLink2 = isFileProtocol ? 'blog/2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light.html' : 'blog.html?post=2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light';
+
                     gridContainer.innerHTML = `
                         <article class="article-card">
                             <div class="article-image-box">
@@ -619,13 +632,13 @@
                             </div>
                             <div class="article-content">
                                 <span class="article-cat">Mindfulness</span>
-                                <h3><a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind">The Myth of the Quiet Mind</a></h3>
+                                <h3><a href="${localLink1}">The Myth of the Quiet Mind</a></h3>
                                 <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
                                     True meditation isn't about stopping thoughts. It's about changing how you relate to them...
                                 </p>
                                 <div class="article-footer">
                                     <span>July 12, 2026</span>
-                                    <a href="blog.html?post=2026-07-12-the-myth-of-the-quiet-mind" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                    <a href="${localLink1}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
                                 </div>
                             </div>
                         </article>
@@ -635,13 +648,13 @@
                             </div>
                             <div class="article-content">
                                 <span class="article-cat">Reflection</span>
-                                <h3><a href="blog.html?post=2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light">The Last Act of Care</a></h3>
+                                <h3><a href="${localLink2}">The Last Act of Care</a></h3>
                                 <p style="font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1.5rem;">
                                     A deep reflection on care, presence, and holding light in moments of transition...
                                 </p>
                                 <div class="article-footer">
                                     <span>July 12, 2026</span>
-                                    <a href="blog.html?post=2026-07-12-the-last-act-of-care-death-resistance-and-being-the-light" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
+                                    <a href="${localLink2}" style="color: var(--accent-terracotta); font-weight: 600;">Read Essay &rarr;</a>
                                 </div>
                             </div>
                         </article>

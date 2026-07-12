@@ -1,15 +1,19 @@
+# .pages.yml
 media:
   input: images/blog
   output: /images/blog
 
-content:
+collections:
   - name: blog
     label: Blog Posts
-    type: collection
-    path: blog
+    path: posts
     extension: html
     format: raw
-    filename: "{year}-{month}-{day}-{slug}" 
+    filename: "{year}-{month}-{day}-{slug}"
+    # Explicitly mapping the media folders inside the collection 
+    # tells the raw parser exactly how to process the HTML file asset paths.
+    media_folder: images/blog
+    public_folder: /images/blog
 
     fields:
       - name: title
@@ -19,7 +23,7 @@ content:
 
       - name: body
         label: Visual Post Editor
-        type: rich-text    # Activates the WYSIWYG editor interface
-        options:
-          format: html     # <--- Forces the visual editor to output raw HTML instead of Markdown
+        type: rich-text
+        props:
+          format: html
         required: true

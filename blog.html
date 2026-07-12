@@ -494,6 +494,14 @@
                                 // Load the HTML body
                                 contentContainer.innerHTML = bodyHtml;
 
+                                // Normalize image paths for proper local file:// and server resolution
+                                contentContainer.querySelectorAll('img').forEach(img => {
+                                    const src = img.getAttribute('src');
+                                    if (src) {
+                                        img.setAttribute('src', src.replace(/^(\/|\.\.\/)+/, ''));
+                                    }
+                                });
+
                                 // Dynamic header rendering
                                 const headerContainer = document.getElementById('post-header-container');
                                 if (title || dateText || tags.length > 0) {

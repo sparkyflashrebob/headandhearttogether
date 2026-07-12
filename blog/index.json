@@ -8,7 +8,7 @@
       "Death",
       "Mindfulness"
     ],
-    "image": "/images/blog/image-2.png",
+    "image": "images/blog/image-2.png",
     "excerpt": "Read our latest blog post reflection."
   },
   {
@@ -20,7 +20,7 @@
       "Meditation",
       "Connection"
     ],
-    "image": "/images/blog/image-1.png",
+    "image": "images/blog/image-1.png",
     "excerpt": "Timeless contemplative traditions point directly to this shift:"
   }
 ]

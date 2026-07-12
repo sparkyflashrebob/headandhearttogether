@@ -44,7 +44,7 @@ files.forEach(file => {
             // Extract image if present in the body
             const imgMatch = bodyHtml.match(/<img[^>]+src="([^">]+)"/);
             if (imgMatch) {
-                image = imgMatch[1];
+                image = imgMatch[1].replace(/^(\/|\.\.\/)+/, '');
             }
 
             // Parse metadata lines

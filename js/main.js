@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     menuToggle.addEventListener('click', () => {
       menuToggle.classList.toggle('active');
       navLinks.classList.toggle('active');
-      
+
       // Accessibility: toggle aria-expanded
       const isExpanded = menuToggle.classList.contains('active');
       menuToggle.setAttribute('aria-expanded', isExpanded);
@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Navigation Highlighting Based on Current Subpage Filename
   const currentPath = window.location.pathname;
   const navItems = document.querySelectorAll('.nav-links a, .footer-links a');
-  
+
   navItems.forEach(item => {
     const href = item.getAttribute('href');
     if (!href) return;
-    
+
     // Extract filename from href (e.g. "about.html" or "contact.html")
     const hrefFilename = href.split('/').pop() || 'index.html';
     const pathFilename = currentPath.split('/').pop() || 'index.html';
-    
+
     if (hrefFilename === pathFilename) {
       item.classList.add('active');
     } else {
@@ -60,54 +60,92 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4. Contact Form Simulated Submission and Verification
-  const contactForm = document.getElementById('contactForm');
-  const formFeedback = document.getElementById('formFeedback');
+  // 4. Form Submission Control (Web3 Forms Integration)
+  const formsToHandle = [
+    { formId: 'contactForm', feedbackId: 'formFeedback' },
+    { formId: 'subscribeForm', feedbackId: 'subscribeFeedback' }
+  ];
 
-  if (contactForm && formFeedback) {
-    contactForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const submitBtn = contactForm.querySelector('button[type="submit"]');
-      const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit';
-      
-      // Basic client-side validation check
-      const nameInput = document.getElementById('name');
-      const emailInput = document.getElementById('email');
-      const messageInput = document.getElementById('message');
-      
-      if (!nameInput.value.trim() || !emailInput.value.trim() || !messageInput.value.trim()) {
-        formFeedback.className = 'form-feedback error';
-        formFeedback.textContent = 'Please fill out all required fields.';
-        formFeedback.style.display = 'block';
-        return;
-      }
+  formsToHandle.forEach(({ formId, feedbackId }) => {
+    const form = document.getElementById(formId);
+    const feedback = document.getElementById(feedbackId);
 
-      // Visual feedback loading state
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Sending Message...';
-      }
+    if (form && feedback) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-      // Simulate network request latency (1 sec)
-      setTimeout(() => {
-        formFeedback.className = 'form-feedback success';
-        formFeedback.textContent = 'Thank you for reaching out! We will contact you soon.';
-        formFeedback.style.display = 'block';
-        
-        // Reset the form values
-        contactForm.reset();
-        
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalBtnText;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Submit';
+
+        // Retrieve inputs inside the submitted form
+        const requiredInputs = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredInputs.forEach(input => {
+          if (!input.value.trim()) {
+            isValid = false;
+            input.classList.add('error');
+          } else {
+            input.classList.remove('error');
+          }
+        });
+
+        if (!isValid) {
+          feedback.className = 'form-feedback error';
+          feedback.textContent = 'Please fill out all required fields.';
+          feedback.style.display = 'block';
+          return;
         }
 
-        // Hide notification after 7 seconds
-        setTimeout(() => {
-          formFeedback.style.display = 'none';
-        }, 7000);
-      }, 1000);
-    });
-  }
+        // Show loading state
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = formId === 'subscribeForm' ? 'Subscribing...' : 'Sending Message...';
+        }
+
+        // Prepare Web3 Forms JSON payload
+        const formData = new FormData(form);
+        const object = Object.fromEntries(formData);
+        const json = JSON.stringify(object);
+
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: json
+        })
+          .then(async (response) => {
+            const result = await response.json();
+            if (response.status === 200) {
+              feedback.className = 'form-feedback success';
+              feedback.textContent = result.message || 'Submitted successfully!';
+              feedback.style.display = 'block';
+              form.reset();
+            } else {
+              feedback.className = 'form-feedback error';
+              feedback.textContent = result.message || 'Something went wrong. Please try again.';
+              feedback.style.display = 'block';
+            }
+          })
+          .catch((error) => {
+            console.error('Submission error:', error);
+            feedback.className = 'form-feedback error';
+            feedback.textContent = 'Network error. Please try again later.';
+            feedback.style.display = 'block';
+          })
+          .finally(() => {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalBtnText;
+            }
+            // Hide feedback after 7 seconds
+            setTimeout(() => {
+              feedback.style.display = 'none';
+            }, 7000);
+          });
+      });
+    }
+  });
 });

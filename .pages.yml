@@ -7,7 +7,7 @@ content:
   - name: blog
     label: Blog Posts
     type: collection
-    path: blog              # Storing articles in the existing blog folder
+    path: _posts            # Storing raw articles in _posts folder for compilation
     extension: html
     format: yaml-frontmatter
     delimiters: ["<!--", "-->"]

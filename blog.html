@@ -466,7 +466,14 @@
                                     const endCommentIdx = cleanHtml.indexOf('-->');
                                     if (endCommentIdx !== -1) {
                                         const commentContent = cleanHtml.substring(4, endCommentIdx).trim();
-                                        bodyHtml = cleanHtml.substring(endCommentIdx + 3).trim();
+                                        const rawBody = cleanHtml.substring(endCommentIdx + 3).trim();
+                                        if (rawBody.toLowerCase().includes('<body')) {
+                                            const parser = new DOMParser();
+                                            const doc = parser.parseFromString(rawBody, 'text/html');
+                                            bodyHtml = (doc.querySelector('body') || doc.documentElement).innerHTML.trim();
+                                        } else {
+                                            bodyHtml = rawBody;
+                                        }
 
                                         const lines = commentContent.split('\n');
                                         lines.forEach(line => {
@@ -582,15 +589,15 @@
                                 }
 
                                 // Share Actions Dynamic Wiring using absolute page URL
-                                const currentUrl = window.location.href;
+                                const shareUrl = isFileProtocol ? window.location.href : `https://headhearttogether.com/blog/${postSlug}.html`;
                                 const fbShareBtn = document.getElementById('share-facebook-btn');
-                                fbShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+                                fbShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
                                 const copyBtn = document.getElementById('share-copy-btn');
                                 const copyBtnText = document.getElementById('copy-btn-text');
                                 copyBtnText.textContent = 'Copy Link';
                                 copyBtn.onclick = () => {
-                                    navigator.clipboard.writeText(currentUrl).then(() => {
+                                    navigator.clipboard.writeText(shareUrl).then(() => {
                                         copyBtnText.textContent = 'Link Copied!';
                                         setTimeout(() => {
                                             copyBtnText.textContent = 'Copy Link';

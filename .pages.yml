@@ -29,6 +29,11 @@ content:
         type: string
         required: false
 
+      - name: discussion_link
+        label: Facebook Discussion Link
+        type: string
+        required: false
+
       - name: body
         label: Visual Post Editor
         type: rich-text

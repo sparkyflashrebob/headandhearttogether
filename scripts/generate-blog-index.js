@@ -123,3 +123,42 @@ posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
 fs.writeFileSync(outputFile, JSON.stringify(posts, null, 2), 'utf8');
 console.log(`Generated ${outputFile} with ${posts.length} posts.`);
+
+// Generate sitemap.xml
+const sitemapFile = path.join(__dirname, '../sitemap.xml');
+const BASE_URL = 'https://headhearttogether.com';
+let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>${BASE_URL}/</loc>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>${BASE_URL}/about.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>${BASE_URL}/events.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>${BASE_URL}/blog.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>${BASE_URL}/contact.html</loc>
+        <priority>0.8</priority>
+    </url>
+`;
+
+posts.forEach(post => {
+    sitemapContent += `    <url>
+        <loc>${BASE_URL}/blog/${post.slug}.html</loc>
+        <lastmod>${post.date}</lastmod>
+        <priority>0.6</priority>
+    </url>\n`;
+});
+
+sitemapContent += `</urlset>`;
+fs.writeFileSync(sitemapFile, sitemapContent, 'utf8');
+console.log(`Generated sitemap.xml with ${posts.length + 5} URLs.`);

@@ -6,11 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar of Events - Head & Heart Together</title>
     <meta name="description"
-        content="Join our weekly online mindful council gatherings. Thursdays 5pm - 6pm PST. Learn about our schedule and RSVP today.">
+        content="Join our weekly online mindful council gatherings. Sundays 5pm - 6pm PST. Learn about our schedule and RSVP today.">
     <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="images/Head and Heart Together logo V3 Full background.png" type="image/x-icon">
-  <meta property="og:image" content="https://headhearttogether.com/images/Head%20and%20Heart%20Together%20logo%20V3%20Full%20background.png">
-  <meta property="og:image:alt" content="Head & Heart Together Logo">
+    <meta property="og:image"
+        content="https://headhearttogether.com/images/Head%20and%20Heart%20Together%20logo%20V3%20Full%20background.png">
+    <meta property="og:image:alt" content="Head & Heart Together Logo">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EventSeries",
+      "name": "Head & Heart Together Weekly Gatherings",
+      "description": "Join our weekly online mindful council gatherings to share insights, check in, and meditate together.",
+      "eventSchedule": {
+        "@type": "Schedule",
+        "byDay": "https://schema.org/Sunday",
+        "startTime": "17:00:00",
+        "endTime": "18:00:00",
+        "scheduleTimezone": "America/Los_Angeles"
+      },
+      "location": {
+        "@type": "VirtualLocation",
+        "url": "https://headhearttogether.com/events.html"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "Head & Heart Together",
+        "url": "https://headhearttogether.com"
+      },
+      "image": "https://headhearttogether.com/images/Head%20and%20Heart%20Together%20logo%20V3%20Full%20background.png"
+    }
+    </script>
 </head>
 
 <body>
@@ -20,7 +46,8 @@
         <div class="container Navbar-wrapper">
             <nav class="navbar">
                 <a href="index.html" class="brand">
-                    <img src="images/Head and Heart Together transparent logo V3.png" alt="Head & Heart Together Logo" class="brand-logo">
+                    <img src="images/Head and Heart Together transparent logo V3.png" alt="Head & Heart Together Logo"
+                        class="brand-logo">
                     <span class="brand-text">Head & Heart Together</span>
                 </a>
                 <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
@@ -53,8 +80,28 @@
 
     <!-- Main Content -->
     <main>
+        <!-- Next Event Section -->
+        <section class="section section-bg"
+            style="padding: 5rem 0 2rem 0; border-bottom: 1px solid var(--border-color);">
+            <div class="container text-center">
+                <div
+                    style="background-color: var(--bg-card); padding: 3rem 2rem; border-radius: var(--radius-md); box-shadow: var(--shadow-medium); max-width: 800px; margin: 0 auto; border: 1px solid var(--border-color);">
+                    <h2
+                        style="font-size: 2rem; color: var(--accent-terracotta); margin-bottom: 0.5rem; font-weight: 700;">
+                        Next Event</h2>
+                    <h3 id="next-event-date" style="font-size: 1.4rem; margin-bottom: 1.5rem; font-weight: 600;">Loading
+                        upcoming gathering...</h3>
+                    <div id="next-event-description"
+                        style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 2rem;">
+                    </div>
+                    <a href="#contactForm" class="btn btn-primary"
+                        style="font-size: 1.05rem; padding: 0.75rem 2rem;">RSVP for Link</a>
+                </div>
+            </div>
+        </section>
+
         <!-- Calendar Section -->
-        <section class="section" style="padding: 5rem 0;">
+        <section id="monthly-calendar" class="section" style="padding: 5rem 0;">
             <div class="container text-center">
                 <div
                     style="background-color: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-subtle);">
@@ -93,8 +140,8 @@
                         <div class="form-group">
                             <label for="session">Select Date</label>
                             <select name="session" id="session" class="form-control">
-                                <option value="Next Thursday at 5:00 PM PST">Next Thursday at 5:00 PM PST</option>
-                                <option value="Following Thursday at 5:00 PM PST">Following Thursday at 5:00 PM PST
+                                <option value="Next Sunday at 5:00 PM PST">Next Sunday at 5:00 PM PST</option>
+                                <option value="Following Sunday at 5:00 PM PST">Following Sunday at 5:00 PM PST
                                 </option>
                             </select>
                         </div>
@@ -133,7 +180,8 @@
                 </div>
                 <div class="footer-col">
                     <h3>Get In Touch</h3>
-                    <p style="color: #8D9892; margin-bottom: 1rem;">Weekly gatherings are hosted online via Google Meet.</p>
+                    <p style="color: #8D9892; margin-bottom: 1rem;">Weekly gatherings are hosted online via Google Meet.
+                    </p>
                     <p style="color: #CDD4D0; font-weight: 500;">Phone: <a href="tel:+14156370348">+1 (415) 637-0348</a>
                     </p>
                     <p style="color: #CDD4D0; font-weight: 500;">Email: <a
@@ -151,6 +199,66 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // =========================================================================
+            // GOOGLE CALENDAR API INTEGRATION
+            // To make this work, replace 'YOUR_API_KEY_HERE' with a real Google Cloud API Key
+            // =========================================================================
+            const CALENDAR_ID = 'headandhearttogether@gmail.com';
+            const API_KEY = 'AIzaSyAw7bGJU0mg7ITkpPf9-wb0kG1DDwBqfdg';
+
+            if (API_KEY === 'YOUR_API_KEY_HERE') {
+                document.getElementById('next-event-date').innerText = "Sundays at 5:00 PM PST";
+                document.getElementById('next-event-description').innerHTML = "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together. <strong><a href='#monthly-calendar' style='color: var(--accent-terracotta); text-decoration: underline;'>Please check the calendar below</a></strong> to see this week's specific details.</p><p style='font-size: 0.9rem; color: red;'><em>(API Key needed for Live Data)</em></p>";
+                return;
+            }
+
+            const timeMin = new Date().toISOString();
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&orderBy=startTime&timeMin=${timeMin}&maxResults=5`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const dateBlock = document.getElementById('next-event-date');
+                    const descBlock = document.getElementById('next-event-description');
+
+                    if (data.error) {
+                        console.error('Calendar API Error:', data.error);
+                        dateBlock.innerText = "API Blocked (Local Environment Restriction)";
+                        descBlock.innerHTML = `<p style="font-size: 0.95rem; color: #d9534f;">Google Calendar API returned an error: <em>${data.error.message}</em>. If you restricted your API key in Google Cloud to only allow your <strong>live website domain</strong>, it will safely block local testing (like this). This means it will work perfectly when pushed live to GitHub!</p>`;
+                        return;
+                    }
+
+                    const events = data.items || [];
+                    // Find the very next event that isn't cancelled
+                    const nextEvent = events.find(event => event.status !== 'cancelled');
+
+                    if (nextEvent) {
+                        // Format the date/time (e.g. Sunday, August 2, 2026 at 5:00 PM)
+                        const eventDate = new Date(nextEvent.start.dateTime || nextEvent.start.date);
+                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+
+                        dateBlock.innerText = eventDate.toLocaleDateString('en-US', options);
+
+                        // Description handling
+                        if (nextEvent.description) {
+                            descBlock.innerHTML = nextEvent.description; // Usually HTML formatted from Google Calendar
+                        } else {
+                            descBlock.innerHTML = "<p>No special description provided for this week's gathering.</p>";
+                        }
+                    } else {
+                        dateBlock.innerText = "No upcoming gatherings scheduled right now.";
+                        descBlock.innerHTML = "";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching calendar:", error);
+                    document.getElementById('next-event-date').innerText = "Error loading next gathering";
+                    document.getElementById('next-event-description').innerHTML = "<p>Please view the monthly calendar down below to see our schedule!</p>";
+                });
+        });
+    </script>
 </body>
 
 </html>

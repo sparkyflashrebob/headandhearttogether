@@ -1114,9 +1114,10 @@ footer a:hover {
   }
 }
 
-/* Next Event Description Styling */
+/* Next Event Description & Section Styling */
+#next-event-date,
 #next-event-description {
-  font-size: 1.1rem;
+  font-size: 1.1rem !important;
   line-height: 1.8;
   color: var(--text-primary);
   margin-bottom: 2rem;
@@ -1131,7 +1132,9 @@ footer a:hover {
 #next-event-description p,
 #next-event-description a,
 #next-event-description span,
-#next-event-description div {
+#next-event-description div,
+#next-event-description b,
+#next-event-description strong {
   font-size: 1.1rem !important;
   line-height: 1.8;
   margin-bottom: 0.75rem;

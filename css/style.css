@@ -1113,3 +1113,35 @@ footer a:hover {
     position: static;
   }
 }
+
+/* Next Event Description Styling */
+#next-event-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+#next-event-description h1,
+#next-event-description h2,
+#next-event-description h3,
+#next-event-description h4,
+#next-event-description h5,
+#next-event-description h6,
+#next-event-description p,
+#next-event-description a,
+#next-event-description span,
+#next-event-description div {
+  font-size: 1.1rem !important;
+  line-height: 1.8;
+  margin-bottom: 0.75rem;
+}
+
+#next-event-description a {
+  color: var(--accent-terracotta);
+  text-decoration: underline;
+}
+
+#next-event-description a:hover {
+  color: var(--accent-terracotta-hover);
+}

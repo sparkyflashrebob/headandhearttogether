@@ -94,7 +94,7 @@
                     <div id="next-event-description"
                         style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 2rem;">
                     </div>
-                    <a href="#contactForm" class="btn btn-primary"
+                    <a href="#contactForm" id="rsvp-button" class="btn btn-primary"
                         style="font-size: 1.05rem; padding: 0.75rem 2rem;">RSVP for Link</a>
                 </div>
             </div>
@@ -208,21 +208,22 @@
             const CALENDAR_ID = 'headandhearttogether@gmail.com';
             const API_KEY = 'AIzaSyAw7bGJU0mg7ITkpPf9-wb0kG1DDwBqfdg';
 
+            const dateBlock = document.getElementById('next-event-date');
+            const descBlock = document.getElementById('next-event-description');
+            const rsvpBtn = document.getElementById('rsvp-button');
+
             if (API_KEY === 'YOUR_API_KEY_HERE') {
-                document.getElementById('next-event-date').innerText = "Sundays at 5:00 PM PST";
-                document.getElementById('next-event-description').innerHTML = "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together. <strong><a href='#monthly-calendar' style='color: var(--accent-terracotta); text-decoration: underline;'>Please check the calendar below</a></strong> to see this week's specific details.</p><p style='font-size: 0.9rem; color: red;'><em>(API Key needed for Live Data)</em></p>";
+                dateBlock.innerText = "Sundays at 5:00 PM PST";
+                descBlock.innerHTML = "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together. <strong><a href='#monthly-calendar' style='color: var(--accent-terracotta); text-decoration: underline;'>Please check the calendar below</a></strong> to see this week's specific details.</p><p style='font-size: 0.9rem; color: red;'><em>(API Key needed for Live Data)</em></p>";
                 return;
             }
 
             const timeMin = new Date().toISOString();
-            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&orderBy=startTime&timeMin=${timeMin}&maxResults=5`;
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${API_KEY}&singleEvents=true&orderBy=startTime&timeMin=${timeMin}&maxResults=15`;
 
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    const dateBlock = document.getElementById('next-event-date');
-                    const descBlock = document.getElementById('next-event-description');
-
                     if (data.error) {
                         console.error('Calendar API Error:', data.error);
                         dateBlock.innerText = "API Blocked (Local Environment Restriction)";
@@ -230,32 +231,64 @@
                         return;
                     }
 
-                    const events = data.items || [];
-                    // Find the very next event that isn't cancelled
-                    const nextEvent = events.find(event => event.status !== 'cancelled');
+                    const items = data.items || [];
 
-                    if (nextEvent) {
-                        // Format the date/time (e.g. Sunday, August 2, 2026 at 5:00 PM)
-                        const eventDate = new Date(nextEvent.start.dateTime || nextEvent.start.date);
+                    // Ignore all-day informational events (which have start.date instead of start.dateTime)
+                    const scheduledMeetings = items.filter(event => {
+                        return event.start && event.start.dateTime;
+                    });
+
+                    if (scheduledMeetings.length > 0) {
+                        const nextEvent = scheduledMeetings[0];
+                        const eventDate = new Date(nextEvent.start.dateTime);
                         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' };
+                        const formattedDate = eventDate.toLocaleDateString('en-US', options);
 
-                        dateBlock.innerText = eventDate.toLocaleDateString('en-US', options);
+                        const isCancelled = (nextEvent.status === 'cancelled') ||
+                            Boolean(nextEvent.summary && /(?:^|\s|\(|\[)cancell?ed(?:$|\s|\)|\])/i.test(nextEvent.summary));
 
-                        // Description handling
-                        if (nextEvent.description) {
-                            descBlock.innerHTML = nextEvent.description; // Usually HTML formatted from Google Calendar
+                        if (isCancelled) {
+                            dateBlock.innerHTML = `
+                                <div style="display: inline-block; background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; padding: 0.25rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    Meeting Cancelled
+                                </div>
+                                <div style="color: var(--text-color); font-size: 1.15rem;">${formattedDate}</div>
+                            `;
+
+                            if (nextEvent.description) {
+                                descBlock.innerHTML = nextEvent.description;
+                            } else {
+                                descBlock.innerHTML = "<p>This scheduled gathering is cancelled. Please check the monthly calendar below for future dates.</p>";
+                            }
+
+                            if (rsvpBtn) {
+                                rsvpBtn.style.display = 'none';
+                            }
                         } else {
-                            descBlock.innerHTML = "<p>No special description provided for this week's gathering.</p>";
+                            dateBlock.innerText = formattedDate;
+
+                            if (nextEvent.description) {
+                                descBlock.innerHTML = nextEvent.description;
+                            } else {
+                                descBlock.innerHTML = "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together.</p>";
+                            }
+
+                            if (rsvpBtn) {
+                                rsvpBtn.style.display = 'inline-block';
+                            }
                         }
                     } else {
                         dateBlock.innerText = "No upcoming gatherings scheduled right now.";
-                        descBlock.innerHTML = "";
+                        descBlock.innerHTML = "<p>Please view the monthly calendar below for future gathering dates.</p>";
+                        if (rsvpBtn) {
+                            rsvpBtn.style.display = 'none';
+                        }
                     }
                 })
                 .catch(error => {
                     console.error("Error fetching calendar:", error);
-                    document.getElementById('next-event-date').innerText = "Error loading next gathering";
-                    document.getElementById('next-event-description').innerHTML = "<p>Please view the monthly calendar down below to see our schedule!</p>";
+                    dateBlock.innerText = "Error loading next gathering";
+                    descBlock.innerHTML = "<p>Please view the monthly calendar down below to see our schedule!</p>";
                 });
         });
     </script>

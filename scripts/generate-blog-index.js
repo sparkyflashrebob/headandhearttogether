@@ -95,6 +95,23 @@ discussion_link: ${discussionLink}
     <meta property="og:url" content="https://headhearttogether.com/blog/${file}">
     <meta property="og:type" content="article">
     
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "${title.replace(/"/g, '\\"')}",
+      "description": "${(excerpt || 'Read our latest blog post reflection.').replace(/"/g, '\\"')}",
+      "image": "https://headhearttogether.com/${image}",
+      "url": "https://headhearttogether.com/blog/${file}",
+      "datePublished": "${date || '2026-07-12'}",
+      "author": {
+        "@type": "Organization",
+        "name": "Head & Heart Together",
+        "url": "https://headhearttogether.com"
+      }
+    }
+    </script>
+    
     <script>
         // Redirect human visitors to the dynamic blog view wrapper shell page
         window.location.href = "../blog.html?post=${file.replace('.html', '')}";

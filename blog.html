@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - Head & Heart Together</title>
+    <title>News & Blog - Head & Heart Together</title>
     <meta name="description"
         content="Read mindful insights, spiritual practices, and critiques of modern society. Explore essays from Head & Heart Together.">
 
     <!-- Open Graph / Facebook Sharing Metadata -->
-    <meta property="og:title" content="Blog - Head & Heart Together">
+    <meta property="og:title" content="News & Blog - Head & Heart Together">
     <meta property="og:description"
         content="Read mindful insights, spiritual practices, and critiques of modern society. Explore essays from Head & Heart Together.">
     <meta property="og:type" content="article">
@@ -40,7 +40,7 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="about.html">About</a></li>
                     <li><a href="events.html">Calendar of Events</a></li>
-                    <li><a href="blog.html" class="active">Blog</a></li>
+                    <li><a href="blog.html" class="active">News & Blog</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
@@ -50,11 +50,11 @@
     <!-- Subpage Header -->
     <section class="page-header">
         <div class="container">
-            <h1>Blog</h1>
+            <h1>News & Blog</h1>
             <div class="breadcrumbs">
                 <a href="index.html">Home</a>
                 <span class="separator"></span>
-                <span class="current">Blog</span>
+                <span class="current">News & Blog</span>
             </div>
         </div>
     </section>
@@ -69,6 +69,26 @@
 
                     <!-- Blog List View (Visible by default) -->
                     <section id="blog-list-section">
+                        <!-- Latest News Section -->
+                        <div class="latest-news-section" style="margin-bottom: 3.5rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border-color);">
+                            <div class="section-header text-center" style="margin-bottom: 1.75rem;">
+                                <h4>Latest News</h4>
+                                <h2 style="margin-top: 0.5rem; margin-bottom: 1rem; font-size: 2.25rem;">Announcements & Updates</h2>
+                            </div>
+
+                            <div class="news-announcement-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-terracotta); border-radius: var(--radius-md); padding: 2rem 2.25rem; box-shadow: var(--shadow-subtle);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                                    <span style="display: inline-block; background-color: var(--accent-sage-light); color: var(--text-primary); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.75rem; border-radius: 9999px; border: 1px solid var(--border-color);">
+                                        Community Announcement
+                                    </span>
+                                    <span style="font-size: 0.85rem; color: var(--text-light); font-weight: 500;">September 2026</span>
+                                </div>
+                                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); margin: 0;">
+                                    We are excited to announce that we are now working with the College of Marin ESCOM to offer a new weekly group meditation, reflection and discussion Club meeting beginning September 24th. The meeting will be offered both as an in-person meeting and via Zoom. See our <a href="events.html" style="color: var(--accent-terracotta); text-decoration: underline; font-weight: 600;">Calendar of Events</a> for information.
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="section-header text-center" style="margin-bottom: 2.5rem;">
                             <h4>Our Reflections</h4>
                             <h2 style="margin-top: 0.5rem; margin-bottom: 1.5rem; font-size: 2.5rem;">Mindful Insights &
@@ -89,7 +109,7 @@
                         <div class="breadcrumbs" style="margin-bottom: 2.5rem; display: flex;">
                             <a href="index.html">Home</a>
                             <span class="separator"></span>
-                            <a href="blog.html">Blog</a>
+                            <a href="blog.html">News & Blog</a>
                             <span class="separator"></span>
                             <span class="current" id="detail-breadcrumb-title">Post Title</span>
                         </div>
@@ -235,7 +255,7 @@
                         <li><a href="index.html">Home</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="events.html">Calendar of Events</a></li>
-                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="blog.html">News & Blog</a></li>
                         <li><a href="contact.html">Contact Us</a></li>
                     </ul>
                 </div>
@@ -623,7 +643,7 @@
                                     <div class="text-center" style="padding: 4rem 0;">
                                         <h3 style="color: #E02424; margin-bottom: 1rem;">Post Not Found</h3>
                                         <p style="color: var(--text-light); margin-bottom: 2rem;">We couldn't load the article you are looking for.</p>
-                                        <a href="blog.html" class="btn btn-primary">Return to Blog</a>
+                                        <a href="blog.html" class="btn btn-primary">Return to News & Blog</a>
                                     </div>
                                 `;
                             });
@@ -674,6 +694,33 @@
                             </div>
                         </article>
                     `;
+
+                    // Populate sidebar fallback for local file:// mode
+                    if (recentContainer && recentContainer.children.length === 0) {
+                        recentContainer.innerHTML = `
+                            <li>
+                                <a href="${localLink1}" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; display: block; margin-bottom: 0.25rem;">
+                                    The Myth of the Quiet Mind
+                                </a>
+                                <span style="font-size: 0.8rem; color: var(--text-light);">July 12, 2026</span>
+                            </li>
+                            <li>
+                                <a href="${localLink2}" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; display: block; margin-bottom: 0.25rem;">
+                                    The Last Act of Care
+                                </a>
+                                <span style="font-size: 0.8rem; color: var(--text-light);">July 12, 2026</span>
+                            </li>
+                        `;
+                    }
+
+                    if (tagsContainer && tagsContainer.children.length === 0) {
+                        tagsContainer.innerHTML = `
+                            <button class="post-tag-pill" style="cursor: pointer; padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 9999px; background-color: var(--accent-sage-light); color: var(--accent-sage); border: 1px solid var(--border-color);">Mindfulness</button>
+                            <button class="post-tag-pill" style="cursor: pointer; padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 9999px; background-color: var(--accent-sage-light); color: var(--accent-sage); border: 1px solid var(--border-color);">Reflection</button>
+                            <button class="post-tag-pill" style="cursor: pointer; padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 9999px; background-color: var(--accent-sage-light); color: var(--accent-sage); border: 1px solid var(--border-color);">Presence</button>
+                            <button class="post-tag-pill" style="cursor: pointer; padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 9999px; background-color: var(--accent-sage-light); color: var(--accent-sage); border: 1px solid var(--border-color);">Meditation</button>
+                        `;
+                    }
                 });
         });
     </script>

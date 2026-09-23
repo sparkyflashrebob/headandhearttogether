@@ -59,7 +59,7 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="about.html">About</a></li>
                     <li><a href="events.html" class="active">Calendar of Events</a></li>
-                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="blog.html">News & Blog</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
@@ -92,10 +92,8 @@
                     <h3 id="next-event-date" style="font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 600;">Loading
                         upcoming gathering...</h3>
                     <div id="next-event-description"
-                        style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 2rem;">
+                        style="font-size: 1.1rem; line-height: 1.8; color: var(--text-color); margin-bottom: 0;">
                     </div>
-                    <a href="#contactForm" id="rsvp-button" class="btn btn-primary"
-                        style="font-size: 1.05rem; padding: 0.75rem 2rem;">RSVP for Link</a>
                 </div>
             </div>
         </section>
@@ -174,7 +172,7 @@
                         <li><a href="index.html">Home</a></li>
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="events.html">Calendar of Events</a></li>
-                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="blog.html">News & Blog</a></li>
                         <li><a href="contact.html">Contact Us</a></li>
                     </ul>
                 </div>
@@ -210,7 +208,6 @@
 
             const dateBlock = document.getElementById('next-event-date');
             const descBlock = document.getElementById('next-event-description');
-            const rsvpBtn = document.getElementById('rsvp-button');
 
             if (API_KEY === 'YOUR_API_KEY_HERE') {
                 dateBlock.innerText = "Sundays at 5:00 PM PST";
@@ -247,6 +244,11 @@
                         const isCancelled = (nextEvent.status === 'cancelled') ||
                             Boolean(nextEvent.summary && /(?:^|\s|\(|\[)cancell?ed(?:$|\s|\)|\])/i.test(nextEvent.summary));
 
+                        const isEscom = Boolean(
+                            (nextEvent.summary && /escom/i.test(nextEvent.summary)) ||
+                            (nextEvent.description && /escom/i.test(nextEvent.description))
+                        );
+
                         if (isCancelled) {
                             dateBlock.innerHTML = `
                                 <div style="display: inline-block; background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; padding: 0.25rem 0.85rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
@@ -260,29 +262,20 @@
                             } else {
                                 descBlock.innerHTML = "<p>This scheduled gathering is cancelled. Please check the monthly calendar below for future dates.</p>";
                             }
-
-                            if (rsvpBtn) {
-                                rsvpBtn.style.display = 'none';
-                            }
                         } else {
                             dateBlock.innerText = formattedDate;
 
                             if (nextEvent.description) {
                                 descBlock.innerHTML = nextEvent.description;
                             } else {
-                                descBlock.innerHTML = "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together.</p>";
-                            }
-
-                            if (rsvpBtn) {
-                                rsvpBtn.style.display = 'inline-block';
+                                descBlock.innerHTML = isEscom
+                                    ? "<p>Living Mindfully ESCOM Club Meeting. In-Person and Hybrid via Zoom at College of Marin.</p>"
+                                    : "<p>Join our weekly online mindful council gatherings to share insights, check in, and meditate together.</p>";
                             }
                         }
                     } else {
                         dateBlock.innerText = "No upcoming gatherings scheduled right now.";
                         descBlock.innerHTML = "<p>Please view the monthly calendar below for future gathering dates.</p>";
-                        if (rsvpBtn) {
-                            rsvpBtn.style.display = 'none';
-                        }
                     }
                 })
                 .catch(error => {

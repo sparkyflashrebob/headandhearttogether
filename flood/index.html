@@ -1483,7 +1483,6 @@
       badge.className = 'badge-pill';
 
       // Dynamic countdown relative to live clock or scrubbed time
-      const isScrubbing = (currentScrubIdx !== getLivePointIdx());
       const now = new Date();
       const effectiveHours = isScrubbing ? point.hours : (now.getHours() + now.getMinutes() / 60);
       const countdownStr = getClearanceCountdown(effectiveHours);

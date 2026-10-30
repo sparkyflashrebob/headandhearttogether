@@ -761,101 +761,200 @@
 
     <!-- INTERACTIVE ROAD CROSS-SECTION SIMULATOR (SVG) -->
     <section class="cross-section-card">
-      <div class="card-title">
-        <span>🚗 Road Cross-Section & Prius Clearance Simulator</span>
-        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono);" id="crossSectionTideLabel">TWL: 7.73 ft</span>
+      <div class="card-title" style="flex-wrap: wrap; gap: 8px;">
+        <div>
+          <span>🚗 Road Cross-Section & Prius Clearance Simulator</span>
+          <span style="font-size:0.75rem; color:var(--cyan); font-family:var(--mono);" id="crossSectionTideLabel">TWL: 7.73 ft</span>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
+          <span style="font-size: 0.72rem; color: var(--text-muted);">View:</span>
+          <button id="btnViewSide" class="chip-btn active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('side')">🚗 Side Profile (To Scale)</button>
+          <button id="btnViewFront" class="chip-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('front')">🚘 Front Cross-Section</button>
+        </div>
       </div>
       <div class="svg-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <svg id="roadSvg" viewBox="0 0 600 270" style="width: 100%; min-width: 500px; height: auto; display: block;">
+        <svg id="roadSvg" viewBox="0 0 740 260" style="width: 100%; min-width: 620px; height: auto; display: block;">
           <defs>
             <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
-              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.95"/>
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.75"/>
+              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.88"/>
             </linearGradient>
             <linearGradient id="pavementGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#334155"/>
               <stop offset="100%" stop-color="#1e293b"/>
             </linearGradient>
-            <linearGradient id="priusBodyGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#cbd5e1"/>
-              <stop offset="50%" stop-color="#94a3b8"/>
-              <stop offset="100%" stop-color="#64748b"/>
-            </linearGradient>
           </defs>
 
-          <!-- Elevation Reference Grid Lines (Physical Scale: 3.5px per inch) -->
-          <!-- 8.00' Y=176.6 -->
-          <line x1="40" y1="176.6" x2="580" y2="176.6" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2"/>
-          <text x="35" y="179.6" fill="#64748b" font-size="8.5" text-anchor="end" font-family="monospace">8.00'</text>
+          <!-- Elevation Reference Grid Lines (Exact Scale: 1.988 px/in = 23.856 px/ft) -->
+          <!-- 8.00' Y=192.0 -->
+          <line x1="30" y1="192.0" x2="710" y2="192.0" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2"/>
+          <text x="25" y="195.0" fill="#64748b" font-size="8" text-anchor="end" font-family="monospace">8.00'</text>
 
-          <!-- 7.75' Carport Y=185.9 -->
-          <line x1="40" y1="185.9" x2="580" y2="185.9" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="35" y="188.9" fill="#c084fc" font-size="8.5" text-anchor="end" font-family="monospace">7.75' Stall 86</text>
+          <!-- 7.75' Carport Y=197.9 -->
+          <line x1="30" y1="197.9" x2="710" y2="197.9" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="25" y="200.9" fill="#c084fc" font-size="8" text-anchor="end" font-family="monospace">7.75' Stall 86</text>
 
-          <!-- 7.55' Prius Impassable Y=193.3 -->
-          <line x1="40" y1="193.3" x2="580" y2="193.3" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="35" y="196.3" fill="#f87171" font-size="8.5" text-anchor="end" font-family="monospace">7.55' Prius Sag</text>
+          <!-- 7.55' Prius Impassable Y=202.7 -->
+          <line x1="30" y1="202.7" x2="710" y2="202.7" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="25" y="205.7" fill="#f87171" font-size="8" text-anchor="end" font-family="monospace">7.55' Sag Dip</text>
 
-          <!-- 7.41' Door Sill Y=198.2 -->
-          <line x1="40" y1="198.2" x2="580" y2="198.2" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
-          <text x="35" y="201.2" fill="#fbbf24" font-size="8.5" text-anchor="end" font-family="monospace">7.41' Door Sill</text>
+          <!-- 7.41' Door Sill Y=206.1 -->
+          <line x1="30" y1="206.1" x2="710" y2="206.1" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
+          <text x="25" y="209.1" fill="#fbbf24" font-size="8" text-anchor="end" font-family="monospace">7.41' Door Sill</text>
 
-          <!-- 7.31' Crown Y=201.7 -->
-          <line x1="40" y1="201.7" x2="580" y2="201.7" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="35" y="204.7" fill="#fcd34d" font-size="8.5" text-anchor="end" font-family="monospace">7.31' Crown</text>
+          <!-- 7.31' Crown Y=208.4 -->
+          <line x1="30" y1="208.4" x2="710" y2="208.4" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="25" y="211.4" fill="#fcd34d" font-size="8" text-anchor="end" font-family="monospace">7.31' Crown</text>
 
-          <!-- 6.70' Gutter Y=223.3 -->
-          <line x1="40" y1="223.3" x2="580" y2="223.3" stroke="#38bdf8" stroke-dasharray="2,2"/>
-          <text x="35" y="226.3" fill="#38bdf8" font-size="8.5" text-anchor="end" font-family="monospace">6.70' Gutter</text>
+          <!-- 6.70' Gutter Y=223.0 -->
+          <line x1="30" y1="223.0" x2="710" y2="223.0" stroke="#38bdf8" stroke-dasharray="2,2"/>
+          <text x="25" y="226.0" fill="#38bdf8" font-size="8" text-anchor="end" font-family="monospace">6.70' Gutter</text>
 
-          <!-- Pavement Terrain Polygon -->
-          <polygon points="40,265 40,210 55,223.3 290,223.3 390,201.7 440,212 460,212 470,185.9 580,185.9 580,265" fill="url(#pavementGrad)"/>
+          <!-- Pavement Terrain Polygon (Larkspur Plaza Dr Cross-Section) -->
+          <polygon points="30,260 30,223 430,223 530,208.4 580,216 600,197.9 710,197.9 710,260" fill="url(#pavementGrad)"/>
           
-          <!-- Carport Structure on Right -->
-          <rect x="470" y="110" width="110" height="6" rx="2" fill="#475569"/>
-          <rect x="480" y="116" width="6" height="70" fill="#64748b"/>
-          <rect x="565" y="116" width="6" height="70" fill="#64748b"/>
-          <text x="525" y="102" fill="#cbd5e1" font-size="9" text-anchor="middle" font-weight="bold">Carport Spot #86</text>
+          <!-- Carport Structure on Right (Stall #86) -->
+          <rect x="595" y="125" width="115" height="5" rx="2" fill="#475569"/>
+          <rect x="605" y="130" width="5" height="68" fill="#64748b"/>
+          <rect x="695" y="130" width="5" height="68" fill="#64748b"/>
+          <text x="652" y="118" fill="#cbd5e1" font-size="8.5" text-anchor="middle" font-weight="bold">Carport Spot #86 (7.75')</text>
 
-          <!-- Prius Silhouette (Realistic Scale: 56" tall, 15ft long, tires resting in gutter at Y=223.3) -->
-          <g id="svgPriusGroup">
-            <!-- Rear Wheel (x=115, contact at y=223.3, radius=22) -->
-            <circle cx="115" cy="201.3" r="22" fill="#020617" stroke="#475569" stroke-width="2.5"/>
-            <circle cx="115" cy="201.3" r="14" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
-            <circle cx="115" cy="201.3" r="5" fill="#64748b"/>
+          <!-- ============================================================ -->
+          <!-- PRIUS SIDE PROFILE OUTLINE — 2023-2026 GEN 5 (TRUE TO SCALE) -->
+          <!-- Length: 181.1" (360px), Height: 56.3" (111.9px), Ground: Y=223 -->
+          <!-- ============================================================ -->
+          <g id="svgPriusSideGroup">
+            <!-- Rear Wheel (cx=125, cy=197.65, R_tire=25.35, contact Y=223.0) -->
+            <g id="priusRearWheel">
+              <circle cx="125" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+              <circle cx="125" cy="197.65" r="18.9" fill="#1e293b" stroke="#94a3b8" stroke-width="1.2"/>
+              <!-- 5 Aero Spokes -->
+              <line x1="125" y1="197.65" x2="125" y2="178.75" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="125" y1="197.65" x2="143" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="125" y1="197.65" x2="136" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="125" y1="197.65" x2="114" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="125" y1="197.65" x2="107" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
+              <circle cx="125" cy="197.65" r="4.5" fill="#38bdf8"/>
+            </g>
 
-            <!-- Front Wheel (x=245, contact at y=223.3, radius=22) -->
-            <circle cx="245" cy="201.3" r="22" fill="#020617" stroke="#475569" stroke-width="2.5"/>
-            <circle cx="245" cy="201.3" r="14" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
-            <circle cx="245" cy="201.3" r="5" fill="#64748b"/>
+            <!-- Front Wheel (cx=340, cy=197.65, R_tire=25.35, contact Y=223.0) -->
+            <g id="priusFrontWheel">
+              <circle cx="340" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+              <circle cx="340" cy="197.65" r="18.9" fill="#1e293b" stroke="#94a3b8" stroke-width="1.2"/>
+              <!-- 5 Aero Spokes -->
+              <line x1="340" y1="197.65" x2="340" y2="178.75" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="340" y1="197.65" x2="358" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="340" y1="197.65" x2="351" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="340" y1="197.65" x2="329" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
+              <line x1="340" y1="197.65" x2="322" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
+              <circle cx="340" cy="197.65" r="4.5" fill="#38bdf8"/>
+            </g>
 
-            <!-- Prius Car Body -->
-            <path d="M 68,185 L 72,145 Q 80,110 115,90 L 165,66 Q 195,66 235,95 L 275,145 L 292,165 Q 295,178 288,185 L 268,185 Q 266,170 245,170 Q 224,170 222,185 L 138,185 Q 136,170 115,170 Q 94,170 92,185 Z" 
-                  fill="url(#priusBodyGrad)" stroke="#f1f5f9" stroke-width="1.5"/>
+            <!-- Prius Exterior Body Vector Outline (Gen 5 Mono-Volume Silhouette) -->
+            <path d="M 56,195 
+                     C 52,186 54,175 60,166 
+                     L 68,164 
+                     C 100,140 145,123 195,115 
+                     C 220,111.1 245,111.1 268,114 
+                     C 298,122 332,142 358,162 
+                     C 380,175 402,188 414,195 
+                     C 416,197 416,201 414,204 
+                     C 408,210 398,212 378,212 
+                     L 366,212 
+                     A 26,26 0 0,0 314,211.3 
+                     L 151,211.3 
+                     A 26,26 0 0,0 99,212 
+                     L 68,212 
+                     C 60,212 56,205 56,195 Z" 
+                  fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
 
-            <!-- Cabin Windows -->
-            <path d="M 120,95 L 162,74 L 162,118 L 105,118 Q 112,105 120,95 Z" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-            <path d="M 168,74 L 225,98 Q 255,125 260,135 L 168,135 Z" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+            <!-- Gen 5 Aerodynamic Side Windows & Glass Canopy -->
+            <path d="M 345,161 L 324,139 L 324,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <path d="M 320,138 C 295,127 268,119 236,117 L 236,161 L 320,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <rect x="233" y="117" width="5" height="44" fill="#334155" stroke="#64748b" stroke-width="0.8"/>
+            <path d="M 230,117 C 196,120 162,130 138,145 L 138,161 L 230,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <path d="M 138,145 C 120,154 110,160 102,161 L 138,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
 
-            <!-- Door Sill Line (8.5" above road contact = Y=198.2, elev 7.41') -->
-            <line x1="95" y1="198.2" x2="265" y2="198.2" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="3,2"/>
-            <text x="180" y="195" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Prius Door Sill (7.41')</text>
+            <!-- Door Cutlines & Character Lines -->
+            <line x1="324" y1="161" x2="314" y2="211.3" stroke="#475569" stroke-width="1.2"/>
+            <line x1="235" y1="161" x2="235" y2="211.3" stroke="#475569" stroke-width="1.2"/>
+            <path d="M 138,161 C 138,185 145,200 151,211.3" stroke="#475569" stroke-width="1.2" fill="none"/>
+            <path d="M 314,204 C 270,204 200,198 151,192" stroke="#475569" stroke-width="1" fill="none"/>
 
-            <!-- 5.9" Ground Clearance Line (Y=205.6) -->
-            <line x1="138" y1="205.6" x2="222" y2="205.6" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <!-- Gen 5 Hammerhead LED Headlamp Signature -->
+            <path d="M 414,196 L 396,190 L 390,193 L 400,197 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
+            <!-- Full-Width Thin Blade Rear Taillight -->
+            <path d="M 60,167 L 72,166 L 72,170 L 60,171 Z" fill="#ef4444" stroke="#f87171" stroke-width="0.8"/>
+
+            <!-- Door Sill Reference Line (8.5" Above Gutter = Y=206.1, Elev 7.41') -->
+            <line x1="90" y1="206.1" x2="370" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="235" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Prius Door Sill (7.41' | +8.5" Above Gutter)</text>
+
+            <!-- 5.9" Ground Clearance Line (Y=211.3) -->
+            <line x1="151" y1="211.3" x2="314" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="235" y="221" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Ground Clearance</text>
+
+            <!-- Height Dimension Indicator (56.3" = 111.9px) -->
+            <line x1="240" y1="104" x2="240" y2="111.1" stroke="#38bdf8" stroke-width="1"/>
+            <text x="240" y="100" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">56.3" Roof Height (To Scale)</text>
           </g>
 
-          <!-- Dynamic Water Layer (covers terrain up to waterY) -->
-          <path id="svgWaterLayer" d="M 40,265 L 40,186.7 Q 260,184.7 470,186.7 L 470,265 Z" fill="url(#waterGrad)"/>
+          <!-- ============================================================ -->
+          <!-- PRIUS FRONT CROSS-SECTION — TRANSVERSE VIEW (TRUE TO SCALE)  -->
+          <!-- Width: 70.2" (139.6px), Height: 56.3" (111.9px)              -->
+          <!-- ============================================================ -->
+          <g id="svgPriusFrontGroup" style="display: none;">
+            <!-- Left Tire (in gutter, contact Y=223.0) -->
+            <rect x="142" y="197.65" width="22" height="25.35" rx="3" fill="#090d16" stroke="#38bdf8" stroke-width="1.5"/>
+            <!-- Right Tire (on roadway slope, contact Y=218.0) -->
+            <rect x="246" y="192.65" width="22" height="25.35" rx="3" fill="#090d16" stroke="#38bdf8" stroke-width="1.5"/>
+
+            <!-- Front Body Outline -->
+            <path d="M 135,190 
+                     C 130,175 135,150 145,140 
+                     L 160,118 
+                     C 180,111.1 225,111.1 250,118 
+                     L 265,140 
+                     C 275,150 280,175 275,190 
+                     C 270,208 262,211.3 246,211.3 
+                     L 164,211.3 
+                     C 148,211.3 140,208 135,190 Z" 
+                  fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
+
+            <!-- Front Windshield -->
+            <path d="M 162,142 L 174,121 C 190,117 220,117 236,121 L 248,142 Z" fill="rgba(56, 189, 248, 0.15)" stroke="#94a3b8" stroke-width="1"/>
+
+            <!-- Hammerhead C-Shaped DRL Headlights -->
+            <path d="M 144,182 L 158,178 L 158,184 L 146,187 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
+            <path d="M 266,182 L 252,178 L 252,184 L 264,187 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
+
+            <!-- Side Aero Mirrors -->
+            <path d="M 132,154 L 120,152 L 120,158 L 134,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+            <path d="M 278,154 L 290,152 L 290,158 L 276,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+
+            <!-- Front Lower Grille -->
+            <rect x="180" y="196" width="50" height="12" rx="2" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+
+            <!-- Door Sill Line (Transverse) -->
+            <line x1="135" y1="206.1" x2="275" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="205" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Prius Door Sill (7.41')</text>
+
+            <!-- 5.9" Clearance Line (Transverse) -->
+            <line x1="164" y1="211.3" x2="246" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="205" y="220" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Clearance</text>
+          </g>
+
+          <!-- Dynamic Water Layer (covers terrain across gutter and road up to waterY) -->
+          <path id="svgWaterLayer" d="M 30,260 L 30,198.4 Q 360,197.9 600,198.4 L 600,260 Z" fill="url(#waterGrad)"/>
 
           <!-- Dynamic Water Level Line Marker -->
-          <line id="svgWaterLine" x1="40" y1="186.7" x2="470" y2="186.7" stroke="#38bdf8" stroke-width="2"/>
-          <polygon id="svgWaterMarker" points="470,186.7 482,181.7 482,191.7" fill="#38bdf8"/>
-          <text id="svgWaterText" x="488" y="189.7" fill="#38bdf8" font-size="8.5" font-weight="bold" font-family="monospace">7.73' (+5.0" on crown)</text>
+          <line id="svgWaterLine" x1="30" y1="198.4" x2="600" y2="198.4" stroke="#38bdf8" stroke-width="2"/>
+          <polygon id="svgWaterMarker" points="600,198.4 612,193.4 612,203.4" fill="#38bdf8"/>
+          <text id="svgWaterText" x="618" y="201.4" fill="#38bdf8" font-size="8.5" font-weight="bold" font-family="monospace">7.73' (+5.0" on crown)</text>
 
           <!-- In-Car Flood Warning Badge (Appears when water > 7.41') -->
-          <g id="svgSillAlert" transform="translate(180, 40)" style="display: block;">
-            <rect x="-85" y="-12" width="170" height="24" rx="6" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
+          <g id="svgSillAlert" transform="translate(235, 38)" style="display: block;">
+            <rect x="-95" y="-12" width="190" height="24" rx="6" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
             <text id="svgSillAlertText" x="0" y="4" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">🚨 WATER OVER DOOR SILL (+3.8")</text>
           </g>
         </svg>
@@ -1125,10 +1224,19 @@
     let currentScrubIdx = -1; // Dynamically set to live time on load
     let chartInstance = null;
 
-    // Service Worker Registration for PWA
+    // Service Worker Registration for PWA with Auto-Refresh on Update
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.update();
+        }).catch(err => console.log('SW fail:', err));
+      });
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
       });
     }
 
@@ -1289,8 +1397,20 @@
       const point = tideTimeline[currentScrubIdx];
       const cfg = THRESHOLDS[activeLocKey];
 
-      // Update Time Badge
-      document.getElementById('scrubberTimeBadge').textContent = point.timeLabel;
+      // Update Time Badge with Live vs Sim state
+      const isScrubbing = (currentScrubIdx !== getLivePointIdx());
+      const badgeEl = document.getElementById('scrubberTimeBadge');
+      if (badgeEl) {
+        if (!isScrubbing) {
+          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); margin-right:5px; box-shadow:0 0 6px var(--green);"></span>LIVE: ${point.timeLabel}`;
+          badgeEl.style.borderColor = "rgba(34, 197, 94, 0.4)";
+          badgeEl.style.color = "var(--green)";
+        } else {
+          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--amber); margin-right:5px;"></span>SIM: ${point.timeLabel}`;
+          badgeEl.style.borderColor = "rgba(245, 158, 11, 0.4)";
+          badgeEl.style.color = "var(--amber)";
+        }
+      }
       document.getElementById('currentLocationName').textContent = cfg.name;
 
       // Metric calculations
@@ -1407,25 +1527,28 @@
       }
     }
 
-    // Update SVG Cross-Section with True Physical Proportions
+    // Update SVG Cross-Section with True Physical Proportions (1.988 px/in = 23.856 px/ft)
     function updateSvgCrossSection(twl, cfg) {
       document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
 
-      // Physically calibrated scale: Gutter Y=223.3 (6.70'), Crown Y=201.7 (7.31'), 1 ft = ~35.9px
-      const gutterY = 223.3;
-      const pxPerFt = 35.92;
-      const waterY = Math.max(50, Math.min(240, gutterY - (twl - 6.70) * pxPerFt));
+      const gutterY = 223.0;
+      const pxPerFt = 23.856;
+      const waterY = Math.max(40, Math.min(255, gutterY - (twl - 6.70) * pxPerFt));
 
       // Update water layer polygon
-      const waterPath = `M 40,265 L 40,${waterY} Q 250,${waterY - 1} 470,${waterY} L 470,265 Z`;
-      document.getElementById('svgWaterLayer').setAttribute('d', waterPath);
+      const waterPath = `M 30,260 L 30,${waterY} Q 360,${waterY - 0.5} 600,${waterY} L 600,260 Z`;
+      const waterLayer = document.getElementById('svgWaterLayer');
+      if (waterLayer) waterLayer.setAttribute('d', waterPath);
       
       // Update water level line and label
-      document.getElementById('svgWaterLine').setAttribute('y1', waterY);
-      document.getElementById('svgWaterLine').setAttribute('y2', waterY);
+      const waterLine = document.getElementById('svgWaterLine');
+      if (waterLine) {
+        waterLine.setAttribute('y1', waterY);
+        waterLine.setAttribute('y2', waterY);
+      }
       
       const marker = document.getElementById('svgWaterMarker');
-      if (marker) marker.setAttribute('points', `470,${waterY} 482,${waterY - 5} 482,${waterY + 5}`);
+      if (marker) marker.setAttribute('points', `600,${waterY} 612,${waterY - 5} 612,${waterY + 5}`);
       
       const crownDeltaIn = (twl - 7.31) * 12;
       const gutterDepthIn = (twl - 6.70) * 12;
@@ -1452,16 +1575,40 @@
       if (sillDeltaIn > 0) {
         if (sillAlert) sillAlert.style.display = 'block';
         if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — INTERIOR FLOODING`;
+        const rect = sillAlert ? sillAlert.querySelector('rect') : null;
+        if (rect) {
+          rect.setAttribute('fill', '#ef4444');
+          rect.setAttribute('stroke', '#ffffff');
+        }
       } else if (gutterDepthIn > 0) {
         if (sillAlert) sillAlert.style.display = 'block';
         if (sillText) sillText.textContent = `🟡 WATER IN GUTTER (+${gutterDepthIn.toFixed(1)}") — SILL DRY`;
-        const rect = sillAlert.querySelector('rect');
+        const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#f59e0b');
           rect.setAttribute('stroke', '#fbbf24');
         }
       } else {
         if (sillAlert) sillAlert.style.display = 'none';
+      }
+    }
+
+    // Toggle between Side Profile (To Scale) and Front Cross-Section (To Scale)
+    function switchPriusView(view) {
+      const sideGrp = document.getElementById('svgPriusSideGroup');
+      const frontGrp = document.getElementById('svgPriusFrontGroup');
+      const btnSide = document.getElementById('btnViewSide');
+      const btnFront = document.getElementById('btnViewFront');
+      if (view === 'front') {
+        if (sideGrp) sideGrp.style.display = 'none';
+        if (frontGrp) frontGrp.style.display = 'block';
+        if (btnSide) btnSide.classList.remove('active');
+        if (btnFront) btnFront.classList.add('active');
+      } else {
+        if (sideGrp) sideGrp.style.display = 'block';
+        if (frontGrp) frontGrp.style.display = 'none';
+        if (btnSide) btnSide.classList.add('active');
+        if (btnFront) btnFront.classList.remove('active');
       }
     }
 

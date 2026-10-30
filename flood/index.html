@@ -768,8 +768,8 @@
         </div>
         <div style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
           <span style="font-size: 0.72rem; color: var(--text-muted);">View:</span>
-          <button id="btnViewSide" class="chip-btn active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('side')">🚗 Side Profile (To Scale)</button>
-          <button id="btnViewFront" class="chip-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('front')">🚘 Front Cross-Section</button>
+          <button type="button" id="btnViewSide" class="chip-btn active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('side', event)">🚗 Side Profile (To Scale)</button>
+          <button type="button" id="btnViewFront" class="chip-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('front', event)">🚘 Front Cross-Section</button>
         </div>
       </div>
       <div class="svg-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
@@ -916,45 +916,52 @@
           <!-- PRIUS FRONT CROSS-SECTION — TRANSVERSE VIEW (TRUE TO SCALE)  -->
           <!-- Width: 70.2" (139.6px), Height: 56.3" (111.9px)              -->
           <!-- ============================================================ -->
-          <g id="svgPriusFrontGroup" style="display: none;">
+          <g id="svgPriusFrontGroup" display="none" visibility="hidden">
+            <!-- Front View Title Badge -->
+            <rect x="120" y="86" width="190" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+            <text x="215" y="98" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT CROSS-SECTION VIEW</text>
+
             <!-- Left Tire (in gutter, contact Y=223.0) -->
-            <rect x="142" y="197.65" width="22" height="25.35" rx="3" fill="#090d16" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="148" y="196.65" width="24" height="26.35" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
             <!-- Right Tire (on roadway slope, contact Y=218.0) -->
-            <rect x="246" y="192.65" width="22" height="25.35" rx="3" fill="#090d16" stroke="#38bdf8" stroke-width="1.5"/>
+            <rect x="258" y="191.65" width="24" height="26.35" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
 
             <!-- Front Body Outline -->
-            <path d="M 135,190 
-                     C 130,175 135,150 145,140 
-                     L 160,118 
-                     C 180,111.1 225,111.1 250,118 
-                     L 265,140 
-                     C 275,150 280,175 275,190 
-                     C 270,208 262,211.3 246,211.3 
-                     L 164,211.3 
-                     C 148,211.3 140,208 135,190 Z" 
-                  fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 142,190 
+                     C 136,175 142,150 152,138 
+                     L 168,118 
+                     C 188,111.1 242,111.1 262,118 
+                     L 278,138 
+                     C 288,150 294,175 288,190 
+                     C 284,208 274,211.3 258,211.3 
+                     L 172,211.3 
+                     C 156,211.3 146,208 142,190 Z" 
+                  fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
 
             <!-- Front Windshield -->
-            <path d="M 162,142 L 174,121 C 190,117 220,117 236,121 L 248,142 Z" fill="rgba(56, 189, 248, 0.15)" stroke="#94a3b8" stroke-width="1"/>
+            <path d="M 170,140 L 180,121 C 196,117 234,117 250,121 L 260,140 Z" fill="rgba(56, 189, 248, 0.18)" stroke="#94a3b8" stroke-width="1.2"/>
+
+            <!-- Rearview Mirror inside cabin -->
+            <rect x="211" y="123" width="8" height="4" rx="1" fill="#64748b"/>
 
             <!-- Hammerhead C-Shaped DRL Headlights -->
-            <path d="M 144,182 L 158,178 L 158,184 L 146,187 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
-            <path d="M 266,182 L 252,178 L 252,184 L 264,187 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
+            <path d="M 152,182 L 166,177 L 166,183 L 154,186 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="1"/>
+            <path d="M 278,182 L 264,177 L 264,183 L 276,186 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="1"/>
 
             <!-- Side Aero Mirrors -->
-            <path d="M 132,154 L 120,152 L 120,158 L 134,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
-            <path d="M 278,154 L 290,152 L 290,158 L 276,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+            <path d="M 140,154 L 126,151 L 126,157 L 142,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+            <path d="M 290,154 L 304,151 L 304,157 L 288,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
 
             <!-- Front Lower Grille -->
-            <rect x="180" y="196" width="50" height="12" rx="2" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+            <rect x="188" y="196" width="54" height="12" rx="2" fill="#0f172a" stroke="#475569" stroke-width="1"/>
 
             <!-- Door Sill Line (Transverse) -->
-            <line x1="135" y1="206.1" x2="275" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
-            <text x="205" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Small Car Door Sill (7.41')</text>
+            <line x1="142" y1="206.1" x2="288" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="215" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Small Car Door Sill (7.41')</text>
 
             <!-- 5.9" Clearance Line (Transverse) -->
-            <line x1="164" y1="211.3" x2="246" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
-            <text x="205" y="220" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Clearance</text>
+            <line x1="172" y1="211.3" x2="258" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="215" y="220" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Clearance</text>
           </g>
 
           <!-- Dynamic Water Layer (covers terrain across gutter and road up to waterY) -->
@@ -1606,20 +1613,54 @@
       }
     }
 
-    // Toggle between Side Profile (To Scale) and Front Cross-Section (To Scale)
-    function switchPriusView(view) {
+    // Persistent View State: Side Profile vs Front Cross-Section
+    let currentCarView = 'side';
+    try {
+      currentCarView = localStorage.getItem('floodwatch_car_view') || 'side';
+    } catch(e) {}
+
+    function switchPriusView(view, ev) {
+      if (ev) {
+        if (ev.preventDefault) ev.preventDefault();
+        if (ev.stopPropagation) ev.stopPropagation();
+      }
+      currentCarView = view;
+      try {
+        localStorage.setItem('floodwatch_car_view', view);
+      } catch (e) {}
+      applyCarView();
+    }
+
+    function applyCarView() {
       const sideGrp = document.getElementById('svgPriusSideGroup');
       const frontGrp = document.getElementById('svgPriusFrontGroup');
       const btnSide = document.getElementById('btnViewSide');
       const btnFront = document.getElementById('btnViewFront');
-      if (view === 'front') {
-        if (sideGrp) sideGrp.style.display = 'none';
-        if (frontGrp) frontGrp.style.display = 'block';
+
+      if (currentCarView === 'front') {
+        if (sideGrp) {
+          sideGrp.style.display = 'none';
+          sideGrp.setAttribute('display', 'none');
+          sideGrp.setAttribute('visibility', 'hidden');
+        }
+        if (frontGrp) {
+          frontGrp.style.display = 'inline';
+          frontGrp.setAttribute('display', 'inline');
+          frontGrp.setAttribute('visibility', 'visible');
+        }
         if (btnSide) btnSide.classList.remove('active');
         if (btnFront) btnFront.classList.add('active');
       } else {
-        if (sideGrp) sideGrp.style.display = 'block';
-        if (frontGrp) frontGrp.style.display = 'none';
+        if (sideGrp) {
+          sideGrp.style.display = 'inline';
+          sideGrp.setAttribute('display', 'inline');
+          sideGrp.setAttribute('visibility', 'visible');
+        }
+        if (frontGrp) {
+          frontGrp.style.display = 'none';
+          frontGrp.setAttribute('display', 'none');
+          frontGrp.setAttribute('visibility', 'hidden');
+        }
         if (btnSide) btnSide.classList.add('active');
         if (btnFront) btnFront.classList.remove('active');
       }
@@ -1723,6 +1764,7 @@
 
         renderSvgHydrograph();
         updateUI();
+        applyCarView();
 
         // Wire touch & drag events on hydrograph SVG for intuitive time scrubbing
         const hSvg = document.getElementById('hydrographSvg');

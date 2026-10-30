@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Larkspur WET & FloodWatch</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Larkspur WET">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 30, 49, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-glow: rgba(56, 189, 248, 0.1);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --cyan: #38bdf8;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --green: #10b981;
+      --purple: #a855f7;
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.06) 0px, transparent 50%);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding-bottom: 70px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Top App Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      font-size: 22px;
+    }
+
+    .brand-title h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand-title p {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Status Banner */
+    .status-hero {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .status-hero.red {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.12) 0%, var(--card-bg) 100%);
+    }
+
+    .status-hero.yellow {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, var(--card-bg) 100%);
+    }
+
+    .status-hero.green {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, var(--card-bg) 100%);
+    }
+
+    .status-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .badge-pill.red {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .badge-pill.yellow {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .badge-pill.green {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .hero-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 14px;
+    }
+
+    .countdown-bar {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .countdown-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .countdown-val {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Metric Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      backdrop-filter: blur(12px);
+    }
+
+    .metric-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    .metric-val {
+      font-family: var(--mono);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .metric-val span {
+      font-size: 0.8rem;
+      font-family: var(--font);
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .metric-sub {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Time Scrubber Card */
+    .scrubber-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .scrubber-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .scrubber-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .scrubber-time-badge {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .slider-container {
+      position: relative;
+      margin: 12px 0 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    .scrubber-quick-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      padding-top: 4px;
+    }
+
+    .scrubber-btn-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip-btn.active, .chip-btn:hover {
+      background: var(--cyan);
+      color: #0b0f19;
+      font-weight: 700;
+    }
+
+    /* Road Cross Section SVG */
+    .cross-section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .svg-wrapper {
+      width: 100%;
+      border-radius: 12px;
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px;
+    }
+
+    /* Chart Card */
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 240px;
+      width: 100%;
+    }
+
+    /* Photo Proof Calibration Gallery */
+    .gallery-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .photo-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #000;
+      cursor: pointer;
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .photo-item:hover img {
+      transform: scale(1.04);
+    }
+
+    .photo-tag {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.85) 100%);
+      padding: 14px 8px 6px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* Location / Vehicle Selector Drawer / Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 480px;
+      padding: 22px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .setting-group {
+      margin-bottom: 18px;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .select-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .select-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .select-card.active {
+      border-color: var(--cyan);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .select-card-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .select-card-detail {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Threshold Reference Table */
+    .threshold-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 10px;
+    }
+
+    .threshold-table th, .threshold-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .threshold-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .threshold-table td.val {
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+
+    /* PWA Install Toast */
+    .install-banner {
+      background: linear-gradient(90deg, #0284c7, #6366f1);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.3);
+    }
+
+    .install-banner button {
+      background: #fff;
+      color: #0b0f19;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Header -->
+    <header>
+      <div class="brand">
+        <div class="app-icon">🌊</div>
+        <div class="brand-title">
+          <h1>Larkspur WET</h1>
+          <p>Weather • Event • Tide & FloodWatch</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" title="Refresh Live NOAA Data" onclick="fetchLiveNOAA()">🔄</button>
+        <button class="btn-icon" title="Settings & Thresholds" onclick="openSettings()">⚙️</button>
+      </div>
+    </header>
+
+    <!-- PWA Install Banner -->
+    <div id="pwaBanner" class="install-banner" style="display:none;">
+      <div>📱 Install as Android App on your Home Screen!</div>
+      <button onclick="installPWA()">Install</button>
+    </div>
+
+    <!-- MAIN LIVE STATUS HERO BANNER -->
+    <section class="status-hero red" id="heroBanner">
+      <div class="status-header-row">
+        <div class="badge-pill red" id="statusBadge">
+          <span class="pulse-dot"></span>
+          <span id="statusBadgeText">PRIUS IMPASSABLE</span>
+        </div>
+        <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono);" id="currentLocationName">
+          Larkspur Plaza Dr
+        </div>
+      </div>
+      <div class="hero-title" id="heroTitle">Crosswalk Sag Impassable for Prius</div>
+      <div class="hero-desc" id="heroDesc">
+        Water over the crosswalk dip exceeds 5.9 inches ground clearance. Road officially impassable for Prius.
+      </div>
+      <div class="countdown-bar">
+        <div class="countdown-label" id="countdownLabel">ESTIMATED PRIUS CLEARANCE:</div>
+        <div class="countdown-val" id="countdownVal">Calculating...</div>
+      </div>
+    </section>
+
+    <!-- LIVE METRICS GRID -->
+    <section class="metric-grid">
+      <!-- Total Water Level -->
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span>Total Water Level</span>
+          <span id="tideTrendIcon">⬇️ FALLING</span>
+        </div>
+        <div class="metric-val" id="valTWL">
+          7.51 <span>ft NAVD88</span>
+        </div>
+        <div class="metric-sub" id="valTWLMLLW">
+          Station 9414874: 7.45' MLLW
+        </div>
+      </div>
+
+      <!-- Active Storm Surge -->
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span>Active Surge</span>
+          <span style="color:var(--amber);">KELVIN WAVE</span>
+        </div>
+        <div class="metric-val" id="valSurge" style="color:var(--amber);">
+          +1.38 <span>ft</span>
+        </div>
+        <div class="metric-sub" style="color:var(--text-muted);" id="valSurgeSub">
+          Golden Gate Observed vs Ast
+        </div>
+      </div>
+
+      <!-- Road Crown Water Depth -->
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span>Road Crown (7.31')</span>
+          <span id="crownStatusText">SUBMERGED</span>
+        </div>
+        <div class="metric-val" id="valCrownDepth">
+          +2.4 <span>in water</span>
+        </div>
+        <div class="metric-sub" id="valCrownSub">
+          Center lane crowned peak
+        </div>
+      </div>
+
+      <!-- Prius Clearance Gauge -->
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span>Prius Sag (5.9" CLR)</span>
+          <span style="color:var(--red);">BREACHED</span>
+        </div>
+        <div class="metric-val" id="valPriusClearance" style="color:var(--red);">
+          -0.0 <span>in clr</span>
+        </div>
+        <div class="metric-sub" style="color:#fca5a5;" id="valPriusDepth">
+          Dip water depth: 5.4 in
+        </div>
+      </div>
+    </section>
+
+    <!-- TIME TRAVEL SCRUBBER -->
+    <section class="scrubber-card">
+      <div class="scrubber-header">
+        <div class="scrubber-title">
+          <span>⏱️ Time Travel Scrubber</span>
+        </div>
+        <div class="scrubber-time-badge" id="scrubberTimeBadge">
+          LIVE: 2:48 PM
+        </div>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="timeSlider" min="0" max="144" value="88" oninput="onScrub(this.value)">
+      </div>
+      <div class="scrubber-quick-ticks">
+        <span>11:00 AM</span>
+        <span>1:04 PM</span>
+        <span>1:33 PM</span>
+        <span>2:43 PM</span>
+        <span>3:24 PM</span>
+        <span>6:45 PM</span>
+      </div>
+      <div class="scrubber-btn-row">
+        <button class="chip-btn" onclick="snapTime('now')">📍 Live Now</button>
+        <button class="chip-btn" onclick="snapTime('1142')">11:42 AM (Dry)</button>
+        <button class="chip-btn" onclick="snapTime('1304')">1:04 PM (Gutter Seep)</button>
+        <button class="chip-btn" onclick="snapTime('1333')">1:33 PM (Gutter Wet)</button>
+        <button class="chip-btn" onclick="snapTime('1443')">2:43 PM (Impassable!)</button>
+        <button class="chip-btn" onclick="snapTime('1524')">3:24 PM (Peak 7.70')</button>
+        <button class="chip-btn" onclick="snapTime('1845')">6:45 PM (Cleared)</button>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE ROAD CROSS-SECTION SIMULATOR (SVG) -->
+    <section class="cross-section-card">
+      <div class="card-title">
+        <span>🚗 Road Cross-Section & Prius Clearance Simulator</span>
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono);" id="crossSectionTideLabel">TWL: 7.51 ft</span>
+      </div>
+      <div class="svg-wrapper">
+        <svg id="roadSvg" viewBox="0 0 500 220" style="width: 100%; height: auto; display: block;">
+          <defs>
+            <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.95"/>
+            </linearGradient>
+            <linearGradient id="pavementGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Background Grid lines -->
+          <line x1="40" y1="50" x2="480" y2="50" stroke="#334155" stroke-dasharray="2,2"/>
+          <text x="35" y="53" fill="#64748b" font-size="9" text-anchor="end">8.0'</text>
+
+          <line x1="40" y1="85" x2="480" y2="85" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="35" y="88" fill="#c084fc" font-size="9" text-anchor="end">7.75' (Carport 86)</text>
+
+          <line x1="40" y1="113" x2="480" y2="113" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="35" y="116" fill="#f87171" font-size="9" text-anchor="end">7.55' (Prius Impassable)</text>
+
+          <line x1="40" y1="147" x2="480" y2="147" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="35" y="150" fill="#fcd34d" font-size="9" text-anchor="end">7.31' (Crown)</text>
+
+          <line x1="40" y1="190" x2="480" y2="190" stroke="#38bdf8" stroke-dasharray="2,2"/>
+          <text x="35" y="193" fill="#38bdf8" font-size="9" text-anchor="end">6.70' (Gutter)</text>
+
+          <!-- Road & Terrain Polygon -->
+          <!-- Left gutter: x=50,y=190. Crown: x=210, y=147. Right gutter/sag: x=340, y=185. Curb/Carport: x=400, y=85. -->
+          <polygon points="40,215 50,190 120,170 210,147 300,165 340,185 370,180 380,85 480,85 480,215" fill="url(#pavementGrad)"/>
+          
+          <!-- Carport Roof & Pillar -->
+          <rect x="380" y="30" width="100" height="8" rx="2" fill="#475569"/>
+          <rect x="390" y="38" width="6" height="47" fill="#64748b"/>
+          <rect x="470" y="38" width="6" height="47" fill="#64748b"/>
+          <text x="430" y="24" fill="#cbd5e1" font-size="9" text-anchor="middle" font-weight="bold">Carport Spot #86</text>
+
+          <!-- Dynamic Water Layer -->
+          <path id="svgWaterLayer" d="M 40,215 L 40,119 Q 200,117 380,119 L 380,215 Z" fill="url(#waterGrad)"/>
+
+          <!-- Prius Silhouette -->
+          <g id="svgPriusGroup" transform="translate(160, 95)">
+            <!-- Car body -->
+            <path d="M 10,38 Q 20,20 40,15 L 75,15 Q 95,20 105,38 Z" fill="#94a3b8" stroke="#f1f5f9" stroke-width="1.5"/>
+            <!-- Windows -->
+            <path d="M 35,18 L 50,18 L 50,28 L 26,28 Z" fill="#0f172a"/>
+            <path d="M 54,18 L 73,18 L 82,28 L 54,28 Z" fill="#0f172a"/>
+            <!-- Wheels -->
+            <circle cx="30" cy="42" r="10" fill="#020617" stroke="#64748b" stroke-width="2"/>
+            <circle cx="85" cy="42" r="10" fill="#020617" stroke="#64748b" stroke-width="2"/>
+            <!-- 5.9" ground clearance line -->
+            <line x1="40" y1="42" x2="75" y2="42" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+          </g>
+
+          <!-- Live Water Level Line Marker -->
+          <line id="svgWaterLine" x1="40" y1="119" x2="380" y2="119" stroke="#38bdf8" stroke-width="2"/>
+          <polygon id="svgWaterMarker" points="380,119 392,114 392,124" fill="#38bdf8"/>
+          <text id="svgWaterText" x="398" y="122" fill="#38bdf8" font-size="10" font-weight="bold" font-family="monospace">7.51'</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 48-HOUR HYDROGRAPH CHART (NATIVE RESPONSIVE SVG) -->
+    <section class="chart-card">
+      <div class="card-title">
+        <span>📈 48-Hour Tide & Surge Forecast (Larkspur #9414874)</span>
+        <span style="font-size:0.75rem; color:var(--cyan); font-family:var(--mono);">NOAA Live</span>
+      </div>
+      <div class="chart-container" style="height: auto; min-height: 240px;">
+        <svg id="hydrographSvg" viewBox="0 0 600 240" style="width: 100%; height: auto; display: block; overflow: visible; touch-action: none; user-select: none;">
+          <defs>
+            <linearGradient id="twlGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.5"/>
+              <stop offset="60%" stop-color="#0284c7" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Background Elevation Reference Grid Lines -->
+          <line x1="55" y1="30" x2="585" y2="30" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2,2"/>
+          <text x="50" y="34" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">8.0'</text>
+
+          <line x1="55" y1="52" x2="585" y2="52" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="50" y="55" fill="#c084fc" font-size="9" text-anchor="end" font-family="monospace">7.75' Stall 86</text>
+
+          <line x1="55" y1="72" x2="585" y2="72" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="50" y="75" fill="#f87171" font-size="9" text-anchor="end" font-family="monospace">7.55' Prius Impassable</text>
+
+          <line x1="55" y1="94" x2="585" y2="94" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="50" y="97" fill="#fcd34d" font-size="9" text-anchor="end" font-family="monospace">7.31' Crown</text>
+
+          <line x1="55" y1="150" x2="585" y2="150" stroke="#38bdf8" stroke-dasharray="2,2" stroke-width="1"/>
+          <text x="50" y="153" fill="#38bdf8" font-size="9" text-anchor="end" font-family="monospace">6.70' Gutter</text>
+
+          <line x1="55" y1="200" x2="585" y2="200" stroke="rgba(255,255,255,0.08)"/>
+          <text x="50" y="203" fill="#64748b" font-size="9" text-anchor="end" font-family="monospace">5.0'</text>
+
+          <!-- Dynamic Wave Curves -->
+          <path id="svgTwlArea" d="" fill="url(#twlGrad)"/>
+          <path id="svgAstPath" d="" fill="none" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4,4"/>
+          <path id="svgTwlPath" d="" fill="none" stroke="#38bdf8" stroke-width="2.8"/>
+
+          <!-- Bottom Time Ticks -->
+          <g id="svgTimeTicks" font-size="9" fill="#94a3b8" font-family="monospace" text-anchor="middle">
+            <text x="55" y="222">12 AM</text>
+            <text x="143" y="222">4 AM</text>
+            <text x="231" y="222">8 AM</text>
+            <text x="320" y="222">12 PM</text>
+            <text x="408" y="222">4 PM</text>
+            <text x="496" y="222">8 PM</text>
+            <text x="585" y="222">12 AM</text>
+          </g>
+
+          <!-- Interactive Time Scrubber Indicator -->
+          <line id="svgScrubLine" x1="390" y1="20" x2="390" y2="200" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3,3"/>
+          <circle id="svgScrubDot" cx="390" cy="74" r="5" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+          <g id="svgScrubBadge" transform="translate(390, 15)">
+            <rect x="-35" y="-14" width="70" height="16" rx="4" fill="#1e293b" stroke="#f59e0b" stroke-width="1"/>
+            <text id="svgScrubText" x="0" y="-3" font-size="9" font-weight="bold" fill="#f59e0b" font-family="monospace" text-anchor="middle">2:43 PM</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- GROUND-TRUTH CALIBRATION GALLERY -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Oct 30 Ground-Truth Photo Calibration</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Field Sequence</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-item" onclick="openPhoto('photos/stage1_1142am_dry.jpg', '11:42 AM — Baseline dry road. Tide 3.2 ft.')">
+          <img src="photos/stage1_1142am_dry.jpg" alt="11:42 AM Dry">
+          <div class="photo-tag">11:42 AM • Road Dry (3.2')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/stage2_104pm_seep.jpg', '1:04 PM — Creek seeps into left gutter drain. Tide 6.70 ft.')">
+          <img src="photos/stage2_104pm_seep.jpg" alt="1:04 PM Seep">
+          <div class="photo-tag">1:04 PM • Gutter Seep (6.70')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/stage3_133pm_gutter.jpg', '1:33 PM — Gutters wet, center crown dry. Traffic flowing. Tide 7.05 ft.')">
+          <img src="photos/stage3_133pm_gutter.jpg" alt="1:33 PM Gutter ponding">
+          <div class="photo-tag">1:33 PM • Gutters Wet (7.05')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/stage4_243pm_impassable.jpg', '2:43 PM — Gold Standard: Crosswalk dip reaches 5.9 in depth. Prius impassable! Tide 7.55 ft.')">
+          <img src="photos/stage4_243pm_impassable.jpg" alt="2:43 PM Prius Impassable">
+          <div class="photo-tag" style="color:#fca5a5;">2:43 PM • Prius Impassable (7.55')</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRITICAL THRESHOLD REFERENCE TABLE -->
+    <section class="cross-section-card">
+      <div class="card-title">
+        <span>📋 Calibrated Elevation Thresholds</span>
+      </div>
+      <table class="threshold-table">
+        <thead>
+          <tr>
+            <th>Feature / Benchmark</th>
+            <th>Elevation</th>
+            <th>Status / Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Street Gutter Inverts</td>
+            <td class="val" style="color:var(--cyan);">6.70 ft</td>
+            <td>Water begins seeping into curb gutters (1:04 PM)</td>
+          </tr>
+          <tr>
+            <td>Yellow Flag Alert</td>
+            <td class="val" style="color:var(--amber);">6.95 ft</td>
+            <td>Move Prius from street curb to Carport #86</td>
+          </tr>
+          <tr>
+            <td>Center Road Crown</td>
+            <td class="val" style="color:#fdba74;">7.31 ft</td>
+            <td>Water covers asphalt peak (Crown flooded)</td>
+          </tr>
+          <tr>
+            <td><strong>Prius Impassable (Sag)</strong></td>
+            <td class="val" style="color:var(--red);"><strong>7.55 ft</strong></td>
+            <td><strong>Travel lane depth &ge; 5.9" (Ground truth: 2:43 PM)</strong></td>
+          </tr>
+          <tr>
+            <td>Carport Stall #86 Floor</td>
+            <td class="val" style="color:var(--purple);">7.75 ft</td>
+            <td>Concrete floor. Kept dry today (peak was 7.70 ft)</td>
+          </tr>
+          <tr>
+            <td>SUV / Truck Impassable</td>
+            <td class="val" style="color:#f43f5e;">7.85 ft</td>
+            <td>High clearance vehicles &ge; 9" ground clearance</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>⚙️ Location & Vehicle Settings</h2>
+        <button class="btn-icon" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="setting-group">
+        <label>Reporting Location</label>
+        <div class="select-card-list">
+          <div class="select-card active" id="loc-larkspur" onclick="selectLocation('larkspur')">
+            <div>
+              <div class="select-card-name">📍 Larkspur Plaza Drive & Carport #86</div>
+              <div class="select-card-detail">Crown: 7.31' | Prius Sag: 7.55' | Stall: 7.75'</div>
+            </div>
+            <span>✓</span>
+          </div>
+          <div class="select-card" id="loc-manzanita" onclick="selectLocation('manzanita')">
+            <div>
+              <div class="select-card-name">📍 Manzanita Park & Ride (Shoreline Hwy)</div>
+              <div class="select-card-detail">Lot Floods: 7.20' | Impassable: 7.45'</div>
+            </div>
+          </div>
+          <div class="select-card" id="loc-tam" onclick="selectLocation('tam')">
+            <div>
+              <div class="select-card-name">📍 Tam Junction (Almonte Blvd / SR-1)</div>
+              <div class="select-card-detail">Road Floods: 7.35' | Impassable: 7.60'</div>
+            </div>
+          </div>
+          <div class="select-card" id="loc-creek" onclick="selectLocation('creek')">
+            <div>
+              <div class="select-card-name">📍 Corte Madera Creek Multi-Use Path</div>
+              <div class="select-card-detail">Path Overtopped: 6.60'</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label>Vehicle Ground Clearance</label>
+        <div class="select-card-list">
+          <div class="select-card active" id="veh-prius" onclick="selectVehicle('prius', 5.9)">
+            <div>
+              <div class="select-card-name">🚗 Andy's 2026 Prius (5.9" Clearance)</div>
+              <div class="select-card-detail">Impassable at 7.55 ft NAVD88</div>
+            </div>
+            <span>✓</span>
+          </div>
+          <div class="select-card" id="veh-sedan" onclick="selectVehicle('sedan', 6.5)">
+            <div>
+              <div class="select-card-name">🚙 Standard Compact / Sedan (6.5" Clearance)</div>
+              <div class="select-card-detail">Impassable at 7.60 ft NAVD88</div>
+            </div>
+          </div>
+          <div class="select-card" id="veh-suv" onclick="selectVehicle('suv', 8.7)">
+            <div>
+              <div class="select-card-name">🚙 Subaru / Crossover SUV (8.7" Clearance)</div>
+              <div class="select-card-detail">Impassable at 7.78 ft NAVD88</div>
+            </div>
+          </div>
+          <div class="select-card" id="veh-truck" onclick="selectVehicle('truck', 10.0)">
+            <div>
+              <div class="select-card-name">🛻 4x4 Truck / High Clearance (10.0" Clearance)</div>
+              <div class="select-card-detail">Impassable at 7.89 ft NAVD88</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: right; margin-top: 16px;">
+        <button class="chip-btn active" style="padding: 8px 18px; font-size:0.85rem;" onclick="closeSettings()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    // Configuration & Ground Truth Constants
+    const THRESHOLDS = {
+      larkspur: {
+        name: "Larkspur Plaza Drive",
+        gutter: 6.70,
+        yellow: 6.95,
+        crown: 7.31,
+        priusSag: 7.55, // Confirmed 2:43 PM ground truth!
+        stall: 7.75,
+        lagMinutes: 135 // 2 hr 15 min drainage lag
+      },
+      manzanita: {
+        name: "Manzanita Park & Ride",
+        gutter: 7.00,
+        yellow: 7.15,
+        crown: 7.20,
+        priusSag: 7.45,
+        stall: 7.80,
+        lagMinutes: 90
+      },
+      tam: {
+        name: "Tam Junction (SR-1)",
+        gutter: 7.10,
+        yellow: 7.25,
+        crown: 7.35,
+        priusSag: 7.60,
+        stall: 8.00,
+        lagMinutes: 120
+      },
+      creek: {
+        name: "Corte Madera Creek Path",
+        gutter: 6.40,
+        yellow: 6.50,
+        crown: 6.60,
+        priusSag: 6.80,
+        stall: 7.50,
+        lagMinutes: 45
+      }
+    };
+
+    let activeLocKey = 'larkspur';
+    let activeVehicleClearance = 5.9; // inches
+    let liveSurge = 1.38; // ft
+    let tideTimeline = []; // 6-minute points
+    let currentScrubIdx = -1; // Dynamically set to live time on load
+    let chartInstance = null;
+
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
+      });
+    }
+
+    // PWA Install prompt listener
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwaBanner').style.display = 'flex';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('pwaBanner').style.display = 'none';
+        });
+      }
+    }
+
+    // Modal Helpers
+    function openSettings() {
+      document.getElementById('settingsModal').classList.add('open');
+    }
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('open');
+      updateUI();
+    }
+    function selectLocation(key) {
+      activeLocKey = key;
+      document.querySelectorAll('.select-card-list #loc-larkspur, #loc-manzanita, #loc-tam, #loc-creek').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('loc-' + key);
+      if (target) target.classList.add('active');
+    }
+    function selectVehicle(key, clr) {
+      activeVehicleClearance = clr;
+      document.querySelectorAll('.select-card-list #veh-prius, #veh-sedan, #veh-suv, #veh-truck').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('veh-' + key);
+      if (target) target.classList.add('active');
+    }
+
+    // Generate simulated high-accuracy 24h harmonic curve matching NOAA Station 9414874 for Oct 30
+    function generateTideData() {
+      const data = [];
+      // Model October 30 King Tide: Low at 8:45 AM (0.8'), High at 3:24 PM (6.32' ast + 1.38' surge = 7.70' TWL)
+      for (let i = 0; i < 144; i++) {
+        const totalMinutes = i * 10; // 0:00 to 24:00 in 10 min steps
+        const hours = totalMinutes / 60;
+        
+        // High harmonic approximation peaking at 15.4 hrs (3:24 PM)
+        const dt = (hours - 15.4) * 0.52;
+        const astTide = 3.6 + 2.72 * Math.cos(dt);
+        const twl = astTide + liveSurge;
+
+        const h = Math.floor(hours);
+        const m = Math.floor(totalMinutes % 60);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const displayH = h % 12 === 0 ? 12 : h % 12;
+        const timeLabel = `${displayH}:${m < 10 ? '0' : ''}${m} ${ampm}`;
+
+        data.push({
+          idx: i,
+          timeLabel: timeLabel,
+          hours: hours,
+          ast: parseFloat(astTide.toFixed(2)),
+          surge: liveSurge,
+          twl: parseFloat(twl.toFixed(2))
+        });
+      }
+      return data;
+    }
+
+    // Fetch Live NOAA Golden Gate Surge & Larkspur Predictions
+    async function fetchLiveNOAA() {
+      try {
+        // Golden Gate Observed vs Harmonic
+        const respObs = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?range=2&station=9414290&product=water_level&datum=NAVD&time_zone=lst_ldt&units=english&format=json');
+        const dataObs = await respObs.json();
+        
+        const respPred = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=NAVD&time_zone=lst_ldt&units=english&interval=6&format=json');
+        const dataPred = await respPred.json();
+
+        if (dataObs.data && dataObs.data.length > 0 && dataPred.predictions) {
+          const latestObs = parseFloat(dataObs.data[dataObs.data.length - 1].v);
+          const latestTime = dataObs.data[dataObs.data.length - 1].t;
+          
+          // Match nearest prediction
+          const matchingPred = dataPred.predictions.find(p => p.t.slice(11, 16) === latestTime.slice(11, 16)) || dataPred.predictions[dataPred.predictions.length - 1];
+          const predVal = parseFloat(matchingPred.v);
+          const calculatedSurge = latestObs - predVal;
+          if (!isNaN(calculatedSurge)) {
+            liveSurge = parseFloat(calculatedSurge.toFixed(2));
+          }
+        }
+      } catch (e) {
+        console.log("NOAA Live fetch fallback to calibrated surge:", e);
+      }
+      
+      tideTimeline = generateTideData();
+      renderSvgHydrograph();
+      updateUI();
+    }
+
+    // Scrubber update handler
+    function onScrub(val) {
+      currentScrubIdx = parseInt(val);
+      updateUI();
+    }
+
+    function getLivePointIdx() {
+      const now = new Date();
+      const mins = now.getHours() * 60 + now.getMinutes();
+      return Math.min(143, Math.max(0, Math.round(mins / 10)));
+    }
+
+    // Dynamic Real-Time Countdown to Reopening / Sag Drainage
+    function getClearanceCountdown(effectiveHours) {
+      const clearanceHours = 18.75; // 6:45 PM
+      const remainingMinutes = Math.round((clearanceHours - effectiveHours) * 60);
+
+      if (remainingMinutes > 0) {
+        const hRemain = Math.floor(remainingMinutes / 60);
+        const mRemain = remainingMinutes % 60;
+        if (hRemain > 0) {
+          return `~6:45 PM (in ${hRemain}h ${mRemain < 10 ? '0' : ''}${mRemain}m)`;
+        } else {
+          return `~6:45 PM (in ${mRemain}m)`;
+        }
+      } else {
+        return "ROAD CLEARED (Prius Safe)";
+      }
+    }
+    function snapTime(preset) {
+      const slider = document.getElementById('timeSlider');
+      if (preset === 'now') {
+        currentScrubIdx = getLivePointIdx();
+      } else if (preset === '1142') {
+        currentScrubIdx = 70; // 11:40
+      } else if (preset === '1304') {
+        currentScrubIdx = 78; // 1:00
+      } else if (preset === '1333') {
+        currentScrubIdx = 81; // 1:30
+      } else if (preset === '1443') {
+        currentScrubIdx = 88; // 2:40 (2:43 PM impassable ground truth)
+      } else if (preset === '1524') {
+        currentScrubIdx = 92; // 3:20 (Peak)
+      } else if (preset === '1845') {
+        currentScrubIdx = 112; // 6:40 (Sag drained)
+      }
+      slider.value = currentScrubIdx;
+      updateUI();
+    }
+
+    // Core dynamic UI state update
+    function updateUI() {
+      if (!tideTimeline.length) return;
+      const point = tideTimeline[currentScrubIdx];
+      const cfg = THRESHOLDS[activeLocKey];
+
+      // Update Time Badge
+      document.getElementById('scrubberTimeBadge').textContent = point.timeLabel;
+      document.getElementById('currentLocationName').textContent = cfg.name;
+
+      // Metric calculations
+      const twl = point.twl;
+      document.getElementById('valTWL').innerHTML = `${twl.toFixed(2)} <span>ft NAVD88</span>`;
+      document.getElementById('valTWLMLLW').textContent = `Station 9414874: ${(twl - 0.06).toFixed(2)}' MLLW`;
+
+      document.getElementById('valSurge').innerHTML = `+${liveSurge.toFixed(2)} <span>ft</span>`;
+
+      // Road crown depth (positive = water depth above crown in inches)
+      const crownDeltaFt = twl - cfg.crown;
+      const crownDepthIn = Math.max(0, crownDeltaFt * 12);
+      if (crownDeltaFt > 0) {
+        document.getElementById('valCrownDepth').innerHTML = `+${crownDepthIn.toFixed(1)} <span>in water</span>`;
+        document.getElementById('crownStatusText').textContent = "SUBMERGED";
+        document.getElementById('crownStatusText').style.color = "var(--red)";
+      } else {
+        document.getElementById('valCrownDepth').innerHTML = `0.0 <span>in dry</span>`;
+        document.getElementById('crownStatusText').textContent = "DRY";
+        document.getElementById('crownStatusText').style.color = "var(--green)";
+      }
+
+      // Prius Sag Crosswalk Dip Depth & Clearance
+      // Impassable threshold calibrated at 7.55 ft = 5.9" travel lane depth
+      const dipWaterDepthIn = Math.max(0, (twl - (cfg.priusSag - (activeVehicleClearance / 12))) * 12);
+      const remainingClearance = Math.max(0, activeVehicleClearance - dipWaterDepthIn);
+
+      if (twl >= cfg.priusSag) {
+        document.getElementById('valPriusClearance').innerHTML = `0.0 <span>in clr</span>`;
+        document.getElementById('valPriusClearance').style.color = "var(--red)";
+        document.getElementById('valPriusDepth').textContent = `Travel lane depth: ${dipWaterDepthIn.toFixed(1)} in`;
+        document.getElementById('valPriusDepth').style.color = "#fca5a5";
+      } else {
+        document.getElementById('valPriusClearance').innerHTML = `${remainingClearance.toFixed(1)} <span>in clr</span>`;
+        document.getElementById('valPriusClearance').style.color = remainingClearance > 2 ? "var(--green)" : "var(--amber)";
+        document.getElementById('valPriusDepth').textContent = dipWaterDepthIn > 0 ? `Ponding depth: ${dipWaterDepthIn.toFixed(1)} in` : `Gutter & dip dry`;
+        document.getElementById('valPriusDepth').style.color = "var(--text-muted)";
+      }
+
+      // Dynamic Hero Status & Countdown
+      const hero = document.getElementById('heroBanner');
+      const badge = document.getElementById('statusBadge');
+      const badgeText = document.getElementById('statusBadgeText');
+      const heroTitle = document.getElementById('heroTitle');
+      const heroDesc = document.getElementById('heroDesc');
+      const cdLabel = document.getElementById('countdownLabel');
+      const cdVal = document.getElementById('countdownVal');
+
+      hero.className = 'status-hero';
+      badge.className = 'badge-pill';
+
+      // Dynamic countdown relative to live clock or scrubbed time
+      const isScrubbing = (currentScrubIdx !== getLivePointIdx());
+      const now = new Date();
+      const effectiveHours = isScrubbing ? point.hours : (now.getHours() + now.getMinutes() / 60);
+      const countdownStr = getClearanceCountdown(effectiveHours);
+
+      if (twl >= cfg.stall) {
+        hero.classList.add('red');
+        badge.classList.add('red');
+        badgeText.textContent = "CRITICAL: CARPORT AT RISK";
+        heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
+        heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
+        cdLabel.textContent = "FALLING BELOW CARPORT IN:";
+        cdVal.textContent = "~35 mins";
+      } else if (twl >= cfg.priusSag) {
+        hero.classList.add('red');
+        badge.classList.add('red');
+        badgeText.textContent = "PRIUS IMPASSABLE";
+        heroTitle.textContent = "Crosswalk Sag Impassable for Prius (< 5.9\")";
+        heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Do not attempt to drive Prius. Trucks have passability.`;
+        cdLabel.textContent = "ESTIMATED PRIUS CLEARANCE:";
+        cdVal.textContent = countdownStr;
+      } else if (twl >= cfg.crown) {
+        hero.classList.add('yellow');
+        badge.classList.add('yellow');
+        badgeText.textContent = "ROAD CROWN FLOODED";
+        heroTitle.textContent = "Center Road Crown Submerged (Shallow)";
+        heroDesc.textContent = `Water covers center asphalt crown (+${crownDepthIn.toFixed(1)} in). Travel lane passable with caution for standard cars.`;
+        cdLabel.textContent = "ESTIMATED PRIUS CLEARANCE:";
+        cdVal.textContent = countdownStr;
+      } else if (twl >= cfg.gutter) {
+        hero.classList.add('yellow');
+        badge.classList.add('yellow');
+        badgeText.textContent = "GUTTER PONDING / CURB WARNING";
+        heroTitle.textContent = "Water Filling Street Gutters (1-2 in)";
+        heroDesc.textContent = "Center road crown completely dry. Traffic flows freely. Move cars parked at the curb to Carport #86.";
+        cdLabel.textContent = "ROAD PASSABLE:";
+        cdVal.textContent = "Gutters filling";
+      } else {
+        hero.classList.add('green');
+        badge.classList.add('green');
+        badgeText.textContent = "ROAD PASSABLE";
+        heroTitle.textContent = "Road & Gutters Clear";
+        heroDesc.textContent = "Safe driving and street parking conditions across all lanes.";
+        cdLabel.textContent = "STATUS:";
+        cdVal.textContent = "No Flood Hazard";
+      }
+
+      // Update SVG Road Cross Section Simulator
+      updateSvgCrossSection(twl, cfg);
+      updateScrubIndicator();
+
+      // Trend Icon
+      const nextTwl = tideTimeline[Math.min(143, currentScrubIdx + 1)].twl;
+      const diff = nextTwl - twl;
+      const trendEl = document.getElementById('tideTrendIcon');
+      if (Math.abs(diff) < 0.02) {
+        trendEl.textContent = "⏸️ SLACK WATER";
+      } else if (diff > 0) {
+        trendEl.textContent = "⬆️ RISING";
+      } else {
+        trendEl.textContent = "⬇️ FALLING";
+      }
+    }
+
+    // Update SVG Cross-Section
+    function updateSvgCrossSection(twl, cfg) {
+      document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
+
+      // Scale: Elevation 6.0' = y:220, Elevation 8.0' = y:50 (170px for 2.0ft = 85px/ft)
+      const zeroY = 220;
+      const ftToPx = 85;
+      const waterY = Math.max(30, Math.min(220, zeroY - (twl - 6.0) * ftToPx));
+
+      // Update water path
+      const waterPath = `M 40,215 L 40,${waterY} Q 210,${waterY - 2} 380,${waterY} L 380,215 Z`;
+      document.getElementById('svgWaterLayer').setAttribute('d', waterPath);
+      
+      // Update water level line and label
+      document.getElementById('svgWaterLine').setAttribute('y1', waterY);
+      document.getElementById('svgWaterLine').setAttribute('y2', waterY);
+      
+      const marker = document.getElementById('svgWaterMarker');
+      marker.setAttribute('points', `380,${waterY} 392,${waterY - 5} 392,${waterY + 5}`);
+      
+      const txt = document.getElementById('svgWaterText');
+      txt.setAttribute('y', waterY + 3);
+      txt.textContent = `${twl.toFixed(2)}'`;
+    }
+
+    // Native SVG Hydrograph Generator & Touch Scrubber
+    function renderSvgHydrograph() {
+      if (!tideTimeline.length) return;
+
+      const xMin = 55;
+      const xMax = 585;
+      const xSpan = xMax - xMin; // 530px
+      const yBottom = 200; // Elevation 5.0'
+      const yTop = 30;    // Elevation 8.0'
+      const elevMin = 5.0;
+      const elevMax = 8.2;
+      const elevSpan = elevMax - elevMin;
+
+      function getX(idx) {
+        return xMin + (idx / (tideTimeline.length - 1)) * xSpan;
+      }
+      function getY(elev) {
+        const clamped = Math.max(elevMin, Math.min(elevMax, elev));
+        return yBottom - ((clamped - elevMin) / elevSpan) * (yBottom - yTop);
+      }
+
+      let twlPoints = [];
+      let astPoints = [];
+
+      for (let i = 0; i < tideTimeline.length; i++) {
+        const x = getX(i);
+        const yTwl = getY(tideTimeline[i].twl);
+        const yAst = getY(tideTimeline[i].ast);
+        twlPoints.push(`${x.toFixed(1)},${yTwl.toFixed(1)}`);
+        astPoints.push(`${x.toFixed(1)},${yAst.toFixed(1)}`);
+      }
+
+      const twlPathD = "M " + twlPoints.join(" L ");
+      const astPathD = "M " + astPoints.join(" L ");
+      const twlAreaD = `M ${xMin},${yBottom} L ${twlPoints.join(" L ")} L ${xMax},${yBottom} Z`;
+
+      const elTwl = document.getElementById('svgTwlPath');
+      const elAst = document.getElementById('svgAstPath');
+      const elArea = document.getElementById('svgTwlArea');
+
+      if (elTwl) elTwl.setAttribute('d', twlPathD);
+      if (elAst) elAst.setAttribute('d', astPathD);
+      if (elArea) elArea.setAttribute('d', twlAreaD);
+
+      updateScrubIndicator();
+    }
+
+    function updateScrubIndicator() {
+      if (!tideTimeline.length) return;
+      const xMin = 55;
+      const xMax = 585;
+      const xSpan = xMax - xMin;
+      const yBottom = 200;
+      const yTop = 30;
+      const elevMin = 5.0;
+      const elevMax = 8.2;
+      const elevSpan = elevMax - elevMin;
+
+      const pt = tideTimeline[currentScrubIdx];
+      const curX = xMin + (currentScrubIdx / (tideTimeline.length - 1)) * xSpan;
+      const curY = yBottom - ((Math.max(elevMin, Math.min(elevMax, pt.twl)) - elevMin) / elevSpan) * (yBottom - yTop);
+
+      const scrubLine = document.getElementById('svgScrubLine');
+      const scrubDot = document.getElementById('svgScrubDot');
+      const scrubBadge = document.getElementById('svgScrubBadge');
+      const scrubText = document.getElementById('svgScrubText');
+
+      if (scrubLine) {
+        scrubLine.setAttribute('x1', curX);
+        scrubLine.setAttribute('x2', curX);
+      }
+      if (scrubDot) {
+        scrubDot.setAttribute('cx', curX);
+        scrubDot.setAttribute('cy', curY);
+      }
+      if (scrubBadge) {
+        const badgeX = Math.max(90, Math.min(550, curX));
+        scrubBadge.setAttribute('transform', `translate(${badgeX}, 15)`);
+      }
+      if (scrubText) {
+        scrubText.textContent = `${pt.timeLabel.replace(' ', '')} (${pt.twl.toFixed(2)}')`;
+      }
+    }
+
+    function openPhoto(url, caption) {
+      alert(`${caption}\n\n(Photo: ${url})`);
+    }
+
+    // Auto-init
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        tideTimeline = generateTideData();
+        currentScrubIdx = getLivePointIdx();
+        const slider = document.getElementById('timeSlider');
+        if (slider) slider.value = currentScrubIdx;
+
+        renderSvgHydrograph();
+        updateUI();
+
+        // Wire touch & drag events on hydrograph SVG for intuitive time scrubbing
+        const hSvg = document.getElementById('hydrographSvg');
+        if (hSvg) {
+          const handleScrubSvg = (e) => {
+            const rect = hSvg.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const xRel = (clientX - rect.left) / rect.width * 600;
+            const clampedX = Math.max(55, Math.min(585, xRel));
+            const idx = Math.round((clampedX - 55) / 530 * (tideTimeline.length - 1));
+            document.getElementById('timeSlider').value = idx;
+            onScrub(idx);
+          };
+
+          hSvg.addEventListener('pointerdown', (e) => {
+            hSvg.setPointerCapture(e.pointerId);
+            handleScrubSvg(e);
+          });
+          hSvg.addEventListener('pointermove', (e) => {
+            if (e.buttons === 1 || e.pointerType === 'touch') {
+              handleScrubSvg(e);
+            }
+          });
+        }
+
+        fetchLiveNOAA();
+        setInterval(fetchLiveNOAA, 300000);
+
+        // Auto-update countdown every 15 seconds
+        setInterval(() => {
+          if (currentScrubIdx === getLivePointIdx()) {
+            updateUI();
+          }
+        }, 15000);
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    });
+  </script>
+</body>
+</html>

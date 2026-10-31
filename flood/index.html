@@ -1699,74 +1699,7 @@
       document.getElementById('valTWLMLLW').textContent = `Station 9414874: ${(twl - 0.06).toFixed(2)}' MLLW`;
       document.getElementById('valSurge').innerHTML = `+${liveSurge.toFixed(2)} <span>ft</span>`;
 
-      // Road crown depth & Gutter water depth
-      const crownDeltaFt = twl - cfg.crown;
-      const crownDepthIn = Math.max(0, crownDeltaFt * 12);
-      const gutterDeltaFt = twl - cfg.gutter;
-      const gutterDepthIn = Math.max(0, gutterDeltaFt * 12);
-
-      const crownSubEl = document.getElementById('valCrownSub');
-      if (crownDeltaFt > 0) {
-        document.getElementById('valCrownDepth').innerHTML = `+${crownDepthIn.toFixed(1)} <span>in water</span>`;
-        document.getElementById('crownStatusText').textContent = "SUBMERGED";
-        document.getElementById('crownStatusText').style.color = "var(--red)";
-        if (crownSubEl) crownSubEl.textContent = `Gutters: +${gutterDepthIn.toFixed(1)}" | Sag Dip: +${crownDepthIn.toFixed(1)}"`;
-      } else if (gutterDeltaFt > 0) {
-        document.getElementById('valCrownDepth').innerHTML = `+${gutterDepthIn.toFixed(1)} <span>in gutter</span>`;
-        document.getElementById('crownStatusText').textContent = "GUTTERS WET";
-        document.getElementById('crownStatusText').style.color = "var(--amber)";
-        if (crownSubEl) crownSubEl.textContent = `Crown exposed | Gutters flooded (+${gutterDepthIn.toFixed(1)}")`;
-      } else {
-        document.getElementById('valCrownDepth').innerHTML = `0.0 <span>in dry</span>`;
-        document.getElementById('crownStatusText').textContent = "DRY";
-        document.getElementById('crownStatusText').style.color = "var(--green)";
-        if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
-      }
-
-      // Vehicle Clearance Gauge & Breached Badge Fix
-      const dipWaterDepthIn = Math.max(0, (twl - (vInfo.impassableTwl - (activeVehicleClearance / 12))) * 12);
-      const remainingClearance = Math.max(0, activeVehicleClearance - dipWaterDepthIn);
-
-      const valClrEl = document.getElementById('valPriusClearance');
-      const statusClrEl = document.getElementById('valPriusStatusText');
-      const depthClrEl = document.getElementById('valPriusDepth');
-
-      if (twl >= vInfo.impassableTwl) {
-        valClrEl.innerHTML = `0.0 <span>in clr</span>`;
-        valClrEl.style.color = "var(--red)";
-        if (statusClrEl) {
-          statusClrEl.textContent = "BREACHED";
-          statusClrEl.style.color = "var(--red)";
-        }
-        if (depthClrEl) {
-          depthClrEl.textContent = `Travel lane depth: ${dipWaterDepthIn.toFixed(1)} in`;
-          depthClrEl.style.color = "#fca5a5";
-        }
-      } else if (dipWaterDepthIn > 0) {
-        valClrEl.innerHTML = `${remainingClearance.toFixed(1)} <span>in clr</span>`;
-        valClrEl.style.color = remainingClearance > 2 ? "var(--amber)" : "var(--red)";
-        if (statusClrEl) {
-          statusClrEl.textContent = "REDUCED";
-          statusClrEl.style.color = "var(--amber)";
-        }
-        if (depthClrEl) {
-          depthClrEl.textContent = `Ponding depth: ${dipWaterDepthIn.toFixed(1)} in`;
-          depthClrEl.style.color = "var(--text-muted)";
-        }
-      } else {
-        valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-        valClrEl.style.color = "var(--green)";
-        if (statusClrEl) {
-          statusClrEl.textContent = "CLEAR";
-          statusClrEl.style.color = "var(--green)";
-        }
-        if (depthClrEl) {
-          depthClrEl.textContent = `Travel lane completely dry`;
-          depthClrEl.style.color = "var(--text-muted)";
-        }
-      }
-
-      // Compute Trend
+      // Compute Trend first so all cards know whether tide is rising or falling
       const nextIdx = Math.min(tideTimeline.length - 1, currentScrubIdx + 1);
       const diff = tideTimeline[nextIdx].twl - twl;
       const isRising = (diff > 0.015);
@@ -1779,6 +1712,131 @@
         trendEl.textContent = "⬆️ RISING";
       } else {
         trendEl.textContent = "⬇️ FALLING";
+      }
+
+      // Physical Road & Gutter Inundation Conditions
+      // Ingress Lag: While tide is RISING toward peak, water is filling underground storm pipes
+      // The pavement remains clear until crest window near peak (~4:24 PM).
+      const crownDeltaFt = twl - cfg.crown;
+      const crownDepthIn = Math.max(0, crownDeltaFt * 12);
+      const gutterDeltaFt = twl - cfg.gutter;
+      const gutterDepthIn = Math.max(0, gutterDeltaFt * 12);
+
+      const crownSubEl = document.getElementById('valCrownSub');
+      const crownStatusEl = document.getElementById('crownStatusText');
+      const valCrownEl = document.getElementById('valCrownDepth');
+
+      const valClrEl = document.getElementById('valPriusClearance');
+      const statusClrEl = document.getElementById('valPriusStatusText');
+      const depthClrEl = document.getElementById('valPriusDepth');
+
+      if (isRising) {
+        // RISING PHASE: Road crown pavement remains dry while pipes fill
+        if (twl >= cfg.crown) {
+          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
+          crownStatusEl.textContent = "DRY (RISING)";
+          crownStatusEl.style.color = "var(--amber)";
+          if (crownSubEl) crownSubEl.textContent = `Pavement dry • Creek: ${twl.toFixed(2)}' (Pipes filling; peak risk ~4:24 PM)`;
+
+          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = "var(--green)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "CLEAR (WATCH)";
+            statusClrEl.style.color = "var(--amber)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Travel lane clear • Cresting in ~35m`;
+            depthClrEl.style.color = "var(--text-muted)";
+          }
+        } else if (twl >= cfg.gutter) {
+          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
+          crownStatusEl.textContent = "DRY (CREEK RISING)";
+          crownStatusEl.style.color = "var(--green)";
+          if (crownSubEl) crownSubEl.textContent = `Creek: ${twl.toFixed(2)}' > Gutter (6.70') • Pipes filling`;
+
+          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = "var(--green)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "CLEAR";
+            statusClrEl.style.color = "var(--green)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Travel lane completely dry`;
+            depthClrEl.style.color = "var(--text-muted)";
+          }
+        } else {
+          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
+          crownStatusEl.textContent = "DRY";
+          crownStatusEl.style.color = "var(--green)";
+          if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
+
+          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = "var(--green)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "CLEAR";
+            statusClrEl.style.color = "var(--green)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Travel lane completely dry`;
+            depthClrEl.style.color = "var(--text-muted)";
+          }
+        }
+      } else {
+        // RECEDING / PEAK CREST PHASE: Water has flooded pavement and decays with drainage lag
+        if (crownDeltaFt > 0) {
+          valCrownEl.innerHTML = `+${crownDepthIn.toFixed(1)} <span>in water</span>`;
+          crownStatusEl.textContent = "SUBMERGED";
+          crownStatusEl.style.color = "var(--red)";
+          if (crownSubEl) crownSubEl.textContent = `Gutters: +${gutterDepthIn.toFixed(1)}" | Sag Dip: +${crownDepthIn.toFixed(1)}"`;
+        } else if (gutterDeltaFt > 0) {
+          valCrownEl.innerHTML = `+${gutterDepthIn.toFixed(1)} <span>in gutter</span>`;
+          crownStatusEl.textContent = "GUTTERS WET";
+          crownStatusEl.style.color = "var(--amber)";
+          if (crownSubEl) crownSubEl.textContent = `Crown exposed | Gutters flooded (+${gutterDepthIn.toFixed(1)}")`;
+        } else {
+          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
+          crownStatusEl.textContent = "DRY";
+          crownStatusEl.style.color = "var(--green)";
+          if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
+        }
+
+        const dipWaterDepthIn = Math.max(0, (twl - (vInfo.impassableTwl - (activeVehicleClearance / 12))) * 12);
+        const remainingClearance = Math.max(0, activeVehicleClearance - dipWaterDepthIn);
+
+        if (twl >= vInfo.impassableTwl) {
+          valClrEl.innerHTML = `0.0 <span>in clr</span>`;
+          valClrEl.style.color = "var(--red)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "BREACHED";
+            statusClrEl.style.color = "var(--red)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Travel lane depth: ${dipWaterDepthIn.toFixed(1)} in`;
+            depthClrEl.style.color = "#fca5a5";
+          }
+        } else if (dipWaterDepthIn > 0) {
+          valClrEl.innerHTML = `${remainingClearance.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = remainingClearance > 2 ? "var(--amber)" : "var(--red)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "REDUCED";
+            statusClrEl.style.color = "var(--amber)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Ponding depth: ${dipWaterDepthIn.toFixed(1)} in`;
+            depthClrEl.style.color = "var(--text-muted)";
+          }
+        } else {
+          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = "var(--green)";
+          if (statusClrEl) {
+            statusClrEl.textContent = "CLEAR";
+            statusClrEl.style.color = "var(--green)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Travel lane completely dry`;
+            depthClrEl.style.color = "var(--text-muted)";
+          }
+        }
       }
 
       // Dynamic Hero Status & Countdown
@@ -1888,35 +1946,41 @@
           }
         }
       }
-    }
 
-    // Update SVG Cross-Section
-    function updateSvgCrossSection(twl, cfg) {
+      // Update SVG Road Cross Section Simulator
+      updateSvgCrossSection(twl, cfg, isRising);
+      updateScrubIndicator();
+    }
+    
+    function updateSvgCrossSection(twl, cfg, isRising) {
       document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
 
       const gutterY = 223.0;
       const pxPerFt = 23.856;
-      const waterY = Math.max(40, Math.min(255, gutterY - (twl - 6.70) * pxPerFt));
+      
+      // If tide is rising before peak, water is in storm pipes below street pavement
+      let waterY;
+      let effectiveStreetTwl = twl;
+      if (isRising && twl < (cfg.crown + 0.15)) {
+        // Water is beneath pavement in catch basins / storm sewer
+        effectiveStreetTwl = Math.min(cfg.gutter - 0.1, twl);
+        waterY = Math.max(40, Math.min(255, gutterY - (effectiveStreetTwl - 6.70) * pxPerFt));
+      } else {
+        waterY = Math.max(40, Math.min(255, gutterY - (twl - 6.70) * pxPerFt));
+      }
 
       const waterPath = `M 30,260 L 30,${waterY} Q 360,${waterY - 0.5} 600,${waterY} L 600,260 Z`;
       const waterLayer = document.getElementById('svgWaterLayer');
       if (waterLayer) waterLayer.setAttribute('d', waterPath);
-      
-      const waterLine = document.getElementById('svgWaterLine');
-      if (waterLine) {
-        waterLine.setAttribute('y1', waterY);
-        waterLine.setAttribute('y2', waterY);
-      }
-      
-      const marker = document.getElementById('svgWaterMarker');
-      if (marker) marker.setAttribute('points', `600,${waterY} 612,${waterY - 5} 612,${waterY + 5}`);
-      
-      const sagCrownDeltaIn = (twl - (cfg.crown || 6.95)) * 12;
-      const gutterDepthIn = (twl - (cfg.gutter || 6.70)) * 12;
 
-      let depthText = `${twl.toFixed(2)}'`;
-      if (sagCrownDeltaIn > 0) {
-        depthText += ` (+${sagCrownDeltaIn.toFixed(1)}" in sag dip | +${gutterDepthIn.toFixed(1)}" in gutter)`;
+      const crownDepthIn = Math.max(0, (effectiveStreetTwl - cfg.crown) * 12);
+      const gutterDepthIn = Math.max(0, (effectiveStreetTwl - cfg.gutter) * 12);
+
+      let depthText = `Water Elevation: ${twl.toFixed(2)}' NAVD88`;
+      if (isRising && twl < (cfg.crown + 0.15)) {
+        depthText += ` (Creek Rising • Pavement Dry; Storm Pipes Filling)`;
+      } else if (crownDepthIn > 0) {
+        depthText += ` (+${crownDepthIn.toFixed(1)}" over sag crown | +${gutterDepthIn.toFixed(1)}" in gutters)`;
       } else if (gutterDepthIn > 0) {
         depthText += ` (Crown clear down st | +${gutterDepthIn.toFixed(1)}" in gutter)`;
       } else {
@@ -1925,7 +1989,7 @@
 
       const waterText = document.getElementById('svgWaterText');
       if (waterText) {
-        waterText.setAttribute('y', waterY + 3);
+        waterText.setAttribute('y', Math.min(235, waterY + 3));
         waterText.textContent = depthText;
       }
 
@@ -1933,9 +1997,9 @@
       const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
       const sillAlert = document.getElementById('svgSillAlert');
       const sillText = document.getElementById('svgSillAlertText');
-      const sillDeltaIn = (twl - vInfo.sill) * 12;
+      const sillDeltaIn = (effectiveStreetTwl - vInfo.sill) * 12;
 
-      if (twl >= vInfo.sill) {
+      if (effectiveStreetTwl >= vInfo.sill) {
         if (sillAlert) sillAlert.style.display = 'block';
         if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — FLOOD RISK`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
@@ -1943,7 +2007,7 @@
           rect.setAttribute('fill', '#ef4444');
           rect.setAttribute('stroke', '#ffffff');
         }
-      } else if (gutterDepthIn > 0) {
+      } else if (gutterDepthIn > 0 && !isRising) {
         if (sillAlert) sillAlert.style.display = 'block';
         if (sillText) sillText.textContent = `🟡 WATER IN GUTTER (+${gutterDepthIn.toFixed(1)}") — SILL DRY`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
@@ -1955,7 +2019,7 @@
         if (sillAlert) sillAlert.style.display = 'none';
       }
     }
-
+    
     // Native SVG Hydrograph Generator & Touch Scrubber (Centered 48-Hour Chart)
     function renderSvgHydrograph() {
       if (!tideTimeline.length) return;
@@ -2062,7 +2126,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=11').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=12').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

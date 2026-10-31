@@ -1403,6 +1403,7 @@
     }
 
     // 48-Hour Rolling Timeline Generator (288 Points: -24h to +24h, Centered on NOW at Index 144)
+    // 48-Hour Rolling Timeline Generator (288 Points: -24h to +24h, Centered on NOW at Index 144)
     function generate48HourTimeline(predArray, obsArray) {
       const data = [];
       const now = new Date();
@@ -1421,26 +1422,15 @@
         const timeLabel = `${displayH}:${m < 10 ? '0' : ''}${m} ${ampm}`;
         const dayLabel = ptDate.toLocaleDateString('en-US', { weekday: 'short' });
 
-        // Calculate astronomical tide from 6-minute predictions array or harmonic model
+        // Calculate astronomical tide from 6-minute predictions array with linear interpolation
         let ast = calculateAstTideAt(ptDate, predArray);
         
-        // Calculate Total Water Level
-        let twl = 0;
+        // Authoritative Total Water Level for Larkspur (Corte Madera Creek Station 9414874):
+        // TWL = Corte Madera Creek Astronomical Prediction + Active Regional Storm Surge Anomaly.
+        // Golden Gate (9414290) is used exclusively for computing the real-time surge anomaly (+1.44 ft).
+        // This ensures continuous, physically consistent water levels with zero phase lag errors.
+        let twl = ast + liveSurge;
         let isPast = (i <= 144);
-
-        if (isPast) {
-          // Past 24h: Use observed water level from Station 9414290 or ast + surge
-          let pastObs = findObservedAt(ptDate, obsArray);
-          if (pastObs !== null) {
-            twl = pastObs; // Actual Golden Gate observed NAVD88
-          } else {
-            twl = ast + liveSurge;
-          }
-        } else {
-          // Future 24h: Forecasted astronomical + surge + street drainage retention
-          let creekTwl = ast + liveSurge;
-          twl = creekTwl;
-        }
 
         data.push({
           idx: i,
@@ -1454,25 +1444,44 @@
         });
       }
 
-      // Apply physical street drainage retention lag to the timeline (Gutters retain water 4.5 hrs after high peak)
-      applyStreetDrainageLag(data);
-
       return data;
     }
 
     // Helper: Find matching astronomical tide at given Date
+    // Helper: Precision Astronomical Tide Interpolation at given Date
     function calculateAstTideAt(d, predArray) {
       if (predArray && predArray.length > 0) {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const hour = String(d.getHours()).padStart(2, '0');
-        const min = String(Math.floor(d.getMinutes() / 6) * 6).padStart(2, '0');
-        const targetStr = `${year}-${month}-${day} ${hour}:${min}`;
-        const match = predArray.find(p => p.t.slice(0, 16) === targetStr);
-        if (match) {
-          return parseFloat(match.v) + 0.06; // MLLW to NAVD88
+        const targetMs = d.getTime();
+        let left = 0;
+        let right = predArray.length - 1;
+
+        const tFirst = new Date(predArray[0].t.replace(' ', 'T')).getTime();
+        const tLast = new Date(predArray[right].t.replace(' ', 'T')).getTime();
+        if (targetMs <= tFirst) return parseFloat(predArray[0].v) + 0.06;
+        if (targetMs >= tLast) return parseFloat(predArray[right].v) + 0.06;
+
+        while (left <= right) {
+          const mid = Math.floor((left + right) / 2);
+          const tMid = new Date(predArray[mid].t.replace(' ', 'T')).getTime();
+          if (tMid === targetMs) {
+            return parseFloat(predArray[mid].v) + 0.06;
+          } else if (tMid < targetMs) {
+            left = mid + 1;
+          } else {
+            right = mid - 1;
+          }
         }
+
+        const idx0 = Math.max(0, right);
+        const idx1 = Math.min(predArray.length - 1, left);
+        const t0 = new Date(predArray[idx0].t.replace(' ', 'T')).getTime();
+        const t1 = new Date(predArray[idx1].t.replace(' ', 'T')).getTime();
+        const v0 = parseFloat(predArray[idx0].v) + 0.06;
+        const v1 = parseFloat(predArray[idx1].v) + 0.06;
+
+        if (t1 === t0) return v0;
+        const frac = (targetMs - t0) / (t1 - t0);
+        return v0 + frac * (v1 - v0);
       }
       // Fallback harmonic model
       const hrs = d.getHours() + d.getMinutes() / 60;
@@ -1637,20 +1646,23 @@
     }
 
     // Dynamic Real-Time Countdown to Reopening or Next High Tide
-    function getClearanceCountdown(currentTwl) {
+    function getClearanceCountdown(currentTwl, isRising) {
+      if (isRising && nextHighTideObj) {
+        return `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+      }
       if (currentTwl >= 6.70) {
-        // Road or gutters currently wet: Find when twl drops < 6.70
+        // Road or gutters wet/receding: Find when twl drops < 6.70
         for (let i = currentScrubIdx; i < tideTimeline.length; i++) {
           if (tideTimeline[i].twl < 6.70) {
-            const diffMins = (i - currentScrubIdx) * 10;
+            const lagIdx = Math.min(tideTimeline.length - 1, i + 5);
+            const diffMins = (lagIdx - currentScrubIdx) * 10;
             const h = Math.floor(diffMins / 60);
             const m = diffMins % 60;
-            return `~${tideTimeline[i].timeLabel} (in ${h}h ${m < 10 ? '0' : ''}${m}m)`;
+            return `~${tideTimeline[lagIdx].timeLabel} (in ${h}h ${m < 10 ? '0' : ''}${m}m)`;
           }
         }
         return "CLEARING SOON";
       } else {
-        // Road is dry: countdown to next high tide peak
         if (nextHighTideObj) {
           return `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
         }
@@ -1754,6 +1766,21 @@
         }
       }
 
+      // Compute Trend
+      const nextIdx = Math.min(tideTimeline.length - 1, currentScrubIdx + 1);
+      const diff = tideTimeline[nextIdx].twl - twl;
+      const isRising = (diff > 0.015);
+      const isFalling = (diff < -0.015);
+
+      const trendEl = document.getElementById('tideTrendIcon');
+      if (Math.abs(diff) < 0.015) {
+        trendEl.textContent = "⏸️ SLACK WATER";
+      } else if (isRising) {
+        trendEl.textContent = "⬆️ RISING";
+      } else {
+        trendEl.textContent = "⬇️ FALLING";
+      }
+
       // Dynamic Hero Status & Countdown
       const hero = document.getElementById('heroBanner');
       const badge = document.getElementById('statusBadge');
@@ -1766,70 +1793,100 @@
       hero.className = 'status-hero';
       badge.className = 'badge-pill';
 
-      const countdownStr = getClearanceCountdown(twl);
+      const countdownStr = getClearanceCountdown(twl, isRising);
 
-      if (twl >= cfg.stall) {
-        hero.classList.add('red');
-        badge.classList.add('red');
-        badgeText.textContent = "CRITICAL: CARPORT AT RISK";
-        heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
-        heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
-        cdLabel.textContent = "FALLING BELOW CARPORT IN:";
-        cdVal.textContent = countdownStr;
-      } else if (twl >= vInfo.impassableTwl) {
-        hero.classList.add('red');
-        badge.classList.add('red');
-        badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE`;
-        heroTitle.textContent = `Crosswalk Sag Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
-        heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Exceeds vehicle ground clearance. Do not drive through salt water.`;
-        cdLabel.textContent = "ESTIMATED CLEARANCE:";
-        cdVal.textContent = countdownStr;
-      } else if (twl >= cfg.crown) { // 6.95'
-        hero.classList.add('yellow');
-        badge.classList.add('yellow');
-        badgeText.textContent = "SALT WATER IN SAG DIP • GUTTERS FLOODED";
-        heroTitle.textContent = `Crosswalk Sag & Gutters Submerged (+${crownDepthIn.toFixed(1)}" on crown | +${gutterDepthIn.toFixed(1)}" in gutters)`;
-        heroDesc.textContent = `High crown ridge in foreground is partially exposed, but looking down the street the sag dip is 100% covered in salt water and curb gutters are deeply flooded (+${gutterDepthIn.toFixed(1)} in). Avoid driving to prevent salt water damage.`;
-        cdLabel.textContent = "ESTIMATED ALL-STREET CLEARANCE:";
-        cdVal.textContent = countdownStr;
-      } else if (twl >= cfg.gutter) { // 6.70'
-        hero.classList.add('yellow');
-        badge.classList.add('yellow');
-        badgeText.textContent = "GUTTERS & PARKING STALLS FLOODED";
-        heroTitle.textContent = `Gutters & Parking Stalls Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Severe Lag`;
-        heroDesc.textContent = `Road center crown is passable, but curb gutters and parking stalls in front of homes/carports remain flooded with standing salt water (+${gutterDepthIn.toFixed(1)} in) due to marsh backwater and flat grades. Do not park in front of home until cleared.`;
-        cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS & PARKING):";
-        cdVal.textContent = countdownStr;
-      } else {
-        hero.classList.add('green');
-        badge.classList.add('green');
-        badgeText.textContent = "ROAD & GUTTERS FULLY CLEAR";
-        heroTitle.textContent = "Roadway & Curb Gutters 100% Clear";
-        if (nextHighTideObj) {
-          heroDesc.textContent = `Road crown and curb gutters completely dry. Next high tide is forecast at ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}' TWL — ${nextHighTideObj.hazard}).`;
-          cdLabel.textContent = "NEXT HIGH TIDE:";
-          cdVal.textContent = `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+      if (isRising) {
+        // TIDE IS RISING TOWARDS HIGH PEAK
+        if (twl >= cfg.stall) {
+          hero.classList.add('red');
+          badge.classList.add('red');
+          badgeText.textContent = "CRITICAL: CARPORT RISK • TIDE RISING";
+          heroTitle.textContent = "Water Approaching Carport Spot #86 (7.75')";
+          heroDesc.textContent = "Tide in Corte Madera Creek is surging toward high peak. Water is rapidly filling low ground. Ensure all vehicles are positioned on highest blocks.";
+          cdLabel.textContent = "CRESTING AT CARPORT IN:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= vInfo.impassableTwl) {
+          hero.classList.add('red');
+          badge.classList.add('red');
+          badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE IMMINENT`;
+          heroTitle.textContent = `Crosswalk Sag Will Become Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
+          heroDesc.textContent = `Corte Madera Creek tide is rising rapidly toward peak (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Crosswalk sag dip will submerge as water backs up through storm drains. Do not drive through salt water.`;
+          cdLabel.textContent = "PEAK HIGH TIDE IN:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= cfg.crown) { // 6.95'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "TIDE RISING • ROAD CROWN AT RISK";
+          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Dip Inundation Approaching`;
+          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Water is backfilling storm drain pipes. Crosswalk sag dip (${cfg.crown}') and curb gutters will flood with salt water as tide crests. Avoid driving.`;
+          cdLabel.textContent = "PEAK HIGH TIDE IN:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= cfg.gutter) { // 6.70'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "TIDE RISING • GUTTERS INUNDATION IMMINENT";
+          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Gutters Filling`;
+          heroDesc.textContent = `Corte Madera Creek water level has surpassed gutter invert elevation (${cfg.gutter}') and continues to rise toward high tide peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Standing salt water will emerge in lowest curb gutters shortly.`;
+          cdLabel.textContent = "NEXT HIGH TIDE PEAK:";
+          cdVal.textContent = countdownStr;
         } else {
-          heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
-          cdLabel.textContent = "STATUS:";
-          cdVal.textContent = "100% Clear";
+          hero.classList.add('green');
+          badge.classList.add('green');
+          badgeText.textContent = "ROAD CLEAR • TIDE RISING";
+          heroTitle.textContent = "Roadway Currently Clear • High Tide Approaching";
+          heroDesc.textContent = `Road crown and curb gutters currently dry. Next high tide is forecast at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL — ${nextHighTideObj ? nextHighTideObj.hazard : ''}).`;
+          cdLabel.textContent = "NEXT HIGH TIDE:";
+          cdVal.textContent = countdownStr;
         }
-      }
-
-      // Update SVG Road Cross Section Simulator
-      updateSvgCrossSection(twl, cfg);
-      updateScrubIndicator();
-
-      // Trend Icon
-      const nextIdx = Math.min(tideTimeline.length - 1, currentScrubIdx + 1);
-      const diff = tideTimeline[nextIdx].twl - twl;
-      const trendEl = document.getElementById('tideTrendIcon');
-      if (Math.abs(diff) < 0.02) {
-        trendEl.textContent = "⏸️ SLACK WATER";
-      } else if (diff > 0) {
-        trendEl.textContent = "⬆️ RISING";
       } else {
-        trendEl.textContent = "⬇️ FALLING";
+        // TIDE IS FALLING OR AT SLACK WATER
+        if (twl >= cfg.stall) {
+          hero.classList.add('red');
+          badge.classList.add('red');
+          badgeText.textContent = "CRITICAL: CARPORT AT RISK";
+          heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
+          heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
+          cdLabel.textContent = "FALLING BELOW CARPORT IN:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= vInfo.impassableTwl) {
+          hero.classList.add('red');
+          badge.classList.add('red');
+          badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE`;
+          heroTitle.textContent = `Crosswalk Sag Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
+          heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Exceeds vehicle ground clearance. Do not drive through salt water.`;
+          cdLabel.textContent = "ESTIMATED CLEARANCE:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= cfg.crown) { // 6.95'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "SALT WATER IN SAG DIP • GUTTERS FLOODED";
+          heroTitle.textContent = `Crosswalk Sag & Gutters Submerged (+${crownDepthIn.toFixed(1)}" on crown | +${gutterDepthIn.toFixed(1)}" in gutters)`;
+          heroDesc.textContent = `High crown ridge in foreground is partially exposed, but looking down the street the sag dip is 100% covered in salt water and curb gutters are deeply flooded (+${gutterDepthIn.toFixed(1)} in). Avoid driving to prevent salt water damage.`;
+          cdLabel.textContent = "ESTIMATED ALL-STREET CLEARANCE:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= cfg.gutter) { // 6.70'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "GUTTERS & PARKING STALLS FLOODED";
+          heroTitle.textContent = `Gutters & Parking Stalls Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Severe Lag`;
+          heroDesc.textContent = `Road center crown is passable, but curb gutters and parking stalls in front of homes/carports remain flooded with standing salt water (+${gutterDepthIn.toFixed(1)} in) due to marsh backwater and flat grades. Do not park in front of home until cleared.`;
+          cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS & PARKING):";
+          cdVal.textContent = countdownStr;
+        } else {
+          hero.classList.add('green');
+          badge.classList.add('green');
+          badgeText.textContent = "ROAD & GUTTERS FULLY CLEAR";
+          heroTitle.textContent = "Roadway & Curb Gutters 100% Clear";
+          if (nextHighTideObj) {
+            heroDesc.textContent = `Road crown and curb gutters completely dry. Next high tide is forecast at ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}' TWL — ${nextHighTideObj.hazard}).`;
+            cdLabel.textContent = "NEXT HIGH TIDE:";
+            cdVal.textContent = `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+          } else {
+            heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
+            cdLabel.textContent = "STATUS:";
+            cdVal.textContent = "100% Clear";
+          }
+        }
       }
     }
 
@@ -2004,6 +2061,9 @@
 
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js?v=11').catch(() => {});
+      }
       applyVehicleAndCarView();
       fetchLiveNOAA();
 

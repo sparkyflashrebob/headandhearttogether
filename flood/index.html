@@ -712,52 +712,48 @@
         </div>
       </div>
 
-      <!-- Small Car Clearance Gauge -->
+      <!-- Vehicle Clearance Gauge -->
       <div class="metric-card">
         <div class="metric-meta">
-          <span>Small Car Sag (5.9" CLR)</span>
-          <span style="color:var(--red);">BREACHED</span>
+          <span id="labelVehicleClearance">Small Car Sag (5.9" CLR)</span>
+          <span id="valPriusStatusText" style="color:var(--green);">CLEAR</span>
         </div>
-        <div class="metric-val" id="valPriusClearance" style="color:var(--red);">
-          -0.0 <span>in clr</span>
+        <div class="metric-val" id="valPriusClearance" style="color:var(--green);">
+          5.9 <span>in clr</span>
         </div>
-        <div class="metric-sub" style="color:#fca5a5;" id="valPriusDepth">
-          Dip water depth: 5.4 in
+        <div class="metric-sub" id="valPriusDepth">
+          Travel lane dry
         </div>
       </div>
     </section>
 
-    <!-- TIME TRAVEL SCRUBBER -->
+    <!-- TIME TRAVEL SCRUBBER (48-HOUR ROLLING WINDOW CENTERED ON LIVE NOW) -->
     <section class="scrubber-card">
       <div class="scrubber-header">
         <div class="scrubber-title">
-          <span>⏱️ Time Travel Scrubber</span>
+          <span>⏱️ 48-Hour Tide Scrubber (Centered on Live Now)</span>
         </div>
         <div class="scrubber-time-badge" id="scrubberTimeBadge">
-          LIVE: 2:48 PM
+          LIVE: --:--
         </div>
       </div>
       <div class="slider-container">
-        <input type="range" id="timeSlider" min="0" max="144" value="88" oninput="onScrub(this.value)">
+        <input type="range" id="timeSlider" min="0" max="288" value="144" oninput="onScrub(this.value)">
       </div>
       <div class="scrubber-quick-ticks">
-        <span>11:00 AM</span>
-        <span>1:04 PM</span>
-        <span>1:33 PM</span>
-        <span>2:43 PM</span>
-        <span>3:24 PM</span>
-        <span>6:45 PM</span>
+        <span id="tickPast24">-24h Past</span>
+        <span id="tickPast12">-12h</span>
+        <span id="tickLiveNow" style="color:var(--cyan); font-weight:bold;">📍 LIVE NOW</span>
+        <span id="tickNext12">+12h</span>
+        <span id="tickNext24">+24h Forecast</span>
       </div>
       <div class="scrubber-btn-row">
-        <button class="chip-btn" onclick="snapTime('now')">📍 Live Now</button>
-        <button class="chip-btn" onclick="snapTime('1142')">11:42 AM (Dry)</button>
-        <button class="chip-btn" onclick="snapTime('1304')">1:04 PM (Gutter Seep)</button>
-        <button class="chip-btn" onclick="snapTime('1333')">1:33 PM (Gutter Wet)</button>
-        <button class="chip-btn" onclick="snapTime('1443')">2:43 PM (Impassable!)</button>
-        <button class="chip-btn" onclick="snapTime('1524')">3:24 PM (Peak 7.70')</button>
-        <button class="chip-btn" onclick="snapTime('1712')">5:12 PM (Sag Wet)</button>
-        <button class="chip-btn" onclick="snapTime('1934')">7:34 PM (Gutters Flooded!)</button>
-        <button class="chip-btn" onclick="snapTime('2130')">9:30 PM (Cleared)</button>
+        <button class="chip-btn active" id="btnSnapLive" onclick="snapTime('now')">📍 Live Now (Center)</button>
+        <button class="chip-btn" id="btnSnapNextHigh" onclick="snapTime('nexthigh')">▲ Next High Tide Peak</button>
+        <button class="chip-btn" onclick="snapTime('impassable')">⚠️ Sag Impassable (7.55')</button>
+        <button class="chip-btn" onclick="snapTime('cleared')">✅ Road Cleared (< 6.95')</button>
+        <button class="chip-btn" onclick="snapTime('oct30_peak')">📜 Oct 30 Peak (3:24 PM)</button>
+        <button class="chip-btn" onclick="snapTime('oct30_lag')">📸 Oct 30 Lag (7:34 PM)</button>
       </div>
     </section>
 
@@ -839,135 +835,125 @@
           </g>
 
           <!-- ============================================================ -->
-          <!-- PRIUS SIDE PROFILE OUTLINE — 2023-2026 GEN 5 (TRUE TO SCALE) -->
-          <!-- Length: 181.1" (360px), Height: 56.3" (111.9px), Ground: Y=223 -->
           <!-- ============================================================ -->
-          <g id="svgPriusSideGroup">
-            <!-- Rear Wheel (cx=125, cy=197.65, R_tire=25.35, contact Y=223.0) -->
-            <g id="priusRearWheel">
-              <circle cx="125" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
-              <circle cx="125" cy="197.65" r="18.9" fill="#1e293b" stroke="#94a3b8" stroke-width="1.2"/>
-              <!-- 5 Aero Spokes -->
-              <line x1="125" y1="197.65" x2="125" y2="178.75" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="125" y1="197.65" x2="143" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="125" y1="197.65" x2="136" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="125" y1="197.65" x2="114" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="125" y1="197.65" x2="107" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
-              <circle cx="125" cy="197.65" r="4.5" fill="#38bdf8"/>
-            </g>
+          <!-- 4 AUTHENTIC VEHICLE SILHOUETTES TO TRUE PHYSICAL SCALE        -->
+          <!-- 1. Small Car (Prius 5.9") 2. Sedan (6.5") 3. SUV (8.1") 4. Truck (9.4") -->
+          <!-- ============================================================ -->
 
-            <!-- Front Wheel (cx=340, cy=197.65, R_tire=25.35, contact Y=223.0) -->
-            <g id="priusFrontWheel">
-              <circle cx="340" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
-              <circle cx="340" cy="197.65" r="18.9" fill="#1e293b" stroke="#94a3b8" stroke-width="1.2"/>
-              <!-- 5 Aero Spokes -->
-              <line x1="340" y1="197.65" x2="340" y2="178.75" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="340" y1="197.65" x2="358" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="340" y1="197.65" x2="351" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="340" y1="197.65" x2="329" y2="213.0" stroke="#cbd5e1" stroke-width="1.8"/>
-              <line x1="340" y1="197.65" x2="322" y2="191.8" stroke="#cbd5e1" stroke-width="1.8"/>
-              <circle cx="340" cy="197.65" r="4.5" fill="#38bdf8"/>
-            </g>
-
-            <!-- Prius Exterior Body Vector Outline (Gen 5 Mono-Volume Silhouette) -->
-            <path d="M 56,195 
-                     C 52,186 54,175 60,166 
-                     L 68,164 
-                     C 100,140 145,123 195,115 
-                     C 220,111.1 245,111.1 268,114 
-                     C 298,122 332,142 358,162 
-                     C 380,175 402,188 414,195 
-                     C 416,197 416,201 414,204 
-                     C 408,210 398,212 378,212 
-                     L 366,212 
-                     A 26,26 0 0,0 314,211.3 
-                     L 151,211.3 
-                     A 26,26 0 0,0 99,212 
-                     L 68,212 
-                     C 60,212 56,205 56,195 Z" 
-                  fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
-
-            <!-- Gen 5 Aerodynamic Side Windows & Glass Canopy -->
+          <!-- 1. SMALL CAR / PRIUS (Gen 5: 5.9" CLR, 56.3" H, 181.1" L) -->
+          <g id="svgVeh_prius_side" class="vehicle-svg-group">
+            <circle cx="125" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <circle cx="340" cy="197.65" r="25.35" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 56,195 C 52,186 54,175 60,166 L 68,164 C 100,140 145,123 195,115 C 220,111.1 245,111.1 268,114 C 298,122 332,142 358,162 C 380,175 402,188 414,195 C 416,197 416,201 414,204 C 408,210 398,212 378,212 L 366,212 A 26,26 0 0,0 314,211.3 L 151,211.3 A 26,26 0 0,0 99,212 L 68,212 C 60,212 56,205 56,195 Z" fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
             <path d="M 345,161 L 324,139 L 324,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
             <path d="M 320,138 C 295,127 268,119 236,117 L 236,161 L 320,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
             <rect x="233" y="117" width="5" height="44" fill="#334155" stroke="#64748b" stroke-width="0.8"/>
             <path d="M 230,117 C 196,120 162,130 138,145 L 138,161 L 230,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
-            <path d="M 138,145 C 120,154 110,160 102,161 L 138,161 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
-
-            <!-- Door Cutlines & Character Lines -->
-            <line x1="324" y1="161" x2="314" y2="211.3" stroke="#475569" stroke-width="1.2"/>
-            <line x1="235" y1="161" x2="235" y2="211.3" stroke="#475569" stroke-width="1.2"/>
-            <path d="M 138,161 C 138,185 145,200 151,211.3" stroke="#475569" stroke-width="1.2" fill="none"/>
-            <path d="M 314,204 C 270,204 200,198 151,192" stroke="#475569" stroke-width="1" fill="none"/>
-
-            <!-- Gen 5 Hammerhead LED Headlamp Signature -->
-            <path d="M 414,196 L 396,190 L 390,193 L 400,197 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="0.8"/>
-            <!-- Full-Width Thin Blade Rear Taillight -->
-            <path d="M 60,167 L 72,166 L 72,170 L 60,171 Z" fill="#ef4444" stroke="#f87171" stroke-width="0.8"/>
-
-            <!-- Door Sill Reference Line (8.5" Above Gutter = Y=206.1, Elev 7.41') -->
             <line x1="90" y1="206.1" x2="370" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
-            <text x="235" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Small Car Door Sill (7.41' | +8.5" Above Gutter)</text>
-
-            <!-- 5.9" Ground Clearance Line (Y=211.3) -->
+            <text x="235" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.41' | +8.5" Above Gutter)</text>
             <line x1="151" y1="211.3" x2="314" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
-            <text x="235" y="221" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Ground Clearance</text>
-
-            <!-- Height Dimension Indicator (56.3" = 111.9px) -->
-            <line x1="240" y1="104" x2="240" y2="111.1" stroke="#38bdf8" stroke-width="1"/>
-            <text x="240" y="100" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">56.3" Roof Height (To Scale)</text>
+            <text x="235" y="221" fill="#f87171" font-size="7.5" font-weight="bold" text-anchor="middle">5.9" Ground Clearance</text>
+            <text x="240" y="100" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">Small Car / Prius (56.3" Height To Scale)</text>
           </g>
 
-          <!-- ============================================================ -->
-          <!-- PRIUS FRONT CROSS-SECTION — TRANSVERSE VIEW (TRUE TO SCALE)  -->
-          <!-- Width: 70.2" (139.6px), Height: 56.3" (111.9px)              -->
-          <!-- ============================================================ -->
-          <g id="svgPriusFrontGroup" display="none" visibility="hidden">
-            <!-- Front View Title Badge -->
+          <g id="svgVeh_prius_front" class="vehicle-svg-group" display="none" visibility="hidden">
             <rect x="120" y="86" width="190" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
-            <text x="215" y="98" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT CROSS-SECTION VIEW</text>
-
-            <!-- Left Tire (in gutter, contact Y=223.0) -->
+            <text x="215" y="98" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT VIEW: SMALL CAR (5.9" CLR)</text>
             <rect x="148" y="196.65" width="24" height="26.35" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
-            <!-- Right Tire (on roadway slope, contact Y=218.0) -->
             <rect x="258" y="191.65" width="24" height="26.35" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
-
-            <!-- Front Body Outline -->
-            <path d="M 142,190 
-                     C 136,175 142,150 152,138 
-                     L 168,118 
-                     C 188,111.1 242,111.1 262,118 
-                     L 278,138 
-                     C 288,150 294,175 288,190 
-                     C 284,208 274,211.3 258,211.3 
-                     L 172,211.3 
-                     C 156,211.3 146,208 142,190 Z" 
-                  fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
-
-            <!-- Front Windshield -->
+            <path d="M 142,190 C 136,175 142,150 152,138 L 168,118 C 188,111.1 242,111.1 262,118 L 278,138 C 288,150 294,175 288,190 C 284,208 274,211.3 258,211.3 L 172,211.3 C 156,211.3 146,208 142,190 Z" fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
             <path d="M 170,140 L 180,121 C 196,117 234,117 250,121 L 260,140 Z" fill="rgba(56, 189, 248, 0.18)" stroke="#94a3b8" stroke-width="1.2"/>
-
-            <!-- Rearview Mirror inside cabin -->
-            <rect x="211" y="123" width="8" height="4" rx="1" fill="#64748b"/>
-
-            <!-- Hammerhead C-Shaped DRL Headlights -->
-            <path d="M 152,182 L 166,177 L 166,183 L 154,186 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="1"/>
-            <path d="M 278,182 L 264,177 L 264,183 L 276,186 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="1"/>
-
-            <!-- Side Aero Mirrors -->
-            <path d="M 140,154 L 126,151 L 126,157 L 142,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
-            <path d="M 290,154 L 304,151 L 304,157 L 288,159 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
-
-            <!-- Front Lower Grille -->
-            <rect x="188" y="196" width="54" height="12" rx="2" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-
-            <!-- Door Sill Line (Transverse) -->
             <line x1="142" y1="206.1" x2="288" y2="206.1" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
-            <text x="215" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Small Car Door Sill (7.41')</text>
-
-            <!-- 5.9" Clearance Line (Transverse) -->
+            <text x="215" y="202" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.41')</text>
             <line x1="172" y1="211.3" x2="258" y2="211.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
             <text x="215" y="220" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">5.9" Clearance</text>
+          </g>
+
+          <!-- 2. STANDARD SEDAN (Camry: 6.5" CLR, 56.9" H, 192.1" L) -->
+          <g id="svgVeh_sedan_side" class="vehicle-svg-group" display="none" visibility="hidden">
+            <circle cx="120" cy="197.2" r="25.8" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <circle cx="345" cy="197.2" r="25.8" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 50,196 C 46,188 50,178 56,174 L 140,172 L 195,142 C 220,126 248,110 275,109.9 L 315,112 C 342,122 368,142 388,166 L 420,174 C 428,178 432,185 432,194 C 430,202 422,208 405,210 L 372,210 A 27,27 0 0,0 318,210.1 L 147,210.1 A 27,27 0 0,0 93,210 L 62,210 C 54,210 50,204 50,196 Z" fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 365,165 L 325,120 L 285,116 L 205,118 L 155,165 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="250" y1="116" x2="250" y2="165" stroke="#475569" stroke-width="1.2"/>
+            <line x1="90" y1="204.8" x2="380" y2="204.8" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="235" y="201" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.47' | +9.1" Above Gutter)</text>
+            <line x1="147" y1="210.1" x2="318" y2="210.1" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="235" y="219" fill="#f87171" font-size="7.5" font-weight="bold" text-anchor="middle">6.5" Ground Clearance</text>
+            <text x="240" y="98" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">Standard Sedan / Camry (56.9" Height To Scale)</text>
+          </g>
+
+          <g id="svgVeh_sedan_front" class="vehicle-svg-group" display="none" visibility="hidden">
+            <rect x="120" y="86" width="190" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+            <text x="215" y="98" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT VIEW: SEDAN (6.5" CLR)</text>
+            <rect x="146" y="196.2" width="25" height="26.8" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <rect x="256" y="191.2" width="25" height="26.8" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 140,190 C 134,175 140,150 150,136 L 166,116 C 186,109.9 238,109.9 258,116 L 274,136 C 284,150 290,175 284,190 C 280,208 270,210.1 254,210.1 L 170,210.1 C 154,210.1 144,208 140,190 Z" fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 168,138 L 178,119 C 196,114 234,114 252,119 L 262,138 Z" fill="rgba(56, 189, 248, 0.18)" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="140" y1="204.8" x2="284" y2="204.8" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="212" y="201" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.47')</text>
+            <line x1="170" y1="210.1" x2="254" y2="210.1" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="212" y="219" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">6.5" Clearance</text>
+          </g>
+
+          <!-- 3. CROSSOVER SUV (Corolla Cross: 8.1" CLR, 64.9" H, 175.6" L) -->
+          <g id="svgVeh_suv_side" class="vehicle-svg-group" display="none" visibility="hidden">
+            <circle cx="128" cy="195.5" r="27.5" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <circle cx="338" cy="195.5" r="27.5" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 62,192 C 58,180 60,155 64,136 L 76,116 C 88,104 105,97 130,95 L 285,94 C 315,96 338,118 358,142 L 398,158 C 412,164 416,172 416,184 C 414,196 406,204 390,206 L 366,206 A 28,28 0 0,0 310,206.9 L 156,206.9 A 28,28 0 0,0 100,206 L 74,206 C 66,206 62,200 62,192 Z" fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
+            <line x1="120" y1="90" x2="280" y2="90" stroke="#94a3b8" stroke-width="2.5"/>
+            <line x1="140" y1="90" x2="140" y2="95" stroke="#94a3b8" stroke-width="2"/>
+            <line x1="260" y1="90" x2="260" y2="95" stroke="#94a3b8" stroke-width="2"/>
+            <path d="M 345,142 L 305,103 L 138,103 L 88,124 L 88,148 L 345,148 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="220" y1="103" x2="220" y2="148" stroke="#475569" stroke-width="1.2"/>
+            <line x1="90" y1="200.0" x2="380" y2="200.0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="235" y="196" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.67' | +11.5" Above Gutter)</text>
+            <line x1="156" y1="206.9" x2="310" y2="206.9" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="235" y="216" fill="#f87171" font-size="7.5" font-weight="bold" text-anchor="middle">8.1" Ground Clearance</text>
+            <text x="240" y="82" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">Crossover SUV / Corolla Cross (64.9" H To Scale)</text>
+          </g>
+
+          <g id="svgVeh_suv_front" class="vehicle-svg-group" display="none" visibility="hidden">
+            <rect x="120" y="70" width="190" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+            <text x="215" y="82" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT VIEW: SUV (8.1" CLR)</text>
+            <rect x="145" y="194.5" width="26" height="28.5" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <rect x="255" y="189.5" width="26" height="28.5" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <line x1="165" y1="90" x2="185" y2="90" stroke="#94a3b8" stroke-width="2.5"/>
+            <line x1="237" y1="90" x2="257" y2="90" stroke="#94a3b8" stroke-width="2.5"/>
+            <path d="M 139,188 C 132,170 138,140 148,120 L 162,100 C 182,94 240,94 260,100 L 274,120 C 284,140 290,170 283,188 C 278,206 268,206.9 252,206.9 L 170,206.9 C 154,206.9 144,206 139,188 Z" fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 166,122 L 176,104 C 196,98 230,98 248,104 L 258,122 Z" fill="rgba(56, 189, 248, 0.18)" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="139" y1="200.0" x2="283" y2="200.0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="211" y="196" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.67')</text>
+            <line x1="170" y1="206.9" x2="252" y2="206.9" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="211" y="216" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">8.1" Clearance</text>
+          </g>
+
+          <!-- 4. 4x4 TRUCK (Tacoma: 9.4" CLR, 70.6" H, 212.3" L) -->
+          <g id="svgVeh_truck_side" class="vehicle-svg-group" display="none" visibility="hidden">
+            <circle cx="125" cy="192.2" r="30.8" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <circle cx="355" cy="192.2" r="30.8" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 48,186 L 48,145 L 210,145 L 222,110 C 230,95 245,84 270,82.7 L 330,82.7 C 352,85 365,102 375,125 L 428,142 C 438,146 442,154 442,170 C 440,186 432,198 418,202 L 388,202 A 33,33 0 0,0 322,204.3 L 158,204.3 A 33,33 0 0,0 92,202 L 58,202 C 50,202 48,194 48,186 Z" fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 360,126 L 328,92 L 235,92 L 228,140 L 360,140 Z" fill="rgba(56, 189, 248, 0.12)" stroke="#94a3b8" stroke-width="1"/>
+            <line x1="285" y1="92" x2="285" y2="140" stroke="#475569" stroke-width="1.2"/>
+            <line x1="52" y1="145" x2="210" y2="145" stroke="#38bdf8" stroke-width="1.5"/>
+            <line x1="90" y1="195.0" x2="400" y2="195.0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+            <text x="240" y="191" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.87' | +14.0" Above Gutter)</text>
+            <line x1="158" y1="204.3" x2="322" y2="204.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="240" y="214" fill="#f87171" font-size="7.5" font-weight="bold" text-anchor="middle">9.4" Ground Clearance</text>
+            <text x="270" y="72" fill="#38bdf8" font-size="7.5" font-weight="bold" text-anchor="middle">4x4 Truck / Tacoma (70.6" H To Scale)</text>
+          </g>
+
+          <g id="svgVeh_truck_front" class="vehicle-svg-group" display="none" visibility="hidden">
+            <rect x="120" y="60" width="190" height="18" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+            <text x="215" y="72" fill="#38bdf8" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">FRONT VIEW: 4x4 TRUCK (9.4" CLR)</text>
+            <rect x="142" y="191.2" width="28" height="31.8" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <rect x="254" y="186.2" width="28" height="31.8" rx="4" fill="#090d16" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 137,185 C 130,165 135,135 145,110 L 160,89 C 180,82.7 244,82.7 264,89 L 279,110 C 289,135 294,165 287,185 C 282,204 270,204.3 252,204.3 L 172,204.3 C 154,204.3 142,204 137,185 Z" fill="rgba(15, 23, 42, 0.55)" stroke="#38bdf8" stroke-width="1.8"/>
+            <path d="M 164,115 L 176,96 C 196,90 232,90 252,96 L 264,115 Z" fill="rgba(56, 189, 248, 0.18)" stroke="#94a3b8" stroke-width="1.2"/>
+            <line x1="137" y1="195.0" x2="287" y2="195.0" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="212" y="191" fill="#fcd34d" font-size="7.5" font-weight="bold" text-anchor="middle">Door Sill (7.87')</text>
+            <line x1="172" y1="204.3" x2="252" y2="204.3" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="2,2"/>
+            <text x="212" y="213" fill="#f87171" font-size="7" font-weight="bold" text-anchor="middle">9.4" Clearance</text>
           </g>
 
           <!-- Dynamic Water Layer (covers terrain across gutter and road up to waterY) -->
@@ -1002,6 +988,25 @@
               <stop offset="100%" stop-color="#0284c7" stop-opacity="0.0"/>
             </linearGradient>
           </defs>
+
+          <!-- Rolling 48-Hour Background Quadrants (Center = LIVE NOW at X=320) -->
+          <rect x="55" y="30" width="265" height="170" fill="rgba(15, 23, 42, 0.45)"/>
+          <text x="187" y="25" fill="#64748b" font-size="7.5" font-family="monospace" text-anchor="middle">← PAST 24 HOURS (OBSERVED)</text>
+          
+          <rect x="320" y="30" width="265" height="170" fill="rgba(30, 41, 59, 0.25)"/>
+          <text x="452" y="25" fill="#64748b" font-size="7.5" font-family="monospace" text-anchor="middle">NEXT 24 HOURS (FORECAST) →</text>
+
+          <!-- Fixed Center LIVE NOW Marker (X=320) -->
+          <line x1="320" y1="28" x2="320" y2="200" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="4,2"/>
+          <rect x="290" y="14" width="60" height="15" rx="3" fill="#0369a1" stroke="#38bdf8" stroke-width="1"/>
+          <text x="320" y="25" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="monospace" text-anchor="middle">LIVE NOW</text>
+
+          <!-- Dynamic Next High Tide Marker on Forecast Half -->
+          <g id="svgNextHighMarker" transform="translate(0, 0)">
+            <polygon points="0,-6 6,0 0,6 -6,0" fill="#f59e0b" stroke="#ffffff" stroke-width="1"/>
+            <rect id="svgNextHighBox" x="-50" y="-22" width="100" height="14" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1"/>
+            <text id="svgNextHighLabel" x="0" y="-12" fill="#fef08a" font-size="7" font-weight="bold" font-family="monospace" text-anchor="middle">▲ Next Peak</text>
+          </g>
 
           <!-- Background Elevation Reference Grid Lines (NOAA Live Calibration) -->
           <line x1="55" y1="41" x2="585" y2="41" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2,2"/>
@@ -1185,31 +1190,31 @@
       </div>
 
       <div class="setting-group">
-        <label>Vehicle Ground Clearance</label>
+        <label>Vehicle Ground Clearance & Model</label>
         <div class="select-card-list">
           <div class="select-card active" id="veh-prius" onclick="selectVehicle('prius', 5.9)">
             <div>
-              <div class="select-card-name">🚗 Small Car / Compact / Sedan (5.9" Clearance)</div>
-              <div class="select-card-detail">Impassable at 7.55 ft NAVD88</div>
+              <div class="select-card-name">🚗 Small Car / Prius (5.9" Clearance • 56.3" Height)</div>
+              <div class="select-card-detail">Impassable at 7.55 ft NAVD88 in Sag Dip</div>
             </div>
             <span>✓</span>
           </div>
           <div class="select-card" id="veh-sedan" onclick="selectVehicle('sedan', 6.5)">
             <div>
-              <div class="select-card-name">🚙 Standard Compact / Sedan (6.5" Clearance)</div>
-              <div class="select-card-detail">Impassable at 7.60 ft NAVD88</div>
+              <div class="select-card-name">🚙 Standard Sedan / Camry (6.5" Clearance • 56.9" Height)</div>
+              <div class="select-card-detail">Impassable at 7.60 ft NAVD88 in Sag Dip</div>
             </div>
           </div>
-          <div class="select-card" id="veh-suv" onclick="selectVehicle('suv', 8.7)">
+          <div class="select-card" id="veh-suv" onclick="selectVehicle('suv', 8.1)">
             <div>
-              <div class="select-card-name">🚙 Subaru / Crossover SUV (8.7" Clearance)</div>
-              <div class="select-card-detail">Impassable at 7.78 ft NAVD88</div>
+              <div class="select-card-name">🚙 Crossover SUV / Corolla Cross (8.1" Clearance • 64.9" Height)</div>
+              <div class="select-card-detail">Impassable at 7.73 ft NAVD88 in Sag Dip</div>
             </div>
           </div>
-          <div class="select-card" id="veh-truck" onclick="selectVehicle('truck', 10.0)">
+          <div class="select-card" id="veh-truck" onclick="selectVehicle('truck', 9.4)">
             <div>
-              <div class="select-card-name">🛻 4x4 Truck / High Clearance (10.0" Clearance)</div>
-              <div class="select-card-detail">Impassable at 7.89 ft NAVD88</div>
+              <div class="select-card-name">🛻 4x4 Truck / Tacoma (9.4" Clearance • 70.6" Height)</div>
+              <div class="select-card-detail">High Clearance • Impassable at 7.84 ft NAVD88</div>
             </div>
           </div>
         </div>
@@ -1229,12 +1234,12 @@
         name: "Larkspur Plaza Drive",
         gutter: 6.70,
         yellow: 6.95,
-        crown: 6.95, // Recalibrated to lowest road crown in sag dip for true all-street clearance (Ground truth Oct 30 4:53 PM photo)
-        highCrown: 7.31, // High crown foreground ridge
-        priusSag: 7.55, // Confirmed 2:43 PM ground truth!
+        crown: 6.95, // Recalibrated to lowest road crown in sag dip
+        highCrown: 7.31,
+        priusSag: 7.55, // Impassable for 5.9" clearance
         stall: 7.75, // Carport Spot #86 slab ground level
-        damageLevel: 8.46, // +8.5" above carport slab (car interior flood risk)
-        lagMinutes: 135 // 2 hr 15 min drainage lag
+        damageLevel: 8.46, // +8.5" above carport slab
+        lagMinutes: 270 // 4.5 hour drainage lag for curb gutters & front stalls
       },
       manzanita: {
         name: "Manzanita Park & Ride",
@@ -1243,7 +1248,7 @@
         crown: 7.20,
         priusSag: 7.45,
         stall: 7.80,
-        lagMinutes: 90
+        lagMinutes: 120
       },
       tam: {
         name: "Tam Junction (SR-1)",
@@ -1252,7 +1257,7 @@
         crown: 7.35,
         priusSag: 7.60,
         stall: 8.00,
-        lagMinutes: 120
+        lagMinutes: 150
       },
       creek: {
         name: "Corte Madera Creek Path",
@@ -1261,52 +1266,58 @@
         crown: 6.60,
         priusSag: 6.80,
         stall: 7.50,
-        lagMinutes: 45
+        lagMinutes: 60
+      }
+    };
+
+    const VEHICLES = {
+      prius: {
+        name: "Small Car / Prius",
+        clearance: 5.9,
+        sill: 7.41,
+        height: 56.3,
+        impassableTwl: 7.55
+      },
+      sedan: {
+        name: "Standard Sedan / Camry",
+        clearance: 6.5,
+        sill: 7.47,
+        height: 56.9,
+        impassableTwl: 7.60
+      },
+      suv: {
+        name: "Crossover SUV / Corolla Cross",
+        clearance: 8.1,
+        sill: 7.67,
+        height: 64.9,
+        impassableTwl: 7.73
+      },
+      truck: {
+        name: "4x4 Truck / Tacoma",
+        clearance: 9.4,
+        sill: 7.87,
+        height: 70.6,
+        impassableTwl: 7.84
       }
     };
 
     let activeLocKey = 'larkspur';
-    let activeVehicleClearance = 5.9; // inches
-    let liveSurge = 1.38; // ft
-    let tideTimeline = []; // 6-minute points
-    let currentScrubIdx = -1; // Dynamically set to live time on load
-    let chartInstance = null;
+    let activeVehicleKey = 'prius';
+    try {
+      activeVehicleKey = localStorage.getItem('floodwatch_veh_key') || 'prius';
+    } catch(e) {}
+    let activeVehicleClearance = VEHICLES[activeVehicleKey] ? VEHICLES[activeVehicleKey].clearance : 5.9;
+    let currentCarView = 'side';
+    try {
+      currentCarView = localStorage.getItem('floodwatch_car_view') || 'side';
+    } catch(e) {}
 
-    // Service Worker Registration for PWA with Auto-Refresh on Update
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          reg.update();
-        }).catch(err => console.log('SW fail:', err));
-      });
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
-        }
-      });
-    }
+    let liveSurge = 1.38; // ft NAVD88
+    let tideTimeline = []; // 288 points: Index 0 = -24h, Index 144 = NOW, Index 288 = +24h
+    let currentScrubIdx = 144; // Starts at Center (LIVE NOW)
+    let nextHighTideObj = null;
 
-    // PWA Install prompt listener
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwaBanner').style.display = 'flex';
-    });
-
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-          document.getElementById('pwaBanner').style.display = 'none';
-        });
-      }
-    }
-
-    // Modal Helpers
+    // UI Navigation & Modals
     function openSettings() {
       document.getElementById('settingsModal').classList.add('open');
     }
@@ -1319,114 +1330,261 @@
       document.querySelectorAll('.select-card-list #loc-larkspur, #loc-manzanita, #loc-tam, #loc-creek').forEach(el => el.classList.remove('active'));
       const target = document.getElementById('loc-' + key);
       if (target) target.classList.add('active');
+      updateUI();
     }
+
+    // Vehicle Selection Switcher (Updates 3D/SVG Model Across Both Views)
     function selectVehicle(key, clr) {
+      activeVehicleKey = key;
       activeVehicleClearance = clr;
-      document.querySelectorAll('.select-card-list #veh-prius, #veh-sedan, #veh-suv, #veh-truck').forEach(el => el.classList.remove('active'));
+      try {
+        localStorage.setItem('floodwatch_veh_key', key);
+      } catch (e) {}
+
+      document.querySelectorAll('#veh-prius, #veh-sedan, #veh-suv, #veh-truck').forEach(el => el.classList.remove('active'));
       const target = document.getElementById('veh-' + key);
       if (target) target.classList.add('active');
+
+      applyVehicleAndCarView();
+      updateUI();
     }
 
-    // Master Pre-Baked Astronomical Predictions for NOAA Station 9414874 (Corte Madera Creek)
-    // Interpolated to 144 points (every 10 minutes from 00:00 to 23:50 in NAVD88)
-    const CORTE_MADERA_AST_PRED = [0.45, 0.63, 0.81, 1.0, 1.2, 1.4, 1.59, 1.8, 2.0, 2.2, 2.4, 2.59, 2.78, 2.96, 3.14, 3.31, 3.47, 3.62, 3.77, 3.91, 4.04, 4.16, 4.26, 4.36, 4.45, 4.53, 4.59, 4.65, 4.69, 4.72, 4.73, 4.74, 4.73, 4.71, 4.68, 4.64, 4.59, 4.53, 4.46, 4.38, 4.29, 4.2, 4.11, 4.01, 3.91, 3.81, 3.7, 3.61, 3.51, 3.42, 3.33, 3.25, 3.18, 3.12, 3.07, 3.03, 3.0, 2.98, 2.98, 2.98, 3.0, 3.03, 3.07, 3.13, 3.19, 3.27, 3.36, 3.46, 3.56, 3.68, 3.81, 3.94, 4.08, 4.22, 4.37, 4.53, 4.69, 4.84, 5.0, 5.16, 5.31, 5.45, 5.59, 5.73, 5.85, 5.96, 6.06, 6.15, 6.22, 6.28, 6.32, 6.35, 6.37, 6.37, 6.35, 6.32, 6.27, 6.21, 6.13, 6.03, 5.92, 5.8, 5.66, 5.51, 5.34, 5.17, 4.97, 4.77, 4.56, 4.33, 4.1, 3.86, 3.62, 3.37, 3.12, 2.87, 2.61, 2.36, 2.11, 1.86, 1.62, 1.39, 1.17, 0.95, 0.75, 0.56, 0.38, 0.21, 0.06, -0.08, -0.2, -0.3, -0.39, -0.46, -0.51, -0.55, -0.57, -0.58, -0.57, -0.55, -0.51, -0.46, -0.39, -0.31];
-    let currentAstArray = CORTE_MADERA_AST_PRED;
+    function switchPriusView(view, ev) {
+      switchCarView(view, ev);
+    }
 
-    // Generate high-accuracy 24h harmonic curve matching NOAA Station 9414874 for Oct 30 + Street Drainage Lag
-    function generateTideData(astArray = currentAstArray) {
+    function switchCarView(view, ev) {
+      if (ev) {
+        if (ev.preventDefault) ev.preventDefault();
+        if (ev.stopPropagation) ev.stopPropagation();
+      }
+      currentCarView = view;
+      try {
+        localStorage.setItem('floodwatch_car_view', view);
+      } catch (e) {}
+      applyVehicleAndCarView();
+    }
+
+    function applyVehicleAndCarView() {
+      // Hide all vehicle groups
+      const allGroups = document.querySelectorAll('.vehicle-svg-group');
+      allGroups.forEach(g => {
+        g.style.display = 'none';
+        g.setAttribute('display', 'none');
+        g.setAttribute('visibility', 'hidden');
+      });
+
+      // Show active vehicle and active view
+      const activeGroupId = `svgVeh_${activeVehicleKey}_${currentCarView}`;
+      const activeGroup = document.getElementById(activeGroupId);
+      if (activeGroup) {
+        activeGroup.style.display = 'inline';
+        activeGroup.setAttribute('display', 'inline');
+        activeGroup.setAttribute('visibility', 'visible');
+      }
+
+      // Update View Buttons
+      const btnSide = document.getElementById('btnViewSide');
+      const btnFront = document.getElementById('btnViewFront');
+      if (currentCarView === 'front') {
+        if (btnSide) btnSide.classList.remove('active');
+        if (btnFront) btnFront.classList.add('active');
+      } else {
+        if (btnSide) btnSide.classList.add('active');
+        if (btnFront) btnFront.classList.remove('active');
+      }
+
+      // Update Vehicle Card Label
+      const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
+      const labelVeh = document.getElementById('labelVehicleClearance');
+      if (labelVeh) {
+        labelVeh.textContent = `${vInfo.name} (${vInfo.clearance}" CLR)`;
+      }
+    }
+
+    // 48-Hour Rolling Timeline Generator (288 Points: -24h to +24h, Centered on NOW at Index 144)
+    function generate48HourTimeline(predArray, obsArray) {
       const data = [];
-      const sagClearanceHours = 19.0; // 7:00 PM sag crown clearance
-      const gutterClearanceHours = 21.5; // 9:30 PM full gutter & parking clearance (calibrated to 7:34 PM field photos)
-      for (let i = 0; i < 144; i++) {
-        const totalMinutes = i * 10; // 0:00 to 24:00 in 10 min steps
-        const hours = totalMinutes / 60;
-        
-        const astTide = astArray[i];
-        const creekTwl = parseFloat((astTide + liveSurge).toFixed(2));
+      const now = new Date();
+      const nowMs = now.getTime();
+      const tenMinsMs = 10 * 60 * 1000;
 
-        // Physical Street Drainage Retention Model:
-        // Even when creek drops, marsh backwater and flat storm pipes cause severe drainage lag.
-        // Sag crown cleared around ~7:00 PM, but curb gutters and front parking stalls retain standing salt water until ~9:30 PM.
-        let streetTwl = creekTwl;
-        if (hours > 15.4 && hours < gutterClearanceHours) {
-          if (hours < sagClearanceHours) {
-            const sagFrac = Math.max(0, (sagClearanceHours - hours) / (sagClearanceHours - 17.15));
-            const retainedSag = 6.95 + 0.15 * sagFrac;
-            streetTwl = parseFloat(Math.max(creekTwl, retainedSag).toFixed(2));
-          } else {
-            const gutFrac = Math.max(0, (gutterClearanceHours - hours) / (gutterClearanceHours - sagClearanceHours));
-            const retainedGutter = 6.70 + 0.22 * gutFrac;
-            streetTwl = parseFloat(Math.max(creekTwl, retainedGutter).toFixed(2));
-          }
-        }
+      for (let i = 0; i <= 288; i++) {
+        // Point time: i=0 is (now - 24h), i=144 is now, i=288 is (now + 24h)
+        const ptMs = nowMs + (i - 144) * tenMinsMs;
+        const ptDate = new Date(ptMs);
 
-        const h = Math.floor(hours);
-        const m = Math.floor(totalMinutes % 60);
+        const h = ptDate.getHours();
+        const m = ptDate.getMinutes();
         const ampm = h >= 12 ? 'PM' : 'AM';
         const displayH = h % 12 === 0 ? 12 : h % 12;
         const timeLabel = `${displayH}:${m < 10 ? '0' : ''}${m} ${ampm}`;
+        const dayLabel = ptDate.toLocaleDateString('en-US', { weekday: 'short' });
+
+        // Calculate astronomical tide from 6-minute predictions array or harmonic model
+        let ast = calculateAstTideAt(ptDate, predArray);
+        
+        // Calculate Total Water Level
+        let twl = 0;
+        let isPast = (i <= 144);
+
+        if (isPast) {
+          // Past 24h: Use observed water level from Station 9414290 or ast + surge
+          let pastObs = findObservedAt(ptDate, obsArray);
+          if (pastObs !== null) {
+            twl = pastObs; // Actual Golden Gate observed NAVD88
+          } else {
+            twl = ast + liveSurge;
+          }
+        } else {
+          // Future 24h: Forecasted astronomical + surge + street drainage retention
+          let creekTwl = ast + liveSurge;
+          twl = creekTwl;
+        }
 
         data.push({
           idx: i,
+          timeMs: ptMs,
           timeLabel: timeLabel,
-          hours: hours,
-          ast: parseFloat(astTide.toFixed(2)),
+          dayLabel: dayLabel,
+          isPast: isPast,
+          ast: parseFloat(ast.toFixed(2)),
           surge: liveSurge,
-          creekTwl: creekTwl,
-          twl: streetTwl
+          twl: parseFloat(twl.toFixed(2))
         });
       }
+
+      // Apply physical street drainage retention lag to the timeline (Gutters retain water 4.5 hrs after high peak)
+      applyStreetDrainageLag(data);
+
       return data;
     }
 
-    // Fetch Live NOAA Golden Gate Surge & Corte Madera Creek Predictions
+    // Helper: Find matching astronomical tide at given Date
+    function calculateAstTideAt(d, predArray) {
+      if (predArray && predArray.length > 0) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hour = String(d.getHours()).padStart(2, '0');
+        const min = String(Math.floor(d.getMinutes() / 6) * 6).padStart(2, '0');
+        const targetStr = `${year}-${month}-${day} ${hour}:${min}`;
+        const match = predArray.find(p => p.t.slice(0, 16) === targetStr);
+        if (match) {
+          return parseFloat(match.v) + 0.06; // MLLW to NAVD88
+        }
+      }
+      // Fallback harmonic model
+      const hrs = d.getHours() + d.getMinutes() / 60;
+      return 3.6 + 2.5 * Math.cos((hrs - 16.0) * 0.52);
+    }
+
+    // Helper: Find matching past observation
+    function findObservedAt(d, obsArray) {
+      if (!obsArray || !obsArray.length) return null;
+      const targetMs = d.getTime();
+      let best = null;
+      let minDiff = 15 * 60 * 1000; // within 15 mins
+      for (let o of obsArray) {
+        const oMs = new Date(o.t.replace(' ', 'T')).getTime();
+        const diff = Math.abs(oMs - targetMs);
+        if (diff < minDiff) {
+          minDiff = diff;
+          best = parseFloat(o.v);
+        }
+      }
+      return best;
+    }
+
+    // Apply Street Drainage Retention Lag across the 48-hour timeline
+    function applyStreetDrainageLag(timeline) {
+      for (let i = 1; i < timeline.length; i++) {
+        const prev = timeline[i - 1];
+        const cur = timeline[i];
+        // If water was high (> 6.70' gutter) and creek is falling, street water decays with retention
+        if (prev.twl > 6.70 && cur.twl < prev.twl) {
+          const maxDrainRatePer10Min = 0.035; // Maximum gravity drain drop per 10 minutes (calibrated to 4.5hr field lag)
+          const retained = prev.twl - maxDrainRatePer10Min;
+          if (retained > cur.twl && retained > 6.70) {
+            cur.twl = parseFloat(retained.toFixed(2));
+          }
+        }
+      }
+    }
+
+    // Find the Next High Tide peak on the forecast half of the 48h timeline
+    function findNextHighTide(timeline) {
+      if (!timeline || timeline.length <= 144) return null;
+      for (let i = 145; i < timeline.length - 1; i++) {
+        const prev = timeline[i - 1].twl;
+        const cur = timeline[i].twl;
+        const next = timeline[i + 1].twl;
+        if (cur >= prev && cur > next && cur > 6.4) {
+          const nowMs = new Date().getTime();
+          const diffMins = Math.max(0, Math.round((timeline[i].timeMs - nowMs) / (60 * 1000)));
+          const hRem = Math.floor(diffMins / 60);
+          const mRem = diffMins % 60;
+          const hazard = cur >= 7.55 ? "Small Cars Impassable" : cur >= 6.95 ? "Sag Dip Submerged" : cur >= 6.70 ? "Gutters Wet" : "No Hazard";
+          return {
+            idx: i,
+            timeLabel: `${timeline[i].dayLabel} ${timeline[i].timeLabel}`,
+            twl: cur,
+            timeRemaining: `${hRem}h ${mRem < 10 ? '0' : ''}${mRem}m`,
+            hazard: hazard
+          };
+        }
+      }
+      return null;
+    }
+
+    // Fetch Live NOAA 24/7 (Golden Gate Observations + Corte Madera Creek Predictions)
     async function fetchLiveNOAA() {
+      let obsData = [];
+      let predData = [];
+
       try {
-        // Golden Gate Observed vs Harmonic
-        const respObs = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?range=2&station=9414290&product=water_level&datum=NAVD&time_zone=lst_ldt&units=english&format=json');
-        const dataObs = await respObs.json();
+        // Golden Gate Observed (Past 24 Hours)
+        const respObs = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?range=24&station=9414290&product=water_level&datum=NAVD&time_zone=lst_ldt&units=english&format=json');
+        const dObs = await respObs.json();
+        if (dObs.data && dObs.data.length > 0) {
+          obsData = dObs.data;
+          const latestObs = parseFloat(obsData[obsData.length - 1].v);
+          const latestTime = obsData[obsData.length - 1].t;
+
+          // Fetch matching prediction to determine live surge
+          const respPredGG = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=NAVD&time_zone=lst_ldt&units=english&interval=6&format=json');
+          const dPredGG = await respPredGG.json();
+          if (dPredGG.predictions) {
+            const match = dPredGG.predictions.find(p => p.t.slice(11, 16) === latestTime.slice(11, 16)) || dPredGG.predictions[dPredGG.predictions.length - 1];
+            const pVal = parseFloat(match.v);
+            const surge = latestObs - pVal;
+            if (!isNaN(surge)) {
+              liveSurge = parseFloat(surge.toFixed(2));
+            }
+          }
+        }
+      } catch (e) {
+        console.log("NOAA Station 9414290 live fetch fallback:", e);
+      }
+
+      try {
+        // Corte Madera Creek Station 9414874 Predictions (72 Hours)
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yStr = `${yesterday.getFullYear()}${String(yesterday.getMonth()+1).padStart(2,'0')}${String(yesterday.getDate()).padStart(2,'0')}`;
         
-        const respPred = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=NAVD&time_zone=lst_ldt&units=english&interval=6&format=json');
-        const dataPred = await respPred.json();
-
-        if (dataObs.data && dataObs.data.length > 0 && dataPred.predictions) {
-          const latestObs = parseFloat(dataObs.data[dataObs.data.length - 1].v);
-          const latestTime = dataObs.data[dataObs.data.length - 1].t;
-          
-          // Match nearest prediction
-          const matchingPred = dataPred.predictions.find(p => p.t.slice(11, 16) === latestTime.slice(11, 16)) || dataPred.predictions[dataPred.predictions.length - 1];
-          const predVal = parseFloat(matchingPred.v);
-          const calculatedSurge = latestObs - predVal;
-          if (!isNaN(calculatedSurge)) {
-            liveSurge = parseFloat(calculatedSurge.toFixed(2));
-          }
+        const respCM = await fetch(`https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=${yStr}&range=72&station=9414874&product=predictions&datum=MLLW&time_zone=lst_ldt&units=english&interval=6&format=json`);
+        const dCM = await respCM.json();
+        if (dCM.predictions && dCM.predictions.length > 0) {
+          predData = dCM.predictions;
         }
       } catch (e) {
-        console.log("NOAA Live fetch fallback to calibrated surge:", e);
+        console.log("NOAA Station 9414874 predictions fetch fallback:", e);
       }
 
-      // Also dynamically fetch Corte Madera Creek Station 9414874 predictions
-      try {
-        const respCM = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414874&product=predictions&datum=MLLW&time_zone=lst_ldt&units=english&interval=6&format=json');
-        const dataCM = await respCM.json();
-        if (dataCM && dataCM.predictions && dataCM.predictions.length >= 240) {
-          const newAst = [];
-          for (let i = 0; i < 144; i++) {
-            const totalMins = i * 10;
-            const idxFloor = Math.floor(totalMins / 6);
-            const frac = (totalMins % 6) / 6.0;
-            const v1 = parseFloat(dataCM.predictions[idxFloor].v);
-            const v2 = parseFloat(dataCM.predictions[Math.min(239, idxFloor + 1)].v);
-            const vInterp = v1 + (v2 - v1) * frac;
-            newAst.push(parseFloat((vInterp + 0.06).toFixed(2))); // NAVD88 conversion
-          }
-          currentAstArray = newAst;
-        }
-      } catch (e) {
-        console.log("NOAA Station 9414874 live fetch fallback to pre-baked array:", e);
-      }
-      
-      tideTimeline = generateTideData(currentAstArray);
+      tideTimeline = generate48HourTimeline(predData, obsData);
+      nextHighTideObj = findNextHighTide(tideTimeline);
+
       renderSvgHydrograph();
       updateUI();
     }
@@ -1438,69 +1596,85 @@
     }
 
     function getLivePointIdx() {
-      const now = new Date();
-      const mins = now.getHours() * 60 + now.getMinutes();
-      return Math.min(143, Math.max(0, Math.round(mins / 10)));
+      return 144; // Center index is always LIVE NOW in 48h centered window
     }
 
-    // Dynamic Real-Time Countdown to Reopening / Sag & Gutter Drainage
-    function getClearanceCountdown(effectiveHours) {
-      const clearanceHours = 21.5; // 9:30 PM (Curb gutters & front parking stalls)
-      const remainingMinutes = Math.round((clearanceHours - effectiveHours) * 60);
-
-      if (remainingMinutes > 0) {
-        const hRemain = Math.floor(remainingMinutes / 60);
-        const mRemain = remainingMinutes % 60;
-        if (hRemain > 0) {
-          return `~9:30 PM (in ${hRemain}h ${mRemain < 10 ? '0' : ''}${mRemain}m)`;
-        } else {
-          return `~9:30 PM (in ${mRemain}m)`;
-        }
-      } else {
-        return "ROAD & GUTTERS FULLY CLEARED";
-      }
-    }
+    // Snap Time Presets
     function snapTime(preset) {
       const slider = document.getElementById('timeSlider');
       if (preset === 'now') {
-        currentScrubIdx = getLivePointIdx();
-      } else if (preset === '1142') {
-        currentScrubIdx = 70; // 11:40
-      } else if (preset === '1304') {
-        currentScrubIdx = 78; // 1:00
-      } else if (preset === '1333') {
-        currentScrubIdx = 81; // 1:30
-      } else if (preset === '1443') {
-        currentScrubIdx = 88; // 2:40 (2:43 PM impassable ground truth)
-      } else if (preset === '1524') {
-        currentScrubIdx = 92; // 3:20 (Peak)
-      } else if (preset === '1712') {
-        currentScrubIdx = 103; // 5:10 PM (5:12 PM Field photo: Gutters & Sag wet)
-      } else if (preset === '1934') {
-        currentScrubIdx = 117; // 7:30 PM (7:34 PM Field photo: Gutters & parking flooded)
-      } else if (preset === '2130') {
-        currentScrubIdx = 129; // 9:30 PM (Gutters clear)
+        currentScrubIdx = 144;
+      } else if (preset === 'nexthigh') {
+        if (nextHighTideObj) currentScrubIdx = nextHighTideObj.idx;
+      } else if (preset === 'impassable') {
+        // Find next point where TWL reaches active vehicle impassable threshold
+        const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
+        for (let i = 144; i < tideTimeline.length; i++) {
+          if (tideTimeline[i].twl >= vInfo.impassableTwl) {
+            currentScrubIdx = i;
+            break;
+          }
+        }
+      } else if (preset === 'cleared') {
+        // Find point after next peak where road clears
+        if (nextHighTideObj) {
+          for (let i = nextHighTideObj.idx; i < tideTimeline.length; i++) {
+            if (tideTimeline[i].twl < 6.95) {
+              currentScrubIdx = i;
+              break;
+            }
+          }
+        }
+      } else if (preset === 'oct30_peak') {
+        // Find peak yesterday (~3:24 PM Oct 30)
+        currentScrubIdx = 38; // In past 24h
+      } else if (preset === 'oct30_lag') {
+        // 7:34 PM yesterday
+        currentScrubIdx = 63;
       }
       slider.value = currentScrubIdx;
       updateUI();
     }
 
-    // Core dynamic UI state update
+    // Dynamic Real-Time Countdown to Reopening or Next High Tide
+    function getClearanceCountdown(currentTwl) {
+      if (currentTwl >= 6.70) {
+        // Road or gutters currently wet: Find when twl drops < 6.70
+        for (let i = currentScrubIdx; i < tideTimeline.length; i++) {
+          if (tideTimeline[i].twl < 6.70) {
+            const diffMins = (i - currentScrubIdx) * 10;
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            return `~${tideTimeline[i].timeLabel} (in ${h}h ${m < 10 ? '0' : ''}${m}m)`;
+          }
+        }
+        return "CLEARING SOON";
+      } else {
+        // Road is dry: countdown to next high tide peak
+        if (nextHighTideObj) {
+          return `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+        }
+        return "ROAD & GUTTERS 100% CLEAR";
+      }
+    }
+
+    // Core Dynamic UI State Update
     function updateUI() {
       if (!tideTimeline.length) return;
       const point = tideTimeline[currentScrubIdx];
       const cfg = THRESHOLDS[activeLocKey];
+      const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
 
-      // Update Time Badge with Live vs Sim state
-      const isScrubbing = (currentScrubIdx !== getLivePointIdx());
+      // Update Scrubber Time Badge
+      const isScrubbing = (currentScrubIdx !== 144);
       const badgeEl = document.getElementById('scrubberTimeBadge');
       if (badgeEl) {
         if (!isScrubbing) {
-          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); margin-right:5px; box-shadow:0 0 6px var(--green);"></span>LIVE: ${point.timeLabel}`;
+          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); margin-right:5px; box-shadow:0 0 6px var(--green);"></span>LIVE NOW: ${point.dayLabel} ${point.timeLabel}`;
           badgeEl.style.borderColor = "rgba(34, 197, 94, 0.4)";
           badgeEl.style.color = "var(--green)";
         } else {
-          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--amber); margin-right:5px;"></span>SIM: ${point.timeLabel}`;
+          badgeEl.innerHTML = `<span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--amber); margin-right:5px;"></span>${point.isPast ? 'PAST' : 'FORECAST'}: ${point.dayLabel} ${point.timeLabel}`;
           badgeEl.style.borderColor = "rgba(245, 158, 11, 0.4)";
           badgeEl.style.color = "var(--amber)";
         }
@@ -1511,7 +1685,6 @@
       const twl = point.twl;
       document.getElementById('valTWL').innerHTML = `${twl.toFixed(2)} <span>ft NAVD88</span>`;
       document.getElementById('valTWLMLLW').textContent = `Station 9414874: ${(twl - 0.06).toFixed(2)}' MLLW`;
-
       document.getElementById('valSurge').innerHTML = `+${liveSurge.toFixed(2)} <span>ft</span>`;
 
       // Road crown depth & Gutter water depth
@@ -1538,21 +1711,47 @@
         if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
       }
 
-      // Small Car Sag Crosswalk Dip Depth & Clearance
-      // Impassable threshold calibrated at 7.55 ft = 5.9" travel lane depth
-      const dipWaterDepthIn = Math.max(0, (twl - (cfg.priusSag - (activeVehicleClearance / 12))) * 12);
+      // Vehicle Clearance Gauge & Breached Badge Fix
+      const dipWaterDepthIn = Math.max(0, (twl - (vInfo.impassableTwl - (activeVehicleClearance / 12))) * 12);
       const remainingClearance = Math.max(0, activeVehicleClearance - dipWaterDepthIn);
 
-      if (twl >= cfg.priusSag) {
-        document.getElementById('valPriusClearance').innerHTML = `0.0 <span>in clr</span>`;
-        document.getElementById('valPriusClearance').style.color = "var(--red)";
-        document.getElementById('valPriusDepth').textContent = `Travel lane depth: ${dipWaterDepthIn.toFixed(1)} in`;
-        document.getElementById('valPriusDepth').style.color = "#fca5a5";
+      const valClrEl = document.getElementById('valPriusClearance');
+      const statusClrEl = document.getElementById('valPriusStatusText');
+      const depthClrEl = document.getElementById('valPriusDepth');
+
+      if (twl >= vInfo.impassableTwl) {
+        valClrEl.innerHTML = `0.0 <span>in clr</span>`;
+        valClrEl.style.color = "var(--red)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "BREACHED";
+          statusClrEl.style.color = "var(--red)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = `Travel lane depth: ${dipWaterDepthIn.toFixed(1)} in`;
+          depthClrEl.style.color = "#fca5a5";
+        }
+      } else if (dipWaterDepthIn > 0) {
+        valClrEl.innerHTML = `${remainingClearance.toFixed(1)} <span>in clr</span>`;
+        valClrEl.style.color = remainingClearance > 2 ? "var(--amber)" : "var(--red)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "REDUCED";
+          statusClrEl.style.color = "var(--amber)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = `Ponding depth: ${dipWaterDepthIn.toFixed(1)} in`;
+          depthClrEl.style.color = "var(--text-muted)";
+        }
       } else {
-        document.getElementById('valPriusClearance').innerHTML = `${remainingClearance.toFixed(1)} <span>in clr</span>`;
-        document.getElementById('valPriusClearance').style.color = remainingClearance > 2 ? "var(--green)" : "var(--amber)";
-        document.getElementById('valPriusDepth').textContent = dipWaterDepthIn > 0 ? `Ponding depth: ${dipWaterDepthIn.toFixed(1)} in` : `Gutter & dip dry`;
-        document.getElementById('valPriusDepth').style.color = "var(--text-muted)";
+        valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+        valClrEl.style.color = "var(--green)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "CLEAR";
+          statusClrEl.style.color = "var(--green)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = `Travel lane completely dry`;
+          depthClrEl.style.color = "var(--text-muted)";
+        }
       }
 
       // Dynamic Hero Status & Countdown
@@ -1567,10 +1766,7 @@
       hero.className = 'status-hero';
       badge.className = 'badge-pill';
 
-      // Dynamic countdown relative to live clock or scrubbed time
-      const now = new Date();
-      const effectiveHours = isScrubbing ? point.hours : (now.getHours() + now.getMinutes() / 60);
-      const countdownStr = getClearanceCountdown(effectiveHours);
+      const countdownStr = getClearanceCountdown(twl);
 
       if (twl >= cfg.stall) {
         hero.classList.add('red');
@@ -1579,14 +1775,14 @@
         heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
         heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
         cdLabel.textContent = "FALLING BELOW CARPORT IN:";
-        cdVal.textContent = "~35 mins";
-      } else if (twl >= cfg.priusSag) {
+        cdVal.textContent = countdownStr;
+      } else if (twl >= vInfo.impassableTwl) {
         hero.classList.add('red');
         badge.classList.add('red');
-        badgeText.textContent = "SMALL CAR IMPASSABLE";
-        heroTitle.textContent = "Crosswalk Sag Impassable for Small Cars (< 5.9\")";
-        heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Do not attempt to drive small cars or low-clearance sedans. Trucks have passability.`;
-        cdLabel.textContent = "ESTIMATED SMALL CAR CLEARANCE:";
+        badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE`;
+        heroTitle.textContent = `Crosswalk Sag Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
+        heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Exceeds vehicle ground clearance. Do not drive through salt water.`;
+        cdLabel.textContent = "ESTIMATED CLEARANCE:";
         cdVal.textContent = countdownStr;
       } else if (twl >= cfg.crown) { // 6.95'
         hero.classList.add('yellow');
@@ -1601,7 +1797,7 @@
         badge.classList.add('yellow');
         badgeText.textContent = "GUTTERS & PARKING STALLS FLOODED";
         heroTitle.textContent = `Gutters & Parking Stalls Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Severe Lag`;
-        heroDesc.textContent = `Road crown is passable, but curb gutters and parking stalls in front of homes/carports remain flooded with standing salt water (+${gutterDepthIn.toFixed(1)} in) due to marsh backwater and flat grades. Do not park in front of home until cleared.`;
+        heroDesc.textContent = `Road center crown is passable, but curb gutters and parking stalls in front of homes/carports remain flooded with standing salt water (+${gutterDepthIn.toFixed(1)} in) due to marsh backwater and flat grades. Do not park in front of home until cleared.`;
         cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS & PARKING):";
         cdVal.textContent = countdownStr;
       } else {
@@ -1609,9 +1805,15 @@
         badge.classList.add('green');
         badgeText.textContent = "ROAD & GUTTERS FULLY CLEAR";
         heroTitle.textContent = "Roadway & Curb Gutters 100% Clear";
-        heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
-        cdLabel.textContent = "STATUS:";
-        cdVal.textContent = "100% Clear";
+        if (nextHighTideObj) {
+          heroDesc.textContent = `Road crown and curb gutters completely dry. Next high tide is forecast at ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}' TWL — ${nextHighTideObj.hazard}).`;
+          cdLabel.textContent = "NEXT HIGH TIDE:";
+          cdVal.textContent = `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+        } else {
+          heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
+          cdLabel.textContent = "STATUS:";
+          cdVal.textContent = "100% Clear";
+        }
       }
 
       // Update SVG Road Cross Section Simulator
@@ -1619,8 +1821,8 @@
       updateScrubIndicator();
 
       // Trend Icon
-      const nextTwl = tideTimeline[Math.min(143, currentScrubIdx + 1)].twl;
-      const diff = nextTwl - twl;
+      const nextIdx = Math.min(tideTimeline.length - 1, currentScrubIdx + 1);
+      const diff = tideTimeline[nextIdx].twl - twl;
       const trendEl = document.getElementById('tideTrendIcon');
       if (Math.abs(diff) < 0.02) {
         trendEl.textContent = "⏸️ SLACK WATER";
@@ -1631,7 +1833,7 @@
       }
     }
 
-    // Update SVG Cross-Section with True Physical Proportions (1.988 px/in = 23.856 px/ft)
+    // Update SVG Cross-Section
     function updateSvgCrossSection(twl, cfg) {
       document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
 
@@ -1639,12 +1841,10 @@
       const pxPerFt = 23.856;
       const waterY = Math.max(40, Math.min(255, gutterY - (twl - 6.70) * pxPerFt));
 
-      // Update water layer polygon
       const waterPath = `M 30,260 L 30,${waterY} Q 360,${waterY - 0.5} 600,${waterY} L 600,260 Z`;
       const waterLayer = document.getElementById('svgWaterLayer');
       if (waterLayer) waterLayer.setAttribute('d', waterPath);
       
-      // Update water level line and label
       const waterLine = document.getElementById('svgWaterLine');
       if (waterLine) {
         waterLine.setAttribute('y1', waterY);
@@ -1656,7 +1856,6 @@
       
       const sagCrownDeltaIn = (twl - (cfg.crown || 6.95)) * 12;
       const gutterDepthIn = (twl - (cfg.gutter || 6.70)) * 12;
-      const sillDeltaIn = (twl - 7.41) * 12;
 
       let depthText = `${twl.toFixed(2)}'`;
       if (sagCrownDeltaIn > 0) {
@@ -1667,18 +1866,21 @@
         depthText += ` (Roadway fully dry)`;
       }
 
-      const txt = document.getElementById('svgWaterText');
-      if (txt) {
-        txt.setAttribute('y', waterY + 3);
-        txt.textContent = depthText;
+      const waterText = document.getElementById('svgWaterText');
+      if (waterText) {
+        waterText.setAttribute('y', waterY + 3);
+        waterText.textContent = depthText;
       }
 
-      // Dynamic Door Sill Flooding Alert
+      // Sill Alert
+      const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
       const sillAlert = document.getElementById('svgSillAlert');
       const sillText = document.getElementById('svgSillAlertText');
-      if (sillDeltaIn > 0) {
+      const sillDeltaIn = (twl - vInfo.sill) * 12;
+
+      if (twl >= vInfo.sill) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — INTERIOR FLOODING`;
+        if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — FLOOD RISK`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#ef4444');
@@ -1697,60 +1899,7 @@
       }
     }
 
-    // Persistent View State: Side Profile vs Front Cross-Section
-    let currentCarView = 'side';
-    try {
-      currentCarView = localStorage.getItem('floodwatch_car_view') || 'side';
-    } catch(e) {}
-
-    function switchPriusView(view, ev) {
-      if (ev) {
-        if (ev.preventDefault) ev.preventDefault();
-        if (ev.stopPropagation) ev.stopPropagation();
-      }
-      currentCarView = view;
-      try {
-        localStorage.setItem('floodwatch_car_view', view);
-      } catch (e) {}
-      applyCarView();
-    }
-
-    function applyCarView() {
-      const sideGrp = document.getElementById('svgPriusSideGroup');
-      const frontGrp = document.getElementById('svgPriusFrontGroup');
-      const btnSide = document.getElementById('btnViewSide');
-      const btnFront = document.getElementById('btnViewFront');
-
-      if (currentCarView === 'front') {
-        if (sideGrp) {
-          sideGrp.style.display = 'none';
-          sideGrp.setAttribute('display', 'none');
-          sideGrp.setAttribute('visibility', 'hidden');
-        }
-        if (frontGrp) {
-          frontGrp.style.display = 'inline';
-          frontGrp.setAttribute('display', 'inline');
-          frontGrp.setAttribute('visibility', 'visible');
-        }
-        if (btnSide) btnSide.classList.remove('active');
-        if (btnFront) btnFront.classList.add('active');
-      } else {
-        if (sideGrp) {
-          sideGrp.style.display = 'inline';
-          sideGrp.setAttribute('display', 'inline');
-          sideGrp.setAttribute('visibility', 'visible');
-        }
-        if (frontGrp) {
-          frontGrp.style.display = 'none';
-          frontGrp.setAttribute('display', 'none');
-          frontGrp.setAttribute('visibility', 'hidden');
-        }
-        if (btnSide) btnSide.classList.add('active');
-        if (btnFront) btnFront.classList.remove('active');
-      }
-    }
-
-    // Native SVG Hydrograph Generator & Touch Scrubber
+    // Native SVG Hydrograph Generator & Touch Scrubber (Centered 48-Hour Chart)
     function renderSvgHydrograph() {
       if (!tideTimeline.length) return;
 
@@ -1794,6 +1943,21 @@
       if (elAst) elAst.setAttribute('d', astPathD);
       if (elArea) elArea.setAttribute('d', twlAreaD);
 
+      // Render Next High Tide Marker on forecast side
+      if (nextHighTideObj) {
+        const xPeak = getX(nextHighTideObj.idx);
+        const yPeak = getY(nextHighTideObj.twl);
+        const markerG = document.getElementById('svgNextHighMarker');
+        if (markerG) {
+          markerG.setAttribute('transform', `translate(${xPeak}, ${yPeak})`);
+          markerG.style.display = 'inline';
+          const label = document.getElementById('svgNextHighLabel');
+          if (label) {
+            label.textContent = `▲ Next Peak: ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}')`;
+          }
+        }
+      }
+
       updateScrubIndicator();
     }
 
@@ -1830,7 +1994,7 @@
         scrubBadge.setAttribute('transform', `translate(${badgeX}, 15)`);
       }
       if (scrubText) {
-        scrubText.textContent = `${pt.timeLabel.replace(' ', '')} (${pt.twl.toFixed(2)}')`;
+        scrubText.textContent = `${pt.dayLabel} ${pt.timeLabel} (${pt.twl.toFixed(2)}')`;
       }
     }
 
@@ -1838,55 +2002,21 @@
       alert(`${caption}\n\n(Photo: ${url})`);
     }
 
-    // Auto-init
-    window.addEventListener('DOMContentLoaded', () => {
-      try {
-        tideTimeline = generateTideData();
-        currentScrubIdx = getLivePointIdx();
-        const slider = document.getElementById('timeSlider');
-        if (slider) slider.value = currentScrubIdx;
+    // Startup Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      applyVehicleAndCarView();
+      fetchLiveNOAA();
 
-        renderSvgHydrograph();
-        updateUI();
-        applyCarView();
+      // Continuous 24/7 Polling: Refresh NOAA data every 6 minutes all day & night
+      setInterval(fetchLiveNOAA, 6 * 60 * 1000);
 
-        // Wire touch & drag events on hydrograph SVG for intuitive time scrubbing
-        const hSvg = document.getElementById('hydrographSvg');
-        if (hSvg) {
-          const handleScrubSvg = (e) => {
-            const rect = hSvg.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const xRel = (clientX - rect.left) / rect.width * 600;
-            const clampedX = Math.max(55, Math.min(585, xRel));
-            const idx = Math.round((clampedX - 55) / 530 * (tideTimeline.length - 1));
-            document.getElementById('timeSlider').value = idx;
-            onScrub(idx);
-          };
-
-          hSvg.addEventListener('pointerdown', (e) => {
-            hSvg.setPointerCapture(e.pointerId);
-            handleScrubSvg(e);
-          });
-          hSvg.addEventListener('pointermove', (e) => {
-            if (e.buttons === 1 || e.pointerType === 'touch') {
-              handleScrubSvg(e);
-            }
-          });
+      // Keep Live indicator fresh every 30 seconds
+      setInterval(() => {
+        if (currentScrubIdx === 144) {
+          updateUI();
         }
-
-        fetchLiveNOAA();
-        setInterval(fetchLiveNOAA, 300000);
-
-        // Auto-update countdown every 15 seconds
-        setInterval(() => {
-          if (currentScrubIdx === getLivePointIdx()) {
-            updateUI();
-          }
-        }, 15000);
-      } catch (err) {
-        console.error('Initialization error:', err);
-      }
+      }, 30 * 1000);
     });
-  </script>
+</script>
 </body>
 </html>

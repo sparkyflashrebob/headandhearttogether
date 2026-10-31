@@ -698,17 +698,17 @@
         </div>
       </div>
 
-      <!-- Road Crown Water Depth -->
+      <!-- Road Crown Water Depth (Lowest Sag Dip Benchmark) -->
       <div class="metric-card">
         <div class="metric-meta">
-          <span>Road Crown (7.31')</span>
+          <span>Road Crown (Sag Dip: 6.95')</span>
           <span id="crownStatusText">SUBMERGED</span>
         </div>
         <div class="metric-val" id="valCrownDepth">
           +2.4 <span>in water</span>
         </div>
         <div class="metric-sub" id="valCrownSub">
-          Center lane crowned peak
+          Lowest dip crown (Full clear: 6.95')
         </div>
       </div>
 
@@ -806,9 +806,13 @@
           <line x1="30" y1="206.1" x2="710" y2="206.1" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
           <text x="25" y="209.1" fill="#fbbf24" font-size="8" text-anchor="end" font-family="monospace">7.41' Door Sill</text>
 
-          <!-- 7.31' Crown Y=208.4 -->
+          <!-- 7.31' High Crown Y=208.4 -->
           <line x1="30" y1="208.4" x2="710" y2="208.4" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="25" y="211.4" fill="#fcd34d" font-size="8" text-anchor="end" font-family="monospace">7.31' Crown</text>
+          <text x="25" y="211.4" fill="#fcd34d" font-size="8" text-anchor="end" font-family="monospace">7.31' High Crown</text>
+
+          <!-- 6.95' Sag Dip Crown (Lowest Road Crown — All-Street Clear) Y=217.0 -->
+          <line x1="30" y1="217.0" x2="710" y2="217.0" stroke="#f97316" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="25" y="220.0" fill="#fb923c" font-size="8" text-anchor="end" font-family="monospace">6.95' Sag Crown</text>
 
           <!-- 6.70' Gutter Y=223.0 -->
           <line x1="30" y1="223.0" x2="710" y2="223.0" stroke="#38bdf8" stroke-dasharray="2,2"/>
@@ -1064,7 +1068,11 @@
         </div>
         <div class="photo-item" onclick="openPhoto('photos/stage4_243pm_impassable.jpg', '2:43 PM — Gold Standard: Crosswalk dip reaches 5.9 in depth. Small cars impassable! Tide 7.55 ft.')">
           <img src="photos/stage4_243pm_impassable.jpg" alt="2:43 PM Small Car Impassable">
-          <div class="photo-tag" style="color:#fca5a5;">2:43 PM • Small Car Impassable (7.55')</div>
+          <div class="photo-tag" style="color:#fca5a5;">2:43 PM • Impassable Sag (7.55')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/stage5_453pm_partial_crown.jpg', '4:53 PM — Tide 7.03 ft. Only high crown foreground exposed! Down the street, the sag dip is still 100% covered in salt water. Road NOT clear.')">
+          <img src="photos/stage5_453pm_partial_crown.jpg" alt="4:53 PM Sag Flooded">
+          <div class="photo-tag" style="color:var(--amber);">4:53 PM • Sag Still Flooded (7.03')</div>
         </div>
       </div>
     </section>
@@ -1089,14 +1097,14 @@
             <td>Water begins seeping into curb gutters (1:04 PM)</td>
           </tr>
           <tr>
-            <td>Yellow Flag Alert</td>
-            <td class="val" style="color:var(--amber);">6.95 ft</td>
-            <td>Move low-clearance vehicles from street curb to Carport #86</td>
+            <td><strong>Lowest Crown in Sag Dip</strong></td>
+            <td class="val" style="color:#f97316;"><strong>6.95 ft</strong></td>
+            <td><strong>True All-Street Clearance (Road covered in salt water until &lt; 6.95')</strong></td>
           </tr>
           <tr>
-            <td>Center Road Crown</td>
-            <td class="val" style="color:#fdba74;">7.31 ft</td>
-            <td>Water covers asphalt peak (Crown flooded)</td>
+            <td>High Road Crown (Foreground)</td>
+            <td class="val" style="color:#fbbf24;">7.31 ft</td>
+            <td>High ridge exposed, but sag dip ahead remains submerged (4:53 PM photo)</td>
           </tr>
           <tr>
             <td><strong>Small Car Impassable (Sag)</strong></td>
@@ -1104,9 +1112,14 @@
             <td><strong>Travel lane depth &ge; 5.9" (Ground truth: 2:43 PM)</strong></td>
           </tr>
           <tr>
-            <td>Carport Stall #86 Floor</td>
+            <td>Carport Stall #86 Floor (GL)</td>
             <td class="val" style="color:var(--purple);">7.75 ft</td>
             <td>Concrete floor. Kept dry today (peak was 7.70 ft)</td>
+          </tr>
+          <tr>
+            <td>Carport Door Sill Damage Level</td>
+            <td class="val" style="color:#f43f5e;">8.46 ft</td>
+            <td>+8.5" above carport GL where water enters parked car interior</td>
           </tr>
           <tr>
             <td>SUV / Truck Impassable</td>
@@ -1203,9 +1216,11 @@
         name: "Larkspur Plaza Drive",
         gutter: 6.70,
         yellow: 6.95,
-        crown: 7.31,
+        crown: 6.95, // Recalibrated to lowest road crown in sag dip for true all-street clearance (Ground truth Oct 30 4:53 PM photo)
+        highCrown: 7.31, // High crown foreground ridge
         priusSag: 7.55, // Confirmed 2:43 PM ground truth!
-        stall: 7.75,
+        stall: 7.75, // Carport Spot #86 slab ground level
+        damageLevel: 8.46, // +8.5" above carport slab (car interior flood risk)
         lagMinutes: 135 // 2 hr 15 min drainage lag
       },
       manzanita: {
@@ -1503,30 +1518,30 @@
         heroDesc.textContent = `Water in crosswalk dip is ${dipWaterDepthIn.toFixed(1)} in deep. Do not attempt to drive small cars or low-clearance sedans. Trucks have passability.`;
         cdLabel.textContent = "ESTIMATED SMALL CAR CLEARANCE:";
         cdVal.textContent = countdownStr;
-      } else if (twl >= cfg.crown) {
+      } else if (twl >= cfg.crown) { // 6.95'
         hero.classList.add('yellow');
         badge.classList.add('yellow');
-        badgeText.textContent = "ROAD CROWN FLOODED";
-        heroTitle.textContent = "Center Road Crown Submerged (Shallow)";
-        heroDesc.textContent = `Water covers center asphalt crown (+${crownDepthIn.toFixed(1)} in). Travel lane passable with caution for standard cars.`;
-        cdLabel.textContent = "ESTIMATED SMALL CAR CLEARANCE:";
+        badgeText.textContent = "SALT WATER IN SAG DIP";
+        heroTitle.textContent = "Road Submerged Through Crosswalk Dip (+" + crownDepthIn.toFixed(1) + " in)";
+        heroDesc.textContent = "High crown ridge in foreground is partially exposed, but looking down the street the sag dip is 100% covered in salt water. Avoid driving to prevent salt water damage.";
+        cdLabel.textContent = "ESTIMATED CLEARANCE ALL DOWN STREET:";
         cdVal.textContent = countdownStr;
-      } else if (twl >= cfg.gutter) {
+      } else if (twl >= cfg.gutter) { // 6.70'
         hero.classList.add('yellow');
         badge.classList.add('yellow');
-        badgeText.textContent = "GUTTER PONDING / CURB WARNING";
-        heroTitle.textContent = "Water Filling Street Gutters (1-2 in)";
-        heroDesc.textContent = "Center road crown completely dry. Traffic flows freely. Move cars parked at the curb to Carport #86.";
+        badgeText.textContent = "GUTTERS WET / RESIDUAL PONDING";
+        heroTitle.textContent = "Road Crown Clear All Down Street (Gutters Wet)";
+        heroDesc.textContent = "The center travel lane is completely dry all the way down the street. Residual salt water remains in curb gutters. Safe to drive down center crown.";
         cdLabel.textContent = "ROAD PASSABLE:";
-        cdVal.textContent = "Gutters filling";
+        cdVal.textContent = "Crown clear down street";
       } else {
         hero.classList.add('green');
         badge.classList.add('green');
-        badgeText.textContent = "ROAD PASSABLE";
-        heroTitle.textContent = "Road & Gutters Clear";
-        heroDesc.textContent = "Safe driving and street parking conditions across all lanes.";
+        badgeText.textContent = "ROAD FULLY CLEAR";
+        heroTitle.textContent = "Road & Gutters 100% Clear";
+        heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
         cdLabel.textContent = "STATUS:";
-        cdVal.textContent = "No Flood Hazard";
+        cdVal.textContent = "100% Clear";
       }
 
       // Update SVG Road Cross Section Simulator
@@ -1569,17 +1584,17 @@
       const marker = document.getElementById('svgWaterMarker');
       if (marker) marker.setAttribute('points', `600,${waterY} 612,${waterY - 5} 612,${waterY + 5}`);
       
-      const crownDeltaIn = (twl - 7.31) * 12;
-      const gutterDepthIn = (twl - 6.70) * 12;
+      const sagCrownDeltaIn = (twl - (cfg.crown || 6.95)) * 12;
+      const gutterDepthIn = (twl - (cfg.gutter || 6.70)) * 12;
       const sillDeltaIn = (twl - 7.41) * 12;
 
       let depthText = `${twl.toFixed(2)}'`;
-      if (crownDeltaIn > 0) {
-        depthText += ` (+${crownDeltaIn.toFixed(1)}" on crown | +${gutterDepthIn.toFixed(1)}" in gutter)`;
+      if (sagCrownDeltaIn > 0) {
+        depthText += ` (+${sagCrownDeltaIn.toFixed(1)}" in sag dip | +${gutterDepthIn.toFixed(1)}" in gutter)`;
       } else if (gutterDepthIn > 0) {
-        depthText += ` (+${gutterDepthIn.toFixed(1)}" in gutter)`;
+        depthText += ` (Crown clear down st | +${gutterDepthIn.toFixed(1)}" in gutter)`;
       } else {
-        depthText += ` (Gutter dry)`;
+        depthText += ` (Roadway fully dry)`;
       }
 
       const txt = document.getElementById('svgWaterText');

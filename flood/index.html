@@ -1057,6 +1057,48 @@
       </div>
     </section>
 
+    <!-- OCT 31 GROUND-TRUTH & SURVEY GALLERY -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Oct 31 Breach & Ground Survey Calibration</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Field Sequence</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-item" onclick="openPhoto('photos/Larkspur_Elevation_and_Drain_Survey_Map_Oct31.jpg', 'Ground Survey & Drainage Topology Map — Larkspur Plaza Dr sag, #326 gutter, carport, and creek lagoon inlet.')">
+          <img src="photos/Larkspur_Elevation_and_Drain_Survey_Map_Oct31.jpg" alt="Elevation & Drain Survey Map">
+          <div class="photo-tag" style="color:var(--cyan);">Survey • Elevation & Drains</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_152825.jpg', '3:28 PM — Baseline dry road. Creek TWL 6.78 ft. Roadway clear.')">
+          <img src="photos/20261031_152825.jpg" alt="3:28 PM Dry">
+          <div class="photo-tag">3:28 PM • Dry Baseline (6.78')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_155058.jpg', '3:50 PM — West swale filling, gutters wet, center crown dry. Creek TWL 7.25 ft.')">
+          <img src="photos/20261031_155058.jpg" alt="3:50 PM Gutters Wet">
+          <div class="photo-tag">3:50 PM • Swale Filling (7.25')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_162830.jpg', '4:28 PM — Water reaches crown at sag dip, filling both lanes. Creek TWL 7.40 ft.')">
+          <img src="photos/20261031_162830.jpg" alt="4:28 PM Sag Breach">
+          <div class="photo-tag" style="color:var(--amber);">4:28 PM • Sag Crown Breach (7.40')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_163158.jpg', '4:31 PM — Peak inundation across sag dip. Impassable for small passenger vehicles. Creek TWL 7.42 ft.')">
+          <img src="photos/20261031_163158.jpg" alt="4:31 PM Peak Impassable">
+          <div class="photo-tag" style="color:#fca5a5;">4:31 PM • Peak Impassable (7.42')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_163429.jpg', '4:34 PM — West drainage swale/ditch overflowing and spilling onto travel lanes.')">
+          <img src="photos/20261031_163429.jpg" alt="4:34 PM Ditch Overflow">
+          <div class="photo-tag" style="color:var(--amber);">4:34 PM • Swale Overflow</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_163441.jpg', '4:34 PM — West drainage swale runoff streaming directly across asphalt.')">
+          <img src="photos/20261031_163441.jpg" alt="4:34 PM Swale Detail">
+          <div class="photo-tag" style="color:var(--amber);">4:34 PM • Swale Runoff Detail</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261031_163538.jpg', '4:35 PM — Street backfilling north toward #326 and front parking gutters.')">
+          <img src="photos/20261031_163538.jpg" alt="4:35 PM Parking Backfill">
+          <div class="photo-tag" style="color:var(--red);">4:35 PM • Front Stalls Backfilling</div>
+        </div>
+      </div>
+    </section>
+
     <!-- GROUND-TRUTH CALIBRATION GALLERY -->
     <section class="gallery-card">
       <div class="card-title">
@@ -2154,7 +2196,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=13').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=14').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

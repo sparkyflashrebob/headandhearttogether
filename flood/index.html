@@ -755,8 +755,9 @@
         <button class="chip-btn" onclick="snapTime('1333')">1:33 PM (Gutter Wet)</button>
         <button class="chip-btn" onclick="snapTime('1443')">2:43 PM (Impassable!)</button>
         <button class="chip-btn" onclick="snapTime('1524')">3:24 PM (Peak 7.70')</button>
-        <button class="chip-btn" onclick="snapTime('1712')">5:12 PM (Gutters Wet)</button>
-        <button class="chip-btn" onclick="snapTime('1845')">6:45 PM (Cleared)</button>
+        <button class="chip-btn" onclick="snapTime('1712')">5:12 PM (Sag Wet)</button>
+        <button class="chip-btn" onclick="snapTime('1934')">7:34 PM (Gutters Flooded!)</button>
+        <button class="chip-btn" onclick="snapTime('2130')">9:30 PM (Cleared)</button>
       </div>
     </section>
 
@@ -1082,6 +1083,10 @@
           <img src="photos/20261030_171218.jpg" alt="5:12 PM Gutters & Sag Flooded">
           <div class="photo-tag" style="color:var(--amber);">5:12 PM • Gutters & Sag Wet (6.95')</div>
         </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261030_193136.jpg', '7:34 PM — Extreme drainage lag. Bay tide receded to 2.6 ft, but Larkspur Plaza Dr curb gutters & front parking stalls remain deeply flooded (+2.4 in). Salt marsh storage & flat pipe grades trap water until ~9:30 PM. Cannot park in front stalls!')">
+          <img src="photos/20261030_193136.jpg" alt="7:34 PM Gutters & Parking Flooded">
+          <div class="photo-tag" style="color:var(--red);">7:34 PM • Gutters Flooded (Lag!)</div>
+        </div>
       </div>
     </section>
 
@@ -1330,7 +1335,8 @@
     // Generate high-accuracy 24h harmonic curve matching NOAA Station 9414874 for Oct 30 + Street Drainage Lag
     function generateTideData(astArray = currentAstArray) {
       const data = [];
-      const clearanceHours = 18.75; // 6:45 PM estimated final street clearance
+      const sagClearanceHours = 19.0; // 7:00 PM sag crown clearance
+      const gutterClearanceHours = 21.5; // 9:30 PM full gutter & parking clearance (calibrated to 7:34 PM field photos)
       for (let i = 0; i < 144; i++) {
         const totalMinutes = i * 10; // 0:00 to 24:00 in 10 min steps
         const hours = totalMinutes / 60;
@@ -1339,13 +1345,19 @@
         const creekTwl = parseFloat((astTide + liveSurge).toFixed(2));
 
         // Physical Street Drainage Retention Model:
-        // When creek TWL drops below 6.95', water on Larkspur Plaza Dr does not vanish instantly!
-        // It ponds in the crosswalk sag dip and curb gutters, slowly gravity-draining through flap gates until ~6:45 PM.
+        // Even when creek drops, marsh backwater and flat storm pipes cause severe drainage lag.
+        // Sag crown cleared around ~7:00 PM, but curb gutters and front parking stalls retain standing salt water until ~9:30 PM.
         let streetTwl = creekTwl;
-        if (hours > 15.4 && hours < clearanceHours && creekTwl < 6.95) {
-          const drainFrac = Math.max(0, (clearanceHours - hours) / (clearanceHours - 17.15));
-          const retainedElev = 6.70 + (6.95 - 6.70) * drainFrac;
-          streetTwl = parseFloat(Math.max(creekTwl, retainedElev).toFixed(2));
+        if (hours > 15.4 && hours < gutterClearanceHours) {
+          if (hours < sagClearanceHours) {
+            const sagFrac = Math.max(0, (sagClearanceHours - hours) / (sagClearanceHours - 17.15));
+            const retainedSag = 6.95 + 0.15 * sagFrac;
+            streetTwl = parseFloat(Math.max(creekTwl, retainedSag).toFixed(2));
+          } else {
+            const gutFrac = Math.max(0, (gutterClearanceHours - hours) / (gutterClearanceHours - sagClearanceHours));
+            const retainedGutter = 6.70 + 0.22 * gutFrac;
+            streetTwl = parseFloat(Math.max(creekTwl, retainedGutter).toFixed(2));
+          }
         }
 
         const h = Math.floor(hours);
@@ -1431,21 +1443,21 @@
       return Math.min(143, Math.max(0, Math.round(mins / 10)));
     }
 
-    // Dynamic Real-Time Countdown to Reopening / Sag Drainage
+    // Dynamic Real-Time Countdown to Reopening / Sag & Gutter Drainage
     function getClearanceCountdown(effectiveHours) {
-      const clearanceHours = 18.75; // 6:45 PM
+      const clearanceHours = 21.5; // 9:30 PM (Curb gutters & front parking stalls)
       const remainingMinutes = Math.round((clearanceHours - effectiveHours) * 60);
 
       if (remainingMinutes > 0) {
         const hRemain = Math.floor(remainingMinutes / 60);
         const mRemain = remainingMinutes % 60;
         if (hRemain > 0) {
-          return `~6:45 PM (in ${hRemain}h ${mRemain < 10 ? '0' : ''}${mRemain}m)`;
+          return `~9:30 PM (in ${hRemain}h ${mRemain < 10 ? '0' : ''}${mRemain}m)`;
         } else {
-          return `~6:45 PM (in ${mRemain}m)`;
+          return `~9:30 PM (in ${mRemain}m)`;
         }
       } else {
-        return "ROAD CLEARED (Small Car Safe)";
+        return "ROAD & GUTTERS FULLY CLEARED";
       }
     }
     function snapTime(preset) {
@@ -1464,8 +1476,10 @@
         currentScrubIdx = 92; // 3:20 (Peak)
       } else if (preset === '1712') {
         currentScrubIdx = 103; // 5:10 PM (5:12 PM Field photo: Gutters & Sag wet)
-      } else if (preset === '1845') {
-        currentScrubIdx = 112; // 6:40 (Sag drained)
+      } else if (preset === '1934') {
+        currentScrubIdx = 117; // 7:30 PM (7:34 PM Field photo: Gutters & parking flooded)
+      } else if (preset === '2130') {
+        currentScrubIdx = 129; // 9:30 PM (Gutters clear)
       }
       slider.value = currentScrubIdx;
       updateUI();
@@ -1585,10 +1599,10 @@
       } else if (twl >= cfg.gutter) { // 6.70'
         hero.classList.add('yellow');
         badge.classList.add('yellow');
-        badgeText.textContent = "GUTTERS FLOODED • SAG DRAINING";
-        heroTitle.textContent = `Curb Gutters Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Sag Draining`;
-        heroDesc.textContent = "Road center crown is beginning to emerge, but curb gutters remain heavily flooded with standing salt water across Larkspur Plaza Drive until ~6:45 PM. Small cars risk splashing salt water into undercarriage and brakes.";
-        cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS DRY):";
+        badgeText.textContent = "GUTTERS & PARKING STALLS FLOODED";
+        heroTitle.textContent = `Gutters & Parking Stalls Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Severe Lag`;
+        heroDesc.textContent = `Road crown is passable, but curb gutters and parking stalls in front of homes/carports remain flooded with standing salt water (+${gutterDepthIn.toFixed(1)} in) due to marsh backwater and flat grades. Do not park in front of home until cleared.`;
+        cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS & PARKING):";
         cdVal.textContent = countdownStr;
       } else {
         hero.classList.add('green');

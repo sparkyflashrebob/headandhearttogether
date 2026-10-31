@@ -1731,12 +1731,32 @@
       const depthClrEl = document.getElementById('valPriusDepth');
 
       if (isRising) {
-        // RISING PHASE: Road crown pavement remains dry while pipes fill
-        if (twl >= cfg.crown) {
+        // RISING PHASE: 
+        // Empirical Ground Truth: At Creek TWL >= 7.38' (~3:58 PM), water reaches the crown at the sag dip
+        // and actively backfills both travel lanes toward carports!
+        if (twl >= 7.38) {
+          const dipDepthIn = Math.max(0.5, (twl - 7.38) * 12 + 1.0);
+          valCrownEl.innerHTML = `+${dipDepthIn.toFixed(1)} <span>in water</span>`;
+          crownStatusEl.textContent = "SUBMERGED";
+          crownStatusEl.style.color = "var(--red)";
+          if (crownSubEl) crownSubEl.textContent = `Breached at ~3:58 PM • Actively backfilling both lanes`;
+
+          const remClr = Math.max(0, activeVehicleClearance - dipDepthIn);
+          valClrEl.innerHTML = `${remClr.toFixed(1)} <span>in clr</span>`;
+          valClrEl.style.color = remClr < 2.0 ? "var(--red)" : "var(--amber)";
+          if (statusClrEl) {
+            statusClrEl.textContent = remClr < 1.5 ? "IMPASSABLE" : "REDUCED";
+            statusClrEl.style.color = remClr < 1.5 ? "var(--red)" : "var(--amber)";
+          }
+          if (depthClrEl) {
+            depthClrEl.textContent = `Sag dip water: ${dipDepthIn.toFixed(1)}" deep • Backfilling road`;
+            depthClrEl.style.color = "#fca5a5";
+          }
+        } else if (twl >= cfg.crown) {
           valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
           crownStatusEl.textContent = "DRY (RISING)";
           crownStatusEl.style.color = "var(--amber)";
-          if (crownSubEl) crownSubEl.textContent = `Pavement dry • Creek: ${twl.toFixed(2)}' (Pipes filling; peak risk ~4:24 PM)`;
+          if (crownSubEl) crownSubEl.textContent = `Pavement dry • Creek: ${twl.toFixed(2)}' (Pipes filling; breach at ~7.38')`;
 
           valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
           valClrEl.style.color = "var(--green)";
@@ -1745,7 +1765,7 @@
             statusClrEl.style.color = "var(--amber)";
           }
           if (depthClrEl) {
-            depthClrEl.textContent = `Travel lane clear • Cresting in ~35m`;
+            depthClrEl.textContent = `Travel lane clear • Creek rising to peak`;
             depthClrEl.style.color = "var(--text-muted)";
           }
         } else if (twl >= cfg.gutter) {
@@ -1871,12 +1891,20 @@
           heroDesc.textContent = `Corte Madera Creek tide is rising rapidly toward peak (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Crosswalk sag dip will submerge as water backs up through storm drains. Do not drive through salt water.`;
           cdLabel.textContent = "PEAK HIGH TIDE IN:";
           cdVal.textContent = countdownStr;
+        } else if (twl >= 7.38) {
+          hero.classList.add('red');
+          badge.classList.add('red');
+          badgeText.textContent = "⚠️ SAG DIP SUBMERGED • BACKFILLING ROAD";
+          heroTitle.textContent = `Crosswalk Sag Breached (~3:58 PM) • Tide Peaking at 4:24 PM (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}')`;
+          heroDesc.textContent = `Water reached the road crown at the sag dip (~3:58 PM) and is actively filling both sides of the roadway, backfilling down the street toward carports. Do not drive through salt water.`;
+          cdLabel.textContent = "HIGH TIDE PEAK IN:";
+          cdVal.textContent = countdownStr;
         } else if (twl >= cfg.crown) { // 6.95'
           hero.classList.add('yellow');
           badge.classList.add('yellow');
           badgeText.textContent = "TIDE RISING • ROAD CROWN AT RISK";
           heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Dip Inundation Approaching`;
-          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Water is backfilling storm drain pipes. Crosswalk sag dip (${cfg.crown}') and curb gutters will flood with salt water as tide crests. Avoid driving.`;
+          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Water is backfilling storm drain pipes. Crosswalk sag dip will flood as creek passes 7.38'. Avoid driving.`;
           cdLabel.textContent = "PEAK HIGH TIDE IN:";
           cdVal.textContent = countdownStr;
         } else if (twl >= cfg.gutter) { // 6.70'
@@ -2126,7 +2154,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=12').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=13').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

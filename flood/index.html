@@ -755,6 +755,7 @@
         <button class="chip-btn" onclick="snapTime('1333')">1:33 PM (Gutter Wet)</button>
         <button class="chip-btn" onclick="snapTime('1443')">2:43 PM (Impassable!)</button>
         <button class="chip-btn" onclick="snapTime('1524')">3:24 PM (Peak 7.70')</button>
+        <button class="chip-btn" onclick="snapTime('1712')">5:12 PM (Gutters Wet)</button>
         <button class="chip-btn" onclick="snapTime('1845')">6:45 PM (Cleared)</button>
       </div>
     </section>
@@ -1077,6 +1078,10 @@
           <img src="photos/stage5_453pm_partial_crown.jpg" alt="4:53 PM Sag Flooded">
           <div class="photo-tag" style="color:var(--amber);">4:53 PM • Sag Still Flooded (7.03')</div>
         </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261030_171218.jpg', '5:12 PM — Tide 6.95 ft. Crosswalk sag dip and curb gutters still completely flooded with standing salt water across roadway. Gutters not clear!')">
+          <img src="photos/20261030_171218.jpg" alt="5:12 PM Gutters & Sag Flooded">
+          <div class="photo-tag" style="color:var(--amber);">5:12 PM • Gutters & Sag Wet (6.95')</div>
+        </div>
       </div>
     </section>
 
@@ -1317,18 +1322,31 @@
       if (target) target.classList.add('active');
     }
 
-    // Generate simulated high-accuracy 24h harmonic curve matching NOAA Station 9414874 for Oct 30
-    function generateTideData() {
+    // Master Pre-Baked Astronomical Predictions for NOAA Station 9414874 (Corte Madera Creek)
+    // Interpolated to 144 points (every 10 minutes from 00:00 to 23:50 in NAVD88)
+    const CORTE_MADERA_AST_PRED = [0.45, 0.63, 0.81, 1.0, 1.2, 1.4, 1.59, 1.8, 2.0, 2.2, 2.4, 2.59, 2.78, 2.96, 3.14, 3.31, 3.47, 3.62, 3.77, 3.91, 4.04, 4.16, 4.26, 4.36, 4.45, 4.53, 4.59, 4.65, 4.69, 4.72, 4.73, 4.74, 4.73, 4.71, 4.68, 4.64, 4.59, 4.53, 4.46, 4.38, 4.29, 4.2, 4.11, 4.01, 3.91, 3.81, 3.7, 3.61, 3.51, 3.42, 3.33, 3.25, 3.18, 3.12, 3.07, 3.03, 3.0, 2.98, 2.98, 2.98, 3.0, 3.03, 3.07, 3.13, 3.19, 3.27, 3.36, 3.46, 3.56, 3.68, 3.81, 3.94, 4.08, 4.22, 4.37, 4.53, 4.69, 4.84, 5.0, 5.16, 5.31, 5.45, 5.59, 5.73, 5.85, 5.96, 6.06, 6.15, 6.22, 6.28, 6.32, 6.35, 6.37, 6.37, 6.35, 6.32, 6.27, 6.21, 6.13, 6.03, 5.92, 5.8, 5.66, 5.51, 5.34, 5.17, 4.97, 4.77, 4.56, 4.33, 4.1, 3.86, 3.62, 3.37, 3.12, 2.87, 2.61, 2.36, 2.11, 1.86, 1.62, 1.39, 1.17, 0.95, 0.75, 0.56, 0.38, 0.21, 0.06, -0.08, -0.2, -0.3, -0.39, -0.46, -0.51, -0.55, -0.57, -0.58, -0.57, -0.55, -0.51, -0.46, -0.39, -0.31];
+    let currentAstArray = CORTE_MADERA_AST_PRED;
+
+    // Generate high-accuracy 24h harmonic curve matching NOAA Station 9414874 for Oct 30 + Street Drainage Lag
+    function generateTideData(astArray = currentAstArray) {
       const data = [];
-      // Model October 30 King Tide: Low at 8:45 AM (0.8'), High at 3:24 PM (6.32' ast + 1.38' surge = 7.70' TWL)
+      const clearanceHours = 18.75; // 6:45 PM estimated final street clearance
       for (let i = 0; i < 144; i++) {
         const totalMinutes = i * 10; // 0:00 to 24:00 in 10 min steps
         const hours = totalMinutes / 60;
         
-        // High harmonic approximation peaking at 15.4 hrs (3:24 PM)
-        const dt = (hours - 15.4) * 0.52;
-        const astTide = 3.6 + 2.72 * Math.cos(dt);
-        const twl = astTide + liveSurge;
+        const astTide = astArray[i];
+        const creekTwl = parseFloat((astTide + liveSurge).toFixed(2));
+
+        // Physical Street Drainage Retention Model:
+        // When creek TWL drops below 6.95', water on Larkspur Plaza Dr does not vanish instantly!
+        // It ponds in the crosswalk sag dip and curb gutters, slowly gravity-draining through flap gates until ~6:45 PM.
+        let streetTwl = creekTwl;
+        if (hours > 15.4 && hours < clearanceHours && creekTwl < 6.95) {
+          const drainFrac = Math.max(0, (clearanceHours - hours) / (clearanceHours - 17.15));
+          const retainedElev = 6.70 + (6.95 - 6.70) * drainFrac;
+          streetTwl = parseFloat(Math.max(creekTwl, retainedElev).toFixed(2));
+        }
 
         const h = Math.floor(hours);
         const m = Math.floor(totalMinutes % 60);
@@ -1342,13 +1360,14 @@
           hours: hours,
           ast: parseFloat(astTide.toFixed(2)),
           surge: liveSurge,
-          twl: parseFloat(twl.toFixed(2))
+          creekTwl: creekTwl,
+          twl: streetTwl
         });
       }
       return data;
     }
 
-    // Fetch Live NOAA Golden Gate Surge & Larkspur Predictions
+    // Fetch Live NOAA Golden Gate Surge & Corte Madera Creek Predictions
     async function fetchLiveNOAA() {
       try {
         // Golden Gate Observed vs Harmonic
@@ -1373,8 +1392,29 @@
       } catch (e) {
         console.log("NOAA Live fetch fallback to calibrated surge:", e);
       }
+
+      // Also dynamically fetch Corte Madera Creek Station 9414874 predictions
+      try {
+        const respCM = await fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414874&product=predictions&datum=MLLW&time_zone=lst_ldt&units=english&interval=6&format=json');
+        const dataCM = await respCM.json();
+        if (dataCM && dataCM.predictions && dataCM.predictions.length >= 240) {
+          const newAst = [];
+          for (let i = 0; i < 144; i++) {
+            const totalMins = i * 10;
+            const idxFloor = Math.floor(totalMins / 6);
+            const frac = (totalMins % 6) / 6.0;
+            const v1 = parseFloat(dataCM.predictions[idxFloor].v);
+            const v2 = parseFloat(dataCM.predictions[Math.min(239, idxFloor + 1)].v);
+            const vInterp = v1 + (v2 - v1) * frac;
+            newAst.push(parseFloat((vInterp + 0.06).toFixed(2))); // NAVD88 conversion
+          }
+          currentAstArray = newAst;
+        }
+      } catch (e) {
+        console.log("NOAA Station 9414874 live fetch fallback to pre-baked array:", e);
+      }
       
-      tideTimeline = generateTideData();
+      tideTimeline = generateTideData(currentAstArray);
       renderSvgHydrograph();
       updateUI();
     }
@@ -1422,6 +1462,8 @@
         currentScrubIdx = 88; // 2:40 (2:43 PM impassable ground truth)
       } else if (preset === '1524') {
         currentScrubIdx = 92; // 3:20 (Peak)
+      } else if (preset === '1712') {
+        currentScrubIdx = 103; // 5:10 PM (5:12 PM Field photo: Gutters & Sag wet)
       } else if (preset === '1845') {
         currentScrubIdx = 112; // 6:40 (Sag drained)
       }
@@ -1458,20 +1500,31 @@
 
       document.getElementById('valSurge').innerHTML = `+${liveSurge.toFixed(2)} <span>ft</span>`;
 
-      // Road crown depth (positive = water depth above crown in inches)
+      // Road crown depth & Gutter water depth
       const crownDeltaFt = twl - cfg.crown;
       const crownDepthIn = Math.max(0, crownDeltaFt * 12);
+      const gutterDeltaFt = twl - cfg.gutter;
+      const gutterDepthIn = Math.max(0, gutterDeltaFt * 12);
+
+      const crownSubEl = document.getElementById('valCrownSub');
       if (crownDeltaFt > 0) {
         document.getElementById('valCrownDepth').innerHTML = `+${crownDepthIn.toFixed(1)} <span>in water</span>`;
         document.getElementById('crownStatusText').textContent = "SUBMERGED";
         document.getElementById('crownStatusText').style.color = "var(--red)";
+        if (crownSubEl) crownSubEl.textContent = `Gutters: +${gutterDepthIn.toFixed(1)}" | Sag Dip: +${crownDepthIn.toFixed(1)}"`;
+      } else if (gutterDeltaFt > 0) {
+        document.getElementById('valCrownDepth').innerHTML = `+${gutterDepthIn.toFixed(1)} <span>in gutter</span>`;
+        document.getElementById('crownStatusText').textContent = "GUTTERS WET";
+        document.getElementById('crownStatusText').style.color = "var(--amber)";
+        if (crownSubEl) crownSubEl.textContent = `Crown exposed | Gutters flooded (+${gutterDepthIn.toFixed(1)}")`;
       } else {
         document.getElementById('valCrownDepth').innerHTML = `0.0 <span>in dry</span>`;
         document.getElementById('crownStatusText').textContent = "DRY";
         document.getElementById('crownStatusText').style.color = "var(--green)";
+        if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
       }
 
-      // Prius Sag Crosswalk Dip Depth & Clearance
+      // Small Car Sag Crosswalk Dip Depth & Clearance
       // Impassable threshold calibrated at 7.55 ft = 5.9" travel lane depth
       const dipWaterDepthIn = Math.max(0, (twl - (cfg.priusSag - (activeVehicleClearance / 12))) * 12);
       const remainingClearance = Math.max(0, activeVehicleClearance - dipWaterDepthIn);
@@ -1524,24 +1577,24 @@
       } else if (twl >= cfg.crown) { // 6.95'
         hero.classList.add('yellow');
         badge.classList.add('yellow');
-        badgeText.textContent = "SALT WATER IN SAG DIP";
-        heroTitle.textContent = "Road Submerged Through Crosswalk Dip (+" + crownDepthIn.toFixed(1) + " in)";
-        heroDesc.textContent = "High crown ridge in foreground is partially exposed, but looking down the street the sag dip is 100% covered in salt water. Avoid driving to prevent salt water damage.";
-        cdLabel.textContent = "ESTIMATED CLEARANCE ALL DOWN STREET:";
+        badgeText.textContent = "SALT WATER IN SAG DIP • GUTTERS FLOODED";
+        heroTitle.textContent = `Crosswalk Sag & Gutters Submerged (+${crownDepthIn.toFixed(1)}" on crown | +${gutterDepthIn.toFixed(1)}" in gutters)`;
+        heroDesc.textContent = `High crown ridge in foreground is partially exposed, but looking down the street the sag dip is 100% covered in salt water and curb gutters are deeply flooded (+${gutterDepthIn.toFixed(1)} in). Avoid driving to prevent salt water damage.`;
+        cdLabel.textContent = "ESTIMATED ALL-STREET CLEARANCE:";
         cdVal.textContent = countdownStr;
       } else if (twl >= cfg.gutter) { // 6.70'
         hero.classList.add('yellow');
         badge.classList.add('yellow');
-        badgeText.textContent = "GUTTERS WET / RESIDUAL PONDING";
-        heroTitle.textContent = "Road Crown Clear All Down Street (Gutters Wet)";
-        heroDesc.textContent = "The center travel lane is completely dry all the way down the street. Residual salt water remains in curb gutters. Safe to drive down center crown.";
-        cdLabel.textContent = "ROAD PASSABLE:";
-        cdVal.textContent = "Crown clear down street";
+        badgeText.textContent = "GUTTERS FLOODED • SAG DRAINING";
+        heroTitle.textContent = `Curb Gutters Flooded (+${gutterDepthIn.toFixed(1)}" deep) • Sag Draining`;
+        heroDesc.textContent = "Road center crown is beginning to emerge, but curb gutters remain heavily flooded with standing salt water across Larkspur Plaza Drive until ~6:45 PM. Small cars risk splashing salt water into undercarriage and brakes.";
+        cdLabel.textContent = "ESTIMATED FULL CLEARANCE (GUTTERS DRY):";
+        cdVal.textContent = countdownStr;
       } else {
         hero.classList.add('green');
         badge.classList.add('green');
-        badgeText.textContent = "ROAD FULLY CLEAR";
-        heroTitle.textContent = "Road & Gutters 100% Clear";
+        badgeText.textContent = "ROAD & GUTTERS FULLY CLEAR";
+        heroTitle.textContent = "Roadway & Curb Gutters 100% Clear";
         heroDesc.textContent = "All salt water has receded. Road crown and curb gutters completely dry all the way down the street.";
         cdLabel.textContent = "STATUS:";
         cdVal.textContent = "100% Clear";

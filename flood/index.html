@@ -1095,6 +1095,28 @@
       </div>
     </section>
 
+    <!-- NOV 1 KING TIDE & DST CALIBRATION GALLERY -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Nov 1 King Tide & DST Field Sequence</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Daylight Saving Shift Photos (Peak 6.86')</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-item" onclick="openPhoto('photos/20261101_160900.jpg', '4:09 PM PST — Travel Lane Clear • Center road crown dry asphalt. Corte Madera Creek TWL 6.84 ft.')">
+          <img src="photos/20261101_160900.jpg" alt="4:09 PM Crown Dry">
+          <div class="photo-tag" style="color:var(--green);">4:09 PM • Crown Dry (6.84')</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261101_160946.jpg', '4:09 PM PST — Curb Gutters & Front Stalls Flooded (+1.7&quot;) • Backfilled from storm drains while crown remains clear.')">
+          <img src="photos/20261101_160946.jpg" alt="4:09 PM Gutters Flooded">
+          <div class="photo-tag" style="color:var(--amber);">4:09 PM • Gutters Flooded (+1.7&quot;)</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261101_161008.jpg', '4:10 PM PST — Standing Salt Water in Curb Line • Water reaching front stall aprons before road crown breaches.')">
+          <img src="photos/20261101_161008.jpg" alt="4:10 PM Stall Apron Water">
+          <div class="photo-tag" style="color:var(--amber);">4:10 PM • Stall Apron Ponding</div>
+        </div>
+      </div>
+    </section>
+
     <!-- OCT 31 GROUND-TRUTH & SURVEY GALLERY -->
     <section class="gallery-card">
       <div class="card-title">
@@ -1540,8 +1562,10 @@
 
       // Compute Calibrated Physical Street Drainage Lag across the timeline
       // Larkspur Plaza Drive drainage physics:
-      // 1. Ingress Phase: Underground storm pipes fill first. Roadway pavement stays dry until Creek TWL >= 7.38' (~3:58 PM).
-      // 2. Crest Phase: Street water level tracks Creek TWL while TWL >= 7.38'.
+      // 1. Ingress Phase: Salt water backs up through storm drains when Creek TWL >= 6.70'.
+      //    Curb gutters and front stall aprons fill directly with the rising tide!
+      //    Center road crown (6.95') stays dry until storm swale breaches at ~7.38'.
+      // 2. Crest Phase: Street water level tracks Creek TWL while TWL >= 6.70'.
       // 3. Receding Phase: Creek drops quickly, but flat storm pipes (0.23% grade) and salt marsh backwater
       //    limit gravity drainage to ~0.035 ft (0.42 inches) per 10 minutes (4.5 hr drainage lag).
       //    Street water stays retained on pavement and gutters until drained down to 6.70' (dry).
@@ -1552,10 +1576,11 @@
         const isRising = (next.twl > cur.twl + 0.015);
 
         if (isRising) {
-          if (cur.twl >= 7.38) {
+          if (cur.twl >= 6.70) {
+            // Water actively rising in curb gutters & front stalls
             activePonding = cur.twl;
           } else {
-            activePonding = Math.min(cur.twl, 6.70); // in gutters only, crown dry
+            activePonding = 0.0;
           }
         } else {
           // Receding / Crest phase
@@ -1565,12 +1590,12 @@
             if (activePonding <= 6.70 && cur.twl <= 6.70) {
               activePonding = 0.0; // Fully drained dry
             }
-          } else if (cur.twl >= 7.38) {
+          } else if (cur.twl >= 6.70) {
             activePonding = cur.twl;
           }
         }
 
-        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : Math.min(cur.twl, 6.70)).toFixed(2));
+        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : cur.twl).toFixed(2));
       }
 
       return data;
@@ -1895,9 +1920,9 @@
         } else if (gutterDeltaFt > 0) {
           valFrontParkingDepthEl.innerHTML = `+${gutterDepthIn.toFixed(1)} <span>in low gut</span>`;
           valFrontParkingDepthEl.style.color = "var(--amber)";
-          frontParkingStatusEl.textContent = "LOW GUTTER WET";
+          frontParkingStatusEl.textContent = "GUTTERS FILLING";
           frontParkingStatusEl.style.color = "var(--amber)";
-          valFrontParkingSubEl.textContent = `#326 stalls clear | Low drain (6.70') wet`;
+          valFrontParkingSubEl.textContent = `Water entering stall aprons (+${gutterDepthIn.toFixed(1)}" in low gutter)`;
         } else {
           valFrontParkingDepthEl.innerHTML = `0.0 <span>in dry</span>`;
           valFrontParkingDepthEl.style.color = "var(--green)";
@@ -2084,8 +2109,8 @@
           hero.classList.add('red');
           badge.classList.add('red');
           badgeText.textContent = "⚠️ SAG DIP SUBMERGED • BACKFILLING ROAD";
-          heroTitle.textContent = `Crosswalk Sag Breached (~3:58 PM) • Tide Peaking at 4:24 PM (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}')`;
-          heroDesc.textContent = `Water reached the road crown at the sag dip (~3:58 PM) and is actively filling both sides of the roadway, backfilling down the street toward carports. Do not drive through salt water.`;
+          heroTitle.textContent = `Crosswalk Sag Breached • High Tide Peaking at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}')`;
+          heroDesc.textContent = `Water reached the road crown at the sag dip and is actively filling both sides of the roadway, backfilling down the street toward carports. Do not drive through salt water.`;
           cdLabel.textContent = "HIGH TIDE PEAK IN:";
           cdVal.textContent = countdownStr;
         } else if (twl >= cfg.crown) { // 6.95'
@@ -2093,15 +2118,23 @@
           badge.classList.add('yellow');
           badgeText.textContent = "TIDE RISING • ROAD CROWN AT RISK";
           heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Dip Inundation Approaching`;
-          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Water is backfilling storm drain pipes. Crosswalk sag dip will flood as creek passes 7.38'. Avoid driving.`;
+          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : ''}). Water is backfilling storm drain pipes. Crosswalk sag dip will flood as creek passes 7.38'. Avoid driving.`;
+          cdLabel.textContent = "PEAK HIGH TIDE IN:";
+          cdVal.textContent = countdownStr;
+        } else if (twl >= (cfg.houseGutter || 6.85)) { // 6.85'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "⚠️ FRONT STALLS & #326 GUTTER FLOODING • CROWN DRY";
+          heroTitle.textContent = `Front Stalls & #326 Gutter Flooding (+${houseGutterDepthIn.toFixed(1)}" at #326) • Road Crown Clear`;
+          heroDesc.textContent = `Tide in Corte Madera Creek (${twl.toFixed(2)}' TWL) has backed up through storm drains into the curb gutters and front stall aprons (+${houseGutterDepthIn.toFixed(1)} in deep at #326, +${gutterDepthIn.toFixed(1)} in low gutter). Center road crown remains dry and passable.`;
           cdLabel.textContent = "PEAK HIGH TIDE IN:";
           cdVal.textContent = countdownStr;
         } else if (twl >= cfg.gutter) { // 6.70'
           hero.classList.add('yellow');
           badge.classList.add('yellow');
-          badgeText.textContent = "TIDE RISING • GUTTERS INUNDATION IMMINENT";
-          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Gutters Filling`;
-          heroDesc.textContent = `Corte Madera Creek water level has surpassed gutter invert elevation (${cfg.gutter}') and continues to rise toward high tide peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : '4:24 PM'}). Standing salt water will emerge in lowest curb gutters shortly.`;
+          badgeText.textContent = "🟡 CURB GUTTERS FILLING • CROWN DRY";
+          heroTitle.textContent = `Curb Gutters Filling (+${gutterDepthIn.toFixed(1)}" in Low Gutter) • Road Crown Clear`;
+          heroDesc.textContent = `Corte Madera Creek water level (${twl.toFixed(2)}' TWL) has surpassed storm drain gutter elevation (${cfg.gutter}'). Standing salt water is actively filling lowest curb gutters (+${gutterDepthIn.toFixed(1)} in). Travel lane and center crown remain completely dry.`;
           cdLabel.textContent = "NEXT HIGH TIDE PEAK:";
           cdVal.textContent = countdownStr;
         } else {
@@ -2355,7 +2388,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=15').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=16').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

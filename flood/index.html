@@ -2118,31 +2118,15 @@
           badge.classList.add('yellow');
           badgeText.textContent = "TIDE RISING • ROAD CROWN AT RISK";
           heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Dip Inundation Approaching`;
-          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : ''}). Water is backfilling storm drain pipes. Crosswalk sag dip will flood as creek passes 7.38'. Avoid driving.`;
+          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : ''}). Underground storm drain pipes are filling. Road crown and front parking stalls remain dry unless creek breaches 7.38'.`;
           cdLabel.textContent = "PEAK HIGH TIDE IN:";
-          cdVal.textContent = countdownStr;
-        } else if (twl >= (cfg.houseGutter || 6.85)) { // 6.85'
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "⚠️ FRONT STALLS & #326 GUTTER FLOODING • CROWN DRY";
-          heroTitle.textContent = `Front Stalls & #326 Gutter Flooding (+${houseGutterDepthIn.toFixed(1)}" at #326) • Road Crown Clear`;
-          heroDesc.textContent = `Tide in Corte Madera Creek (${twl.toFixed(2)}' TWL) has backed up through storm drains into the curb gutters and front stall aprons (+${houseGutterDepthIn.toFixed(1)} in deep at #326, +${gutterDepthIn.toFixed(1)} in low gutter). Center road crown remains dry and passable.`;
-          cdLabel.textContent = "PEAK HIGH TIDE IN:";
-          cdVal.textContent = countdownStr;
-        } else if (twl >= cfg.gutter) { // 6.70'
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "🟡 CURB GUTTERS FILLING • CROWN DRY";
-          heroTitle.textContent = `Curb Gutters Filling (+${gutterDepthIn.toFixed(1)}" in Low Gutter) • Road Crown Clear`;
-          heroDesc.textContent = `Corte Madera Creek water level (${twl.toFixed(2)}' TWL) has surpassed storm drain gutter elevation (${cfg.gutter}'). Standing salt water is actively filling lowest curb gutters (+${gutterDepthIn.toFixed(1)} in). Travel lane and center crown remain completely dry.`;
-          cdLabel.textContent = "NEXT HIGH TIDE PEAK:";
           cdVal.textContent = countdownStr;
         } else {
           hero.classList.add('green');
           badge.classList.add('green');
           badgeText.textContent = "ROAD CLEAR • TIDE RISING";
-          heroTitle.textContent = "Roadway Currently Clear • High Tide Approaching";
-          heroDesc.textContent = `Road crown and curb gutters currently dry. Next high tide is forecast at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL — ${nextHighTideObj ? nextHighTideObj.hazard : ''}).`;
+          heroTitle.textContent = "Roadway & Parking Stalls Currently Clear";
+          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Next high tide is forecast at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL — ${nextHighTideObj ? nextHighTideObj.hazard : ''}).`;
           cdLabel.textContent = "NEXT HIGH TIDE:";
           cdVal.textContent = countdownStr;
         }
@@ -2172,13 +2156,13 @@
           heroDesc.textContent = `Center road crown is dry and passable for driving. However, curb gutters and parking stalls in front of 326 Larkspur Plaza Dr remain flooded with standing salt water (+${houseGutterDepthIn.toFixed(1)} in at #326, +${gutterDepthIn.toFixed(1)} in low gutter) due to severe drainage lag. Do not park in front stalls yet.`;
           cdLabel.textContent = "ESTIMATED FRONT STALL CLEARANCE:";
           cdVal.textContent = getStreetClearanceCountdown('houseGutter');
-        } else if (streetLevel >= cfg.gutter) { // 6.70'
+        } else if (streetLevel > cfg.gutter) { // > 6.70' (strictly greater than dry baseline!)
           hero.classList.add('yellow');
           badge.classList.add('yellow');
           badgeText.textContent = "FRONT STALLS CLEAR • LOW GUTTER DRAINING";
           heroTitle.textContent = `Front Parking Stalls Clear • Low Gutters Draining (+${gutterDepthIn.toFixed(1)}")`;
           heroDesc.textContent = `Front parking stalls and #326 gutter are clear. Minor standing water remains in the lowest curb gutter inverts (~6.70'). Full street drainage nearly complete.`;
-          cdLabel.textContent = "ESTIMATED FULL GUTTER CLEARANCE:";
+          cdLabel.textContent = "ESTIMATED COMPLETE CLEARANCE:";
           cdVal.textContent = getStreetClearanceCountdown('gutter');
         } else {
           hero.classList.add('green');
@@ -2388,7 +2372,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=16').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=17').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

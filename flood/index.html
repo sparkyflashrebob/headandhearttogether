@@ -1095,6 +1095,24 @@
       </div>
     </section>
 
+    <!-- NOV 6 KING TIDE MORNING PEAK GALLERY -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Nov 6 Morning King Tide Peak Sequence</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Field Sequence (Peak 7.32' NAVD88)</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-item" onclick="openPhoto('photos/20261106_104026.jpg', '10:40 AM PST — Crosswalk sag dip flooded across travel lanes. Peak 7.32 ft NAVD88 overtopped crown (6.95 ft) by +4.4 inches.')">
+          <img src="photos/20261106_104026.jpg" alt="10:40 AM Sag Inundation">
+          <div class="photo-tag" style="color:var(--red);">10:40 AM • Sag Flooded (+4.4&quot;)</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261106_104052.jpg', '10:40 AM PST — Street gutters & parking stall aprons submerged (+5.6 inches in gutter) draining with marsh tailwater lag.')">
+          <img src="photos/20261106_104052.jpg" alt="10:40 AM Gutter Flood">
+          <div class="photo-tag" style="color:var(--amber);">10:40 AM • Gutters Flooded (+5.6&quot;)</div>
+        </div>
+      </div>
+    </section>
+
     <!-- NOV 1 KING TIDE & DST CALIBRATION GALLERY -->
     <section class="gallery-card">
       <div class="card-title">
@@ -1577,33 +1595,38 @@
         const isRising = (next.twl > cur.twl + 0.015);
 
         if (isRising) {
-          if (cur.twl >= 7.38) {
-            // Road swale breached: water spills onto pavement and backfills front stalls
+          if (cur.twl >= 6.95) {
+            // Road crown at crosswalk sag dip breached (6.95'): water actively crosses travel lanes
             hasBreached = true;
             activePonding = cur.twl;
+          } else if (cur.twl >= 6.85) {
+            // Water actively filling street gutters & stall aprons (crown still dry)
+            activePonding = cur.twl;
           } else {
-            // Street surface, front gutters, and stalls remain completely dry until swale overspills at 7.38'
+            // Road crown, street gutters, and stalls remain dry below 6.85'
             activePonding = 0.0;
           }
         } else {
           // Receding / Crest phase
-          if (cur.twl >= 7.38) {
+          if (cur.twl >= 6.95) {
             hasBreached = true;
             activePonding = cur.twl;
           } else if (hasBreached && activePonding > 6.70) {
-            // Water spilled during peak, now draining with severe 4.5-hour marsh lag
+            // Water spilled over crown/gutters during peak, now draining with calibrated 4.5-hour marsh lag
             const drainRatePer10Min = 0.035; // 0.42 inches per 10 min
             activePonding = Math.max(cur.twl, activePonding - drainRatePer10Min);
             if (activePonding <= 6.70 && cur.twl <= 6.70) {
               activePonding = 0.0; // Fully drained dry
               hasBreached = false;
             }
+          } else if (cur.twl >= 6.85) {
+            activePonding = cur.twl;
           } else {
             activePonding = 0.0;
           }
         }
 
-        // streetTWL: If active ponding exists on pavement from a breach, track it. Otherwise baseline dry (6.70').
+        // streetTWL: If active water exists on pavement from a breach, track it. Otherwise baseline dry (6.70').
         cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : 6.70).toFixed(2));
       }
 
@@ -1740,18 +1763,25 @@
       }
 
       try {
-        // Corte Madera Creek Station 9414874 Predictions (72 Hours)
+        // Authoritative Northern Bay NAVD88 Astronomical Predictions (72 Hours)
+        // Station 9414863 (Richmond / Inner Bay adjacent to Corte Madera Creek) provides native geodetic NAVD88,
+        // eliminating the 0.45 ft (5.4-inch) datum offset error inherent to subordinate MLLW predictions.
         const now = new Date();
         const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         const yStr = `${yesterday.getFullYear()}${String(yesterday.getMonth()+1).padStart(2,'0')}${String(yesterday.getDate()).padStart(2,'0')}`;
         
-        const respCM = await fetch(`https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=${yStr}&range=72&station=9414874&product=predictions&datum=MLLW&time_zone=lst_ldt&units=english&interval=6&format=json`);
+        const respCM = await fetch(`https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=${yStr}&range=72&station=9414863&product=predictions&datum=NAVD&time_zone=lst_ldt&units=english&interval=6&format=json`);
         const dCM = await respCM.json();
         if (dCM.predictions && dCM.predictions.length > 0) {
           predData = dCM.predictions;
+        } else {
+          // Fallback to Golden Gate Station 9414290 native NAVD88
+          const respGG = await fetch(`https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=${yStr}&range=72&station=9414290&product=predictions&datum=NAVD&time_zone=lst_ldt&units=english&interval=6&format=json`);
+          const dGG = await respGG.json();
+          if (dGG.predictions && dGG.predictions.length > 0) predData = dGG.predictions;
         }
       } catch (e) {
-        console.log("NOAA Station 9414874 predictions fetch fallback:", e);
+        console.log("NOAA Station 9414863 predictions fetch fallback:", e);
       }
 
       tideTimeline = generate48HourTimeline(predData, obsData);
@@ -2381,7 +2411,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=17').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=18').catch(() => {});
       }
       applyVehicleAndCarView();
       fetchLiveNOAA();

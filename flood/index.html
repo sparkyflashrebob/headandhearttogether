@@ -783,7 +783,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="btn-icon" title="Refresh Live NOAA Data" onclick="fetchLiveNOAA()">🔄</button>
+        <button class="btn-icon" title="Refresh App & Live NOAA Data" onclick="hardReloadApp()">🔄</button>
         <button class="btn-icon" title="Settings & Thresholds" onclick="openSettings()">⚙️</button>
       </div>
     </header>
@@ -2723,10 +2723,30 @@
       alert(`${caption}\n\n(Photo: ${url})`);
     }
 
+    function hardReloadApp() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          for (let reg of regs) reg.update();
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(keys => {
+          keys.forEach(k => caches.delete(k));
+        });
+      }
+      window.location.href = window.location.pathname + '?nocache=' + new Date().getTime();
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    }
+
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=19').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=20').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

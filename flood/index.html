@@ -550,20 +550,37 @@
       max-height: 60vh !important;
     }
 
-    .cross-section-card.is-fullscreen .svg-wrapper {
+    .cross-section-card.is-fullscreen.is-sideways .svg-wrapper {
       flex: 1 1 auto;
+      width: 100% !important;
       min-height: 280px;
-      max-height: 68vh;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: visible;
     }
 
-    .cross-section-card.is-fullscreen svg#roadSvg {
+    .cross-section-card.is-fullscreen.is-sideways svg#roadSvg {
       width: 100% !important;
       min-width: unset !important;
-      height: 100% !important;
+      height: auto !important;
+      max-height: 75vw !important;
+    }
+
+    .cross-section-card.is-fullscreen:not(.is-sideways) .svg-wrapper {
+      flex: 1 1 auto;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .cross-section-card.is-fullscreen:not(.is-sideways) svg#roadSvg {
+      min-width: 650px !important;
+      width: 100% !important;
+      height: auto !important;
       max-height: 68vh !important;
     }
 
@@ -975,6 +992,7 @@
           <span style="font-size: 0.72rem; color: var(--text-muted);">View:</span>
           <button type="button" id="btnViewSide" class="chip-btn active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('side', event)">🚗 Side Profile</button>
           <button type="button" id="btnViewFront" class="chip-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('front', event)">🚘 Front</button>
+          <button type="button" class="btn-rotate-toggle" id="btnRotateRoad" onclick="toggleSidewaysOrientation(event)" style="display:none;">🔄 Turn Sideways</button>
           <button type="button" class="btn-fs-toggle" id="btnFsRoad" onclick="toggleRoadFullscreen(event)" title="Enlarge Simulator to Fullscreen">
             <span class="fs-icon">⤢</span> <span class="fs-text">Enlarge</span>
           </button>
@@ -1167,17 +1185,17 @@
           </g>
 
           <!-- Dynamic Water Layer (covers terrain across gutter and road up to waterY) -->
-          <path id="svgWaterLayer" d="M 30,260 L 30,198.4 Q 360,197.9 600,198.4 L 600,260 Z" fill="url(#waterGrad)"/>
+          <path id="svgWaterLayer" d="M 30,260 L 30,223 Q 360,222.5 600,223 L 600,260 Z" fill="url(#waterGrad)" style="display:none;"/>
 
-          <!-- Dynamic Water Level Line Marker -->
-          <line id="svgWaterLine" x1="30" y1="198.4" x2="600" y2="198.4" stroke="#38bdf8" stroke-width="2"/>
-          <polygon id="svgWaterMarker" points="600,198.4 612,193.4 612,203.4" fill="#38bdf8"/>
-          <text id="svgWaterText" x="618" y="201.4" fill="#38bdf8" font-size="8.5" font-weight="bold" font-family="monospace">7.73' (+5.0" on crown)</text>
+          <!-- Dynamic Water Level Line Marker (Updated dynamically via updateSvgCrossSection) -->
+          <line id="svgWaterLine" x1="30" y1="223" x2="600" y2="223" stroke="#38bdf8" stroke-width="2" style="display:none;"/>
+          <polygon id="svgWaterMarker" points="600,223 612,218 612,228" fill="#38bdf8" style="display:none;"/>
+          <text id="svgWaterText" x="618" y="226" fill="#86efac" font-size="8.5" font-weight="bold" font-family="monospace">Water Level: 6.95' • Pavement 100% DRY</text>
 
-          <!-- In-Car Flood Warning Badge (Appears when water > 7.41') -->
-          <g id="svgSillAlert" transform="translate(235, 38)" style="display: block;">
+          <!-- In-Car Flood Warning Badge (Only displayed dynamically when water reaches sill/clearance) -->
+          <g id="svgSillAlert" transform="translate(235, 38)" style="display: none;">
             <rect x="-95" y="-12" width="190" height="24" rx="6" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/>
-            <text id="svgSillAlertText" x="0" y="4" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">🚨 WATER OVER DOOR SILL (+3.8")</text>
+            <text id="svgSillAlertText" x="0" y="4" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">🚨 WATER OVER DOOR SILL</text>
           </g>
         </svg>
       </div>
@@ -2083,24 +2101,54 @@
       updateUI();
     }
 
+    // In-App Sideways (Landscape) Orientation Toggle
+    function toggleSidewaysOrientation(e) {
+      if (e) e.stopPropagation();
+      const fsCard = document.querySelector('.chart-card.is-fullscreen, .cross-section-card.is-fullscreen');
+      if (fsCard) {
+        fsCard.classList.toggle('is-sideways');
+        const isSideways = fsCard.classList.contains('is-sideways');
+        document.querySelectorAll('.btn-rotate-toggle').forEach(btn => {
+          btn.innerHTML = isSideways ? '📱 View Upright (Portrait)' : '🔄 Turn Sideways (Landscape)';
+        });
+      }
+    }
+
     function toggleRoadFullscreen(e) {
       if (e) e.stopPropagation();
       const card = document.getElementById('roadCard');
       const btn = document.getElementById('btnFsRoad');
+      const rotateBtn = document.getElementById('btnRotateRoad');
       if (!card) return;
 
       const isFs = card.classList.toggle('is-fullscreen');
       if (isFs) {
         document.body.style.overflow = 'hidden';
         if (btn) btn.innerHTML = '<span class="fs-icon">✕</span> <span class="fs-text">Exit Fullscreen</span>';
+        if (rotateBtn) rotateBtn.style.display = 'inline-flex';
+
+        // On mobile in portrait orientation, automatically apply sideways landscape rotation
+        if (window.innerWidth < 768 && window.innerWidth < window.innerHeight) {
+          card.classList.add('is-sideways');
+          if (rotateBtn) rotateBtn.innerHTML = '📱 View Upright (Portrait)';
+        }
+
         try {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock().catch(() => {});
+          }
           if (card.requestFullscreen && !document.fullscreenElement) {
             card.requestFullscreen().catch(() => {});
           }
         } catch(err) {}
       } else {
         document.body.style.overflow = '';
+        card.classList.remove('is-sideways');
         if (btn) btn.innerHTML = '<span class="fs-icon">⤢</span> <span class="fs-text">Enlarge</span>';
+        if (rotateBtn) {
+          rotateBtn.style.display = 'none';
+          rotateBtn.innerHTML = '🔄 Turn Sideways';
+        }
         try {
           if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
@@ -2614,61 +2662,106 @@
     function updateSvgCrossSection(twl, cfg, isRising) {
       document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
 
-      const gutterY = 223.0;
+      const gutterY = 223.0; // Pavement ground line at bottom of tires
       const pxPerFt = 23.856;
+      const sagGutterElev = cfg.sagGutter || 7.15;
+      const crownElev = cfg.crown || 7.42;
       
-      // If tide is rising before peak, water is in storm pipes below street pavement
+      // Determine real-world water presence on street pavement
       let waterY;
       let effectiveStreetTwl = twl;
-      if (isRising && twl < (cfg.crown + 0.15)) {
-        // Water is beneath pavement in catch basins / storm sewer
-        effectiveStreetTwl = Math.min(cfg.gutter - 0.1, twl);
-        waterY = Math.max(40, Math.min(255, gutterY - (effectiveStreetTwl - 6.70) * pxPerFt));
+      
+      const waterLayer = document.getElementById('svgWaterLayer');
+      const waterLine = document.getElementById('svgWaterLine');
+      const waterMarker = document.getElementById('svgWaterMarker');
+      const waterText = document.getElementById('svgWaterText');
+      const sillAlert = document.getElementById('svgSillAlert');
+      const sillText = document.getElementById('svgSillAlertText');
+
+      if (twl <= sagGutterElev) {
+        // Road and gutters are 100% physically dry
+        effectiveStreetTwl = twl;
+        waterY = 225.0; // below pavement line
+        if (waterLayer) waterLayer.style.display = 'none';
+        if (waterLine) waterLine.style.display = 'none';
+        if (waterMarker) waterMarker.style.display = 'none';
+        if (sillAlert) sillAlert.style.display = 'none';
+
+        if (waterText) {
+          waterText.setAttribute('y', 235);
+          waterText.setAttribute('fill', '#86efac');
+          waterText.textContent = `Water Level: ${twl.toFixed(2)}' NAVD88 • Pavement & Gutters 100% DRY`;
+        }
+        return;
+      }
+
+      // Water is present in gutters or overtopping crown
+      if (isRising && twl < (crownElev + 0.10)) {
+        // Rising tide: storm pipes filling, initial curb backflow
+        effectiveStreetTwl = twl;
+        waterY = Math.max(40, Math.min(223, gutterY - (twl - sagGutterElev) * pxPerFt));
       } else {
-        waterY = Math.max(40, Math.min(255, gutterY - (twl - 6.70) * pxPerFt));
+        waterY = Math.max(40, Math.min(223, gutterY - (twl - sagGutterElev) * pxPerFt));
       }
 
       const waterPath = `M 30,260 L 30,${waterY} Q 360,${waterY - 0.5} 600,${waterY} L 600,260 Z`;
-      const waterLayer = document.getElementById('svgWaterLayer');
-      if (waterLayer) waterLayer.setAttribute('d', waterPath);
-
-      const crownDepthIn = Math.max(0, (effectiveStreetTwl - cfg.crown) * 12);
-      const gutterDepthIn = Math.max(0, (effectiveStreetTwl - cfg.gutter) * 12);
-
-      let depthText = `Water Elevation: ${twl.toFixed(2)}' NAVD88`;
-      if (isRising && twl < (cfg.crown + 0.15)) {
-        depthText += ` (Creek Rising • Pavement Dry; Storm Pipes Filling)`;
-      } else if (crownDepthIn > 0) {
-        depthText += ` (+${crownDepthIn.toFixed(1)}" over sag crown | +${gutterDepthIn.toFixed(1)}" in gutters)`;
-      } else if (gutterDepthIn > 0) {
-        depthText += ` (Crown clear down st | +${gutterDepthIn.toFixed(1)}" in gutter)`;
-      } else {
-        depthText += ` (Roadway fully dry)`;
+      if (waterLayer) {
+        waterLayer.style.display = 'block';
+        waterLayer.setAttribute('d', waterPath);
       }
 
-      const waterText = document.getElementById('svgWaterText');
+      // Dynamically move the blue water line and marker arrow with real-world level
+      if (waterLine) {
+        waterLine.style.display = 'block';
+        waterLine.setAttribute('y1', waterY);
+        waterLine.setAttribute('y2', waterY);
+      }
+      if (waterMarker) {
+        waterMarker.style.display = 'block';
+        waterMarker.setAttribute('points', `600,${waterY} 612,${waterY - 5} 612,${waterY + 5}`);
+      }
+
+      const crownDepthIn = Math.max(0, (effectiveStreetTwl - crownElev) * 12);
+      const gutterDepthIn = Math.max(0, (effectiveStreetTwl - sagGutterElev) * 12);
+
+      let depthText = `Water Elevation: ${twl.toFixed(2)}' NAVD88`;
+      if (crownDepthIn > 0) {
+        depthText += ` (+${crownDepthIn.toFixed(1)}" OVER SAG CROWN | +${gutterDepthIn.toFixed(1)}" in gutters)`;
+        if (waterText) waterText.setAttribute('fill', '#f87171');
+      } else if (gutterDepthIn > 0) {
+        depthText += ` (+${gutterDepthIn.toFixed(1)}" in Sag Gutter • Travel Lane Dry)`;
+        if (waterText) waterText.setAttribute('fill', '#38bdf8');
+      }
+
       if (waterText) {
-        waterText.setAttribute('y', Math.min(235, waterY + 3));
+        waterText.setAttribute('y', Math.max(50, Math.min(235, waterY - 4)));
         waterText.textContent = depthText;
       }
 
       // Sill Alert
       const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
-      const sillAlert = document.getElementById('svgSillAlert');
-      const sillText = document.getElementById('svgSillAlertText');
-      const sillDeltaIn = (effectiveStreetTwl - vInfo.sill) * 12;
+      const sillElev = crownElev + (vInfo.sill ? (vInfo.sill - 7.15) : 0.71); // Door sill elevation
+      const sillDeltaIn = (effectiveStreetTwl - (sagGutterElev + 0.71)) * 12;
 
-      if (effectiveStreetTwl >= vInfo.sill) {
+      if (effectiveStreetTwl >= (sagGutterElev + 0.71)) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — FLOOD RISK`;
+        if (sillText) sillText.textContent = `🚨 WATER REACHING DOOR SILL (+${sillDeltaIn.toFixed(1)}") — VEHICLE RISK`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#ef4444');
           rect.setAttribute('stroke', '#ffffff');
         }
-      } else if (gutterDepthIn > 0 && !isRising) {
+      } else if (crownDepthIn > 0) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `🟡 WATER IN GUTTER (+${gutterDepthIn.toFixed(1)}") — SILL DRY`;
+        if (sillText) sillText.textContent = `⚠️ SAG CROWN SUBMERGED (+${crownDepthIn.toFixed(1)}") — SILL DRY`;
+        const rect = sillAlert ? sillAlert.querySelector('rect') : null;
+        if (rect) {
+          rect.setAttribute('fill', '#f97316');
+          rect.setAttribute('stroke', '#fb923c');
+        }
+      } else if (gutterDepthIn > 0) {
+        if (sillAlert) sillAlert.style.display = 'block';
+        if (sillText) sillText.textContent = `🟡 WATER IN SAG GUTTER (+${gutterDepthIn.toFixed(1)}") — TRAVEL LANE DRY`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#f59e0b');

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Larkspur WET & FloodWatch</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="favicon.ico">
@@ -470,6 +470,38 @@
       transform: translateY(0);
     }
 
+    /* In-App Sideways Rotation (Works even with phone Portrait Lock ON) */
+    .chart-card.is-fullscreen.is-sideways,
+    .cross-section-card.is-fullscreen.is-sideways {
+      top: 50% !important;
+      left: 50% !important;
+      width: 100vh !important;
+      height: 100vw !important;
+      max-width: 100vh !important;
+      max-height: 100vw !important;
+      transform: translate(-50%, -50%) rotate(90deg) !important;
+      transform-origin: center center !important;
+      overflow-y: auto !important;
+    }
+
+    .btn-rotate-toggle {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c084fc;
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: 6px;
+    }
+    .btn-rotate-toggle:hover {
+      background: rgba(168, 85, 247, 0.25);
+    }
+
     /* Fullscreen Overlay Mode */
     .chart-card.is-fullscreen,
     .cross-section-card.is-fullscreen {
@@ -845,17 +877,17 @@
         </div>
       </div>
 
-      <!-- Road Crown Water Depth (Lowest Sag Dip Benchmark) -->
+      <!-- Road Crown Water Depth (Crown SAG in Road) -->
       <div class="metric-card">
         <div class="metric-meta">
-          <span>Road Crown (Sag Dip: 6.95')</span>
-          <span id="crownStatusText">SUBMERGED</span>
+          <span>Crown (SAG in Road: 7.42')</span>
+          <span id="crownStatusText">CLEAR</span>
         </div>
         <div class="metric-val" id="valCrownDepth">
-          +2.4 <span>in water</span>
+          0.0 <span>in dry</span>
         </div>
         <div class="metric-sub" id="valCrownSub">
-          Lowest dip crown (Full clear: 6.95')
+          Sag Area (Drains 2, 3 &amp; 4: 7.15') • Travel Lane: 7.42'
         </div>
       </div>
 
@@ -873,17 +905,17 @@
         </div>
       </div>
 
-      <!-- Front Parking Stalls & Street Gutter Metric -->
+      <!-- Front Street Gutters & Front Parking Metric -->
       <div class="metric-card">
         <div class="metric-meta">
-          <span>Front Parking (Street Gutter)</span>
-          <span id="frontParkingStatusText" style="color:var(--green);">CLEAR</span>
+          <span>Front Street Gutters (Parking)</span>
+          <span id="frontParkingStatusText" style="color:var(--green);">100% DRY</span>
         </div>
         <div class="metric-val" id="valFrontParkingDepth">
           0.0 <span>in dry</span>
         </div>
         <div class="metric-sub" id="valFrontParkingSub">
-          Street Gutter: 6.85' | High patch (7.10') dry
+          Front of House (#326) • Breaches at 7.55' TWL
         </div>
       </div>
 
@@ -986,7 +1018,7 @@
           <line x1="30" y1="208.4" x2="710" y2="208.4" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1"/>
           <text x="25" y="211.4" fill="#fcd34d" font-size="8" text-anchor="end" font-family="monospace">7.31' High Crown</text>
 
-          <!-- 6.95' Sag Dip Crown (Lowest Road Crown — All-Street Clear) Y=217.0 -->
+          <!-- 7.42' Sag Dip Crown (Lowest Road Crown — All-Street Clear) Y=217.0 -->
           <line x1="30" y1="217.0" x2="710" y2="217.0" stroke="#f97316" stroke-dasharray="3,3" stroke-width="1.2"/>
           <text x="25" y="220.0" fill="#fb923c" font-size="8" text-anchor="end" font-family="monospace">6.95' Sag Crown</text>
 
@@ -1203,13 +1235,13 @@
           <text x="50" y="57" fill="#c084fc" font-size="9.5" text-anchor="end" font-family="monospace">7.75' Carport GL</text>
 
           <line x1="55" y1="65" x2="585" y2="65" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="50" y="68" fill="#f87171" font-size="9.5" text-anchor="end" font-family="monospace">7.55' Impassable Sag</text>
+          <text x="50" y="68" fill="#f87171" font-size="9.5" text-anchor="end" font-family="monospace">7.91' Small Car Sag</text>
 
           <line x1="55" y1="77" x2="585" y2="77" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1.2"/>
           <text x="50" y="80" fill="#fcd34d" font-size="9.5" text-anchor="end" font-family="monospace">7.31' High Crown</text>
 
           <line x1="55" y1="96" x2="585" y2="96" stroke="#f97316" stroke-dasharray="3,3" stroke-width="1.4"/>
-          <text x="50" y="99" fill="#fb923c" font-size="10.5" font-weight="bold" text-anchor="end" font-family="monospace">6.95' Sag Dip Crown</text>
+          <text x="50" y="99" fill="#fb923c" font-size="10.5" font-weight="bold" text-anchor="end" font-family="monospace">7.42' Sag Dip Crown</text>
 
           <line x1="55" y1="110" x2="585" y2="110" stroke="#38bdf8" stroke-dasharray="2,2" stroke-width="1"/>
           <text x="50" y="113" fill="#38bdf8" font-size="8.5" text-anchor="end" font-family="monospace">6.70' Gutter Invert</text>
@@ -1217,9 +1249,9 @@
           <line x1="55" y1="200" x2="585" y2="200" stroke="rgba(255,255,255,0.08)"/>
           <text x="50" y="203" fill="#64748b" font-size="8.5" text-anchor="end" font-family="monospace">5.00'</text>
 
-          <!-- 6.85' Street Gutter In Front of House -->
+          <!-- 7.15' Street Gutter In Front of House -->
           <line x1="55" y1="103" x2="585" y2="103" stroke="#06b6d4" stroke-dasharray="2,2" stroke-width="1.1"/>
-          <text x="50" y="106" fill="#22d3ee" font-size="10" font-weight="bold" text-anchor="end" font-family="monospace">6.85' Street Gutter</text>
+          <text x="50" y="106" fill="#22d3ee" font-size="10" font-weight="bold" text-anchor="end" font-family="monospace">7.15' Street Gutter</text>
 
           <!-- Dynamic Wave Curves -->
           <path id="svgTwlArea" d="" fill="url(#twlGrad)"/>
@@ -1255,7 +1287,8 @@
           <input type="range" id="fsTimeSlider" min="0" max="288" value="144" oninput="onScrub(this.value)">
         </div>
         <div class="scrubber-btn-row" style="margin-bottom: 8px;">
-          <button class="chip-btn active" id="btnFsSnapLive" onclick="snapTime('now')">📍 Live Now (Center)</button>
+          <button type="button" class="btn-rotate-toggle" onclick="toggleSidewaysOrientation(event)">🔄 Turn Sideways (Landscape)</button>
+          <button class="chip-btn active" id="btnFsSnapLive" onclick="snapTime('now')">📍 Live Now</button>
           <button class="chip-btn" id="btnFsSnapNextHigh" onclick="snapTime('nexthigh')">▲ Next High Tide Peak</button>
           <button class="chip-btn" onclick="snapTime('impassable')">⚠️ Impassable (6.95')</button>
           <button class="chip-btn" onclick="snapTime('cleared')">✅ Road Cleared (&lt; 6.95')</button>
@@ -1265,6 +1298,46 @@
         </div>
         <div class="fs-rotate-tip">
           💡 Tip: Rotate phone sideways (landscape) for the widest, largest view! Tap '✕ Exit' when done.
+        </div>
+      </div>
+    </section>
+
+    <!-- NOV 7 KING TIDE PEAK GROUND-TRUTH GALLERY (BATCH 18) -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Nov 7 King Tide Peak Truth Sequence (10:06 - 10:07 AM)</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Places Verification (7.47' Peak)</span>
+      </div>
+      <div class="gallery-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="photo-item" onclick="openPhoto('photos/20261107_100751.jpg', '10:07 AM PST — Front Street Gutters (General Front Parking / House #326) completely DRY (0.0 inches). Confirms front street gutters stay dry while sag area floods down street.')">
+          <img src="photos/20261107_100751.jpg" alt="10:07 AM Front Gutters Dry">
+          <div class="photo-tag" style="color:var(--green);">10:07 AM • Front Gutters 100% DRY</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261107_100702.jpg', '10:07 AM PST — Crown (SAG in Road) & Housing Complex Side flooded during high tide peak.')">
+          <img src="photos/20261107_100702.jpg" alt="10:07 AM Sag Flooded">
+          <div class="photo-tag" style="color:var(--red);">10:07 AM • Sag &amp; Complex Flooded</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261107_100628.jpg', '10:06 AM PST — Street Drains 2 & 3 taking water on housing complex side in sync with SAG peak.')">
+          <img src="photos/20261107_100628.jpg" alt="10:06 AM Drains 2 & 3">
+          <div class="photo-tag" style="color:var(--amber);">10:06 AM • Drains 2 &amp; 3 Filling</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOV 7 KING TIDE MORNING PEAK GALLERY -->
+    <section class="gallery-card">
+      <div class="card-title">
+        <span>📸 Nov 7 Morning King Tide Peak Sequence (Today)</span>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Andy's Field Sequence (Peak 7.47' NAVD88)</span>
+      </div>
+      <div class="gallery-grid">
+        <div class="photo-item" onclick="openPhoto('photos/20261107_094945.jpg', '9:49 AM PST — Center Road Crown Passable & Dry. Water confined to gutters & low depressions while travel lane remains clear.')">
+          <img src="photos/20261107_094945.jpg" alt="9:49 AM Crown Passable">
+          <div class="photo-tag" style="color:var(--green);">9:49 AM • Crown Passable (Dry Center)</div>
+        </div>
+        <div class="photo-item" onclick="openPhoto('photos/20261107_094927.jpg', '9:49 AM PST — Street gutters & parking stall aprons taking salt water (+3.8 inches in gutter). Travel lane open.')">
+          <img src="photos/20261107_094927.jpg" alt="9:49 AM Gutters Flooded">
+          <div class="photo-tag" style="color:var(--amber);">9:49 AM • Gutters Taking Water (+3.8&quot;)</div>
         </div>
       </div>
     </section>
@@ -1538,15 +1611,19 @@
     const THRESHOLDS = {
       larkspur: {
         name: "Larkspur Plaza Drive",
-        gutter: 6.70, // Low point in street gutters (Drain 3)
-        houseGutter: 6.85, // Street gutter in front of 326 Larkspur Plaza Dr
-        crown: 6.95, // Sag Dip Road Crown (breaches at ~7.38' creek TWL)
-        higherPatch: 7.10, // Higher front parking patch used to avoid car interior damage
-        highCrown: 7.31, // High road crown ridge in foreground
-        priusSag: 7.55, // Impassable for 5.9" clearance
-        stall: 7.75, // Back lot Carport Spot #86 slab ground level (lagoon inlet regime)
-        damageLevel: 8.46, // +8.5" above carport slab (interior damage)
-        lagMinutes: 270 // 4.5 hour drainage lag for curb gutters & front stalls
+        // Calibrated Ground Truth (from Andy's Places KML 3 & Nov 7 Field Sequences):
+        sagGutter: 7.15, // Sag Area Gutters (Street Drains 2, 3, & 4 on complex side; fills first at 7.15')
+        gutter: 7.15,    // Sag gutter benchmark
+        crown: 7.42,    // Crown (SAG in Road) crosswalk travel lane overtopping threshold
+        frontGutter: 7.55, // Front Street Gutters (General front-of-house parking near #326; 100% DRY at 7.47')
+        houseGutter: 7.55, // Front Street Gutters in front of 326 Larkspur Plaza Dr
+        frontStall: 7.75,  // Front parking stall apron grade
+        higherPatch: 7.75, // Higher front parking patch
+        highCrown: 7.75, // High road crown ridge in foreground
+        priusSag: 7.91,  // Impassable for 5.9" clearance (7.42' crown + 0.49' / 5.9" = 7.91')
+        stall: 8.15,     // Back lot Carport Spot #86 slab ground level
+        damageLevel: 8.86, // Interior damage level
+        lagMinutes: 270   // 4.5 hour drainage lag for curb gutters & front stalls
       },
       manzanita: {
         name: "Manzanita Park & Ride",
@@ -1769,31 +1846,31 @@
         const isRising = (next.twl > cur.twl + 0.015);
 
         if (isRising) {
-          if (cur.twl >= 6.95) {
-            // Road crown at crosswalk sag dip breached (6.95'): water actively crosses travel lanes
+          // Hydraulic Estuary Head Calibration:
+          // Water begins entering street gutters when Richmond TWL >= 7.15'.
+          // Crosswalk sag dip crown begins taking water when Richmond TWL >= 7.42'.
+          if (cur.twl >= 7.42) {
             hasBreached = true;
             activePonding = cur.twl;
-          } else if (cur.twl >= 6.85) {
-            // Water actively filling street gutters & stall aprons (crown still dry)
+          } else if (cur.twl >= 7.15) {
             activePonding = cur.twl;
           } else {
-            // Road crown, street gutters, and stalls remain dry below 6.85'
             activePonding = 0.0;
           }
         } else {
           // Receding / Crest phase
-          if (cur.twl >= 6.95) {
+          if (cur.twl >= 7.42) {
             hasBreached = true;
             activePonding = cur.twl;
-          } else if (hasBreached && activePonding > 6.70) {
-            // Water spilled over crown/gutters during peak, now draining with calibrated 4.5-hour marsh lag
+          } else if (hasBreached && activePonding > 7.15) {
+            // Water draining with calibrated 4.5-hour marsh lag
             const drainRatePer10Min = 0.035; // 0.42 inches per 10 min
             activePonding = Math.max(cur.twl, activePonding - drainRatePer10Min);
-            if (activePonding <= 6.70 && cur.twl <= 6.70) {
+            if (activePonding <= 7.15 && cur.twl <= 7.15) {
               activePonding = 0.0; // Fully drained dry
               hasBreached = false;
             }
-          } else if (cur.twl >= 6.85) {
+          } else if (cur.twl >= 7.15) {
             activePonding = cur.twl;
           } else {
             activePonding = 0.0;
@@ -1801,7 +1878,7 @@
         }
 
         // streetTWL: If active water exists on pavement from a breach, track it. Otherwise baseline dry (6.70').
-        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : 6.70).toFixed(2));
+        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : 7.15).toFixed(2));
       }
 
       return data;
@@ -2213,19 +2290,20 @@
       const statusClrEl = document.getElementById('valPriusStatusText');
       const depthClrEl = document.getElementById('valPriusDepth');
 
-      // Zone 2: Front Parking Stalls & Street Gutter (6.85' gutter / 7.10' higher patch / 6.70' low gutter)
-      const gutterDeltaFt = streetLevel - cfg.gutter;
-      const gutterDepthIn = Math.max(0, gutterDeltaFt * 12);
-      const houseGutterDeltaFt = streetLevel - (cfg.houseGutter || 6.85);
-      const houseGutterDepthIn = Math.max(0, houseGutterDeltaFt * 12);
-      const highPatchDeltaFt = streetLevel - (cfg.higherPatch || 7.10);
-      const highPatchDepthIn = Math.max(0, highPatchDeltaFt * 12);
+      // Zone 2: Front Street Gutters & Front Parking (Front of House #326, Breaches at 7.55' TWL)
+      const frontGutterThresh = cfg.frontGutter || 7.55;
+      const frontGutterDeltaFt = streetLevel - frontGutterThresh;
+      const frontGutterDepthIn = Math.max(0, frontGutterDeltaFt * 12);
+      
+      const sagGutterThresh = cfg.sagGutter || 7.15;
+      const sagGutterDeltaFt = streetLevel - sagGutterThresh;
+      const sagGutterDepthIn = Math.max(0, sagGutterDeltaFt * 12);
 
       const frontParkingStatusEl = document.getElementById('frontParkingStatusText');
       const valFrontParkingDepthEl = document.getElementById('valFrontParkingDepth');
       const valFrontParkingSubEl = document.getElementById('valFrontParkingSub');
 
-      // Zone 3: Back Lot Carport (#86 Stall: 7.75' slab, direct lagoon inlet)
+      // Zone 3: Back Lot Carport (#86 Stall: 8.15' slab, direct lagoon inlet)
       const carportMarginFt = cfg.stall - twl;
       const carportMarginIn = carportMarginFt * 12;
       const carportDepthIn = Math.max(0, (twl - cfg.stall) * 12);
@@ -2233,32 +2311,24 @@
       const valCarportMarginEl = document.getElementById('valCarportMargin');
       const valCarportSubEl = document.getElementById('valCarportSub');
 
-      // Update Zone 2 (Front Parking) Card
+      // Update Zone 2 (Front Street Gutters in front of house / general front parking)
       if (valFrontParkingDepthEl && frontParkingStatusEl && valFrontParkingSubEl) {
-        if (houseGutterDeltaFt > 0) {
-          valFrontParkingDepthEl.innerHTML = `+${houseGutterDepthIn.toFixed(1)} <span>in gutter</span>`;
+        if (frontGutterDepthIn > 0) {
+          valFrontParkingDepthEl.innerHTML = `+${frontGutterDepthIn.toFixed(1)} <span>in gutter</span>`;
           valFrontParkingDepthEl.style.color = "var(--red)";
-          if (highPatchDeltaFt > 0) {
-            frontParkingStatusEl.textContent = "CRITICAL FLOOD";
-            frontParkingStatusEl.style.color = "var(--red)";
-            valFrontParkingSubEl.textContent = `High patch flooded (+${highPatchDepthIn.toFixed(1)}") • Move cars!`;
-          } else {
-            frontParkingStatusEl.textContent = "STALLS FLOODED";
-            frontParkingStatusEl.style.color = "var(--amber)";
-            valFrontParkingSubEl.textContent = `Street gutter +${houseGutterDepthIn.toFixed(1)}" | High patch (7.10') dry`;
-          }
-        } else if (gutterDeltaFt > 0) {
-          valFrontParkingDepthEl.innerHTML = `+${gutterDepthIn.toFixed(1)} <span>in low gut</span>`;
-          valFrontParkingDepthEl.style.color = "var(--amber)";
-          frontParkingStatusEl.textContent = "GUTTERS FILLING";
-          frontParkingStatusEl.style.color = "var(--amber)";
-          valFrontParkingSubEl.textContent = `Water entering stall aprons (+${gutterDepthIn.toFixed(1)}" in low gutter)`;
+          frontParkingStatusEl.textContent = "GUTTER FLOODED";
+          frontParkingStatusEl.style.color = "var(--red)";
+          valFrontParkingSubEl.textContent = `Front gutters taking water (+${frontGutterDepthIn.toFixed(1)}")`;
         } else {
-          valFrontParkingDepthEl.innerHTML = `0.0 <span>in dry</span>`;
+          valFrontParkingDepthEl.innerHTML = `0.0 <span>in (DRY)</span>`;
           valFrontParkingDepthEl.style.color = "var(--green)";
-          frontParkingStatusEl.textContent = "CLEAR";
+          frontParkingStatusEl.textContent = "100% DRY";
           frontParkingStatusEl.style.color = "var(--green)";
-          valFrontParkingSubEl.textContent = `Street gutter & front stalls fully dry`;
+          if (sagGutterDepthIn > 0) {
+            valFrontParkingSubEl.textContent = `Front gutters dry • Water confined to sag drains (+${sagGutterDepthIn.toFixed(1)}")`;
+          } else {
+            valFrontParkingSubEl.textContent = `Front street gutters & parking stalls fully dry`;
+          }
         }
       }
 
@@ -2746,7 +2816,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=20').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=23').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

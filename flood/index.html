@@ -470,36 +470,29 @@
       transform: translateY(0);
     }
 
-    /* In-App Sideways Rotation (Works even with phone Portrait Lock ON) */
-    .chart-card.is-fullscreen.is-sideways,
-    .cross-section-card.is-fullscreen.is-sideways {
-      top: 50% !important;
-      left: 50% !important;
-      width: 100vh !important;
-      height: 100vw !important;
-      max-width: 100vh !important;
-      max-height: 100vw !important;
-      transform: translate(-50%, -50%) rotate(90deg) !important;
-      transform-origin: center center !important;
-      overflow-y: auto !important;
-    }
-
-    .btn-rotate-toggle {
-      background: rgba(168, 85, 247, 0.15);
-      border: 1px solid rgba(168, 85, 247, 0.4);
-      color: #c084fc;
-      border-radius: 8px;
-      padding: 5px 12px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      cursor: pointer;
+    /* Zoom Controls for Enlarge View */
+    .zoom-btn-group {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
       margin-left: 6px;
     }
-    .btn-rotate-toggle:hover {
-      background: rgba(168, 85, 247, 0.25);
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .zoom-btn:hover, .zoom-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--cyan);
     }
 
     /* Fullscreen Overlay Mode */
@@ -550,38 +543,33 @@
       max-height: 60vh !important;
     }
 
-    .cross-section-card.is-fullscreen.is-sideways .svg-wrapper {
+    .cross-section-card.is-fullscreen .svg-wrapper {
       flex: 1 1 auto;
       width: 100% !important;
-      min-height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: visible;
-    }
-
-    .cross-section-card.is-fullscreen.is-sideways svg#roadSvg {
-      width: 100% !important;
-      min-width: unset !important;
-      height: auto !important;
-      max-height: 75vw !important;
-    }
-
-    .cross-section-card.is-fullscreen:not(.is-sideways) .svg-wrapper {
-      flex: 1 1 auto;
-      min-height: 280px;
+      min-height: 320px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
       overflow-x: auto !important;
+      overflow-y: hidden !important;
       -webkit-overflow-scrolling: touch !important;
+      touch-action: pan-x pan-y pinch-zoom;
+      padding: 10px 0;
     }
 
-    .cross-section-card.is-fullscreen:not(.is-sideways) svg#roadSvg {
-      min-width: 650px !important;
+    .cross-section-card.is-fullscreen svg#roadSvg {
+      min-width: 740px !important;
       width: 100% !important;
       height: auto !important;
-      max-height: 68vh !important;
+      max-height: 72vh !important;
+      display: block;
+      transition: min-width 0.2s ease;
+    }
+    .cross-section-card.is-fullscreen svg#roadSvg.zoom-15x {
+      min-width: 1100px !important;
+    }
+    .cross-section-card.is-fullscreen svg#roadSvg.zoom-2x {
+      min-width: 1480px !important;
     }
 
     .chart-fullscreen-controls {
@@ -992,7 +980,11 @@
           <span style="font-size: 0.72rem; color: var(--text-muted);">View:</span>
           <button type="button" id="btnViewSide" class="chip-btn active" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('side', event)">🚗 Side Profile</button>
           <button type="button" id="btnViewFront" class="chip-btn" style="padding: 4px 10px; font-size: 0.72rem;" onclick="switchPriusView('front', event)">🚘 Front</button>
-          <button type="button" class="btn-rotate-toggle" id="btnRotateRoad" onclick="toggleSidewaysOrientation(event)" style="display:none;">🔄 Turn Sideways</button>
+          <div class="zoom-btn-group" id="roadZoomGroup" style="display:none;">
+            <button type="button" class="zoom-btn active" id="btnZoom1" onclick="setRoadZoom(1)">1x</button>
+            <button type="button" class="zoom-btn" id="btnZoom15" onclick="setRoadZoom(1.5)">1.5x</button>
+            <button type="button" class="zoom-btn" id="btnZoom2" onclick="setRoadZoom(2)">2x</button>
+          </div>
           <button type="button" class="btn-fs-toggle" id="btnFsRoad" onclick="toggleRoadFullscreen(event)" title="Enlarge Simulator to Fullscreen">
             <span class="fs-icon">⤢</span> <span class="fs-text">Enlarge</span>
           </button>
@@ -1013,28 +1005,32 @@
 
           <!-- Elevation Reference Grid Lines Calibrated to Front Street Gutters (7.55' Base Y=223.0) -->
           <!-- 8.86' Interior Damage Level Y=191.7 -->
-          <line x1="30" y1="191.7" x2="710" y2="191.7" stroke="rgba(244, 63, 94, 0.4)" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="25" y="194.7" fill="#fb7185" font-size="8" text-anchor="end" font-family="monospace">8.86'</text>
+          <line x1="35" y1="191.7" x2="710" y2="191.7" stroke="rgba(244, 63, 94, 0.4)" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="30" y="194.7" fill="#fb7185" font-size="8" text-anchor="end" font-family="monospace">8.86'</text>
+
+          <!-- 8.50' Reference Line Y=200.3 -->
+          <line x1="35" y1="200.3" x2="710" y2="200.3" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2"/>
+          <text x="30" y="203.3" fill="#64748b" font-size="8" text-anchor="end" font-family="monospace">8.50'</text>
 
           <!-- 8.26' Door Sill (7.55' + 8.5") Y=206.1 -->
-          <line x1="30" y1="206.1" x2="710" y2="206.1" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
-          <text x="25" y="209.1" fill="#fbbf24" font-size="8" text-anchor="end" font-family="monospace">8.26' Door Sill</text>
+          <line x1="35" y1="206.1" x2="710" y2="206.1" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
 
           <!-- 8.15' Carport Slab (Bay #86) Y=208.7 -->
-          <line x1="30" y1="208.7" x2="710" y2="208.7" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="25" y="211.7" fill="#c084fc" font-size="8" text-anchor="end" font-family="monospace">8.15' Carport Slab</text>
+          <line x1="35" y1="208.7" x2="710" y2="208.7" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
 
           <!-- 8.04' Small Car / Prius 5.9" Clearance Y=211.3 -->
-          <line x1="30" y1="211.3" x2="710" y2="211.3" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="25" y="214.3" fill="#f87171" font-size="8" text-anchor="end" font-family="monospace">8.04' Prius Clr</text>
+          <line x1="35" y1="211.3" x2="710" y2="211.3" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+
+          <!-- 8.00' Reference Line Y=212.3 -->
+          <line x1="35" y1="212.3" x2="710" y2="212.3" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2"/>
+          <text x="30" y="215.3" fill="#64748b" font-size="8" text-anchor="end" font-family="monospace">8.00'</text>
 
           <!-- 7.75' Front Parking Stall Apron Y=218.2 -->
-          <line x1="30" y1="218.2" x2="710" y2="218.2" stroke="#38bdf8" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="25" y="220.5" fill="#38bdf8" font-size="8" text-anchor="end" font-family="monospace">7.75' Stall Apron</text>
+          <line x1="35" y1="218.2" x2="710" y2="218.2" stroke="#38bdf8" stroke-dasharray="3,3" stroke-width="1"/>
 
           <!-- 7.55' Front Street Gutters (Andy's Parking Base) Y=223.0 -->
-          <line x1="30" y1="223.0" x2="710" y2="223.0" stroke="#34d399" stroke-dasharray="2,2" stroke-width="1.5"/>
-          <text x="25" y="226.0" fill="#34d399" font-size="8" font-weight="bold" text-anchor="end" font-family="monospace">7.55' Front Gutter</text>
+          <line x1="35" y1="223.0" x2="710" y2="223.0" stroke="#34d399" stroke-dasharray="2,2" stroke-width="1.8"/>
+          <text x="30" y="226.0" fill="#34d399" font-size="8.5" font-weight="bold" text-anchor="end" font-family="monospace">7.55' Base</text>
 
           <!-- Pavement Terrain Polygon (Larkspur Plaza Dr Cross-Section) -->
           <polygon points="30,260 30,223 430,223 530,208.4 580,216 600,197.9 710,197.9 710,260" fill="url(#pavementGrad)"/>
@@ -2140,46 +2136,43 @@
       }
     }
 
+    function setRoadZoom(factor) {
+      const svg = document.getElementById('roadSvg');
+      if (!svg) return;
+      svg.classList.remove('zoom-15x', 'zoom-2x');
+      if (factor === 1.5) svg.classList.add('zoom-15x');
+      if (factor === 2) svg.classList.add('zoom-2x');
+
+      ['btnZoom1', 'btnZoom15', 'btnZoom2'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b) b.classList.remove('active');
+      });
+      if (factor === 1) document.getElementById('btnZoom1')?.classList.add('active');
+      if (factor === 1.5) document.getElementById('btnZoom15')?.classList.add('active');
+      if (factor === 2) document.getElementById('btnZoom2')?.classList.add('active');
+    }
+
     function toggleRoadFullscreen(e) {
       if (e) e.stopPropagation();
       const card = document.getElementById('roadCard');
       const btn = document.getElementById('btnFsRoad');
-      const rotateBtn = document.getElementById('btnRotateRoad');
+      const zoomGroup = document.getElementById('roadZoomGroup');
       if (!card) return;
 
       const isFs = card.classList.toggle('is-fullscreen');
+      // Ensure no sideways transform is applied
+      card.classList.remove('is-sideways');
+
       if (isFs) {
         document.body.style.overflow = 'hidden';
         if (btn) btn.innerHTML = '<span class="fs-icon">✕</span> <span class="fs-text">Exit Fullscreen</span>';
-        if (rotateBtn) rotateBtn.style.display = 'inline-flex';
-
-        // On mobile in portrait orientation, automatically apply sideways landscape rotation
-        if (window.innerWidth < 768 && window.innerWidth < window.innerHeight) {
-          card.classList.add('is-sideways');
-          if (rotateBtn) rotateBtn.innerHTML = '📱 View Upright (Portrait)';
-        }
-
-        try {
-          if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock().catch(() => {});
-          }
-          if (card.requestFullscreen && !document.fullscreenElement) {
-            card.requestFullscreen().catch(() => {});
-          }
-        } catch(err) {}
+        if (zoomGroup) zoomGroup.style.display = 'inline-flex';
+        setRoadZoom(1);
       } else {
         document.body.style.overflow = '';
-        card.classList.remove('is-sideways');
         if (btn) btn.innerHTML = '<span class="fs-icon">⤢</span> <span class="fs-text">Enlarge</span>';
-        if (rotateBtn) {
-          rotateBtn.style.display = 'none';
-          rotateBtn.innerHTML = '🔄 Turn Sideways';
-        }
-        try {
-          if (document.fullscreenElement) {
-            document.exitFullscreen().catch(() => {});
-          }
-        } catch(err) {}
+        if (zoomGroup) zoomGroup.style.display = 'none';
+        setRoadZoom(1);
       }
     }
 

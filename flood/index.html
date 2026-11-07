@@ -985,7 +985,7 @@
     <section class="cross-section-card" id="roadCard">
       <div class="card-title" style="flex-wrap: wrap; gap: 8px;">
         <div>
-          <span>🚗 Road Cross-Section & Small Car Clearance Simulator</span>
+          <span>🚗 Front Parking & Small Car Clearance Simulator (Front Gutters: 7.55')</span>
           <span style="font-size:0.75rem; color:var(--cyan); font-family:var(--mono);" id="crossSectionTideLabel">TWL: 7.73 ft</span>
         </div>
         <div style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
@@ -1011,55 +1011,47 @@
             </linearGradient>
           </defs>
 
-          <!-- Elevation Reference Grid Lines (Exact Scale: 1.988 px/in = 23.856 px/ft) -->
-          <!-- 8.46' Carport Damage Level Y=181.1 -->
-          <line x1="30" y1="181.1" x2="710" y2="181.1" stroke="rgba(244, 63, 94, 0.4)" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="25" y="184.1" fill="#fb7185" font-size="8" text-anchor="end" font-family="monospace">8.46'</text>
+          <!-- Elevation Reference Grid Lines Calibrated to Front Street Gutters (7.55' Base Y=223.0) -->
+          <!-- 8.86' Interior Damage Level Y=191.7 -->
+          <line x1="30" y1="191.7" x2="710" y2="191.7" stroke="rgba(244, 63, 94, 0.4)" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="25" y="194.7" fill="#fb7185" font-size="8" text-anchor="end" font-family="monospace">8.86'</text>
 
-          <!-- 8.00' Y=192.0 -->
-          <line x1="30" y1="192.0" x2="710" y2="192.0" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,2"/>
-          <text x="25" y="195.0" fill="#64748b" font-size="8" text-anchor="end" font-family="monospace">8.00'</text>
-
-          <!-- 7.75' Carport GL Y=197.9 -->
-          <line x1="30" y1="197.9" x2="710" y2="197.9" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="25" y="200.9" fill="#c084fc" font-size="8" text-anchor="end" font-family="monospace">7.75' Carport GL</text>
-
-          <!-- 7.55' Small Car Sag Y=202.7 -->
-          <line x1="30" y1="202.7" x2="710" y2="202.7" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="25" y="205.7" fill="#f87171" font-size="8" text-anchor="end" font-family="monospace">7.55' Sag Dip</text>
-
-          <!-- 7.41' Door Sill Y=206.1 -->
+          <!-- 8.26' Door Sill (7.55' + 8.5") Y=206.1 -->
           <line x1="30" y1="206.1" x2="710" y2="206.1" stroke="#f59e0b" stroke-dasharray="2,2" stroke-width="1.2"/>
-          <text x="25" y="209.1" fill="#fbbf24" font-size="8" text-anchor="end" font-family="monospace">7.41' Door Sill</text>
+          <text x="25" y="209.1" fill="#fbbf24" font-size="8" text-anchor="end" font-family="monospace">8.26' Door Sill</text>
 
-          <!-- 7.31' High Crown Y=208.4 -->
-          <line x1="30" y1="208.4" x2="710" y2="208.4" stroke="#fbbf24" stroke-dasharray="3,3" stroke-width="1"/>
-          <text x="25" y="211.4" fill="#fcd34d" font-size="8" text-anchor="end" font-family="monospace">7.31' High Crown</text>
+          <!-- 8.15' Carport Slab (Bay #86) Y=208.7 -->
+          <line x1="30" y1="208.7" x2="710" y2="208.7" stroke="#a855f7" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="25" y="211.7" fill="#c084fc" font-size="8" text-anchor="end" font-family="monospace">8.15' Carport Slab</text>
 
-          <!-- 7.42' Sag Dip Crown (Lowest Road Crown — All-Street Clear) Y=217.0 -->
-          <line x1="30" y1="217.0" x2="710" y2="217.0" stroke="#f97316" stroke-dasharray="3,3" stroke-width="1.2"/>
-          <text x="25" y="220.0" fill="#fb923c" font-size="8" text-anchor="end" font-family="monospace">6.95' Sag Crown</text>
+          <!-- 8.04' Small Car / Prius 5.9" Clearance Y=211.3 -->
+          <line x1="30" y1="211.3" x2="710" y2="211.3" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+          <text x="25" y="214.3" fill="#f87171" font-size="8" text-anchor="end" font-family="monospace">8.04' Prius Clr</text>
 
-          <!-- 6.70' Gutter Y=223.0 -->
-          <line x1="30" y1="223.0" x2="710" y2="223.0" stroke="#38bdf8" stroke-dasharray="2,2"/>
-          <text x="25" y="226.0" fill="#38bdf8" font-size="8" text-anchor="end" font-family="monospace">6.70' Gutter</text>
+          <!-- 7.75' Front Parking Stall Apron Y=218.2 -->
+          <line x1="30" y1="218.2" x2="710" y2="218.2" stroke="#38bdf8" stroke-dasharray="3,3" stroke-width="1"/>
+          <text x="25" y="220.5" fill="#38bdf8" font-size="8" text-anchor="end" font-family="monospace">7.75' Stall Apron</text>
+
+          <!-- 7.55' Front Street Gutters (Andy's Parking Base) Y=223.0 -->
+          <line x1="30" y1="223.0" x2="710" y2="223.0" stroke="#34d399" stroke-dasharray="2,2" stroke-width="1.5"/>
+          <text x="25" y="226.0" fill="#34d399" font-size="8" font-weight="bold" text-anchor="end" font-family="monospace">7.55' Front Gutter</text>
 
           <!-- Pavement Terrain Polygon (Larkspur Plaza Dr Cross-Section) -->
           <polygon points="30,260 30,223 430,223 530,208.4 580,216 600,197.9 710,197.9 710,260" fill="url(#pavementGrad)"/>
           
           <!-- Carport Reference Markers Directly in Front of Vehicle -->
           <g id="svgCarportMarkers">
-            <!-- 2nd Dashed Line: Carport Damage Level (8.46' = 7.75' GL + 8.5" Door Sill) -->
-            <line x1="420" y1="181.1" x2="710" y2="181.1" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="5,3"/>
-            <rect x="425" y="171.1" width="195" height="18" rx="4" fill="#311219" stroke="#f43f5e" stroke-width="1.2"/>
-            <text x="522" y="183.2" fill="#fb7185" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">Carport Damage Level (8.46' | +8.5")</text>
+            <!-- 2nd Dashed Line: Carport Damage Level (8.86' = 8.15' Slab + 8.5" Door Sill) -->
+            <line x1="420" y1="191.7" x2="710" y2="191.7" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="5,3"/>
+            <rect x="425" y="181.7" width="195" height="18" rx="4" fill="#311219" stroke="#f43f5e" stroke-width="1.2"/>
+            <text x="522" y="193.8" fill="#fb7185" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">Carport Damage Level (8.86' | +8.5")</text>
 
-            <!-- 1st Dashed Line: Carport GL (Ground Level = 7.75') -->
-            <line x1="420" y1="197.9" x2="710" y2="197.9" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="5,3"/>
-            <rect x="425" y="187.9" width="130" height="18" rx="4" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.2"/>
-            <text x="490" y="200" fill="#c084fc" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">Carport GL (7.75' Slab)</text>
+            <!-- 1st Dashed Line: Carport Slab (Bay #86 = 8.15') -->
+            <line x1="420" y1="208.7" x2="710" y2="208.7" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="5,3"/>
+            <rect x="425" y="198.7" width="150" height="18" rx="4" fill="#1e1b4b" stroke="#a855f7" stroke-width="1.2"/>
+            <text x="500" y="210.8" fill="#c084fc" font-size="8" font-weight="bold" font-family="monospace" text-anchor="middle">Carport Bay #86 (8.15' Slab)</text>
 
-            <text x="565" y="218" fill="#94a3b8" font-size="8" text-anchor="middle">Elevated Parking Apron</text>
+            <text x="565" y="219" fill="#94a3b8" font-size="8" text-anchor="middle">Front Parking Stall Apron (7.75')</text>
           </g>
 
           <!-- ============================================================ -->
@@ -1316,6 +1308,40 @@
         </div>
         <div class="fs-rotate-tip">
           💡 Tip: Rotate phone sideways (landscape) for the widest, largest view! Tap '✕ Exit' when done.
+        </div>
+      </div>
+    </section>
+
+    
+    <!-- CALIBRATED SAFE PARKING HAVENS (FROM ANDY'S PLACES KML) -->
+    <section class="card" style="margin-bottom: 16px;">
+      <div class="card-title">
+        <span>🅿️ Safe Parking Havens (Andy's Places Survey)</span>
+        <span style="font-size:0.75rem; color:var(--green); font-family:var(--mono);">High Ground Safe Havens</span>
+      </div>
+      <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+        If tides threaten Front Parking (&gt; 7.55') or Carport #86 (&gt; 8.15'), these surveyed locations remain elevated and accessible:
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px;">
+          <div style="font-weight: 700; color: #6ee7b7; font-size: 0.85rem;">🅿️ Safe Parking 1 (Closest)</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">390 ft West • 37.94046, -122.53605</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Elev: 2.24m GPS (Safe high ground)</div>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px;">
+          <div style="font-weight: 700; color: #6ee7b7; font-size: 0.85rem;">🅿️ Safe Parking 2</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">750 ft Southeast • 37.93911, -122.53340</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Elev: 1.84m GPS (Elevated bay)</div>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px;">
+          <div style="font-weight: 700; color: #6ee7b7; font-size: 0.85rem;">🅿️ Safe Parking 4</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">850 ft Southeast • 37.93885, -122.53326</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Elev: 2.27m GPS (High ridge)</div>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px;">
+          <div style="font-weight: 700; color: #6ee7b7; font-size: 0.85rem;">🅿️ Safe Parking 3 (Highest)</div>
+          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 3px;">1,090 ft South • 37.93795, -122.53388</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">Elev: 2.98m GPS (Extreme retreat)</div>
         </div>
       </div>
     </section>
@@ -2662,12 +2688,15 @@
     function updateSvgCrossSection(twl, cfg, isRising) {
       document.getElementById('crossSectionTideLabel').textContent = `TWL: ${twl.toFixed(2)} ft NAVD88`;
 
-      const gutterY = 223.0; // Pavement ground line at bottom of tires
+      const gutterY = 223.0; // Pavement ground line at bottom of tires in Front Parking
       const pxPerFt = 23.856;
-      const sagGutterElev = cfg.sagGutter || 7.15;
-      const crownElev = cfg.crown || 7.42;
       
-      // Determine real-world water presence on street pavement
+      // Calibrated to Front Street Gutters (where vehicle actually parks outside #326)
+      const frontGutterElev = cfg.frontGutter || 7.55; 
+      const frontStallElev = cfg.frontStall || 7.75;
+      const sagCrownElev = cfg.crown || 7.42;
+      const sagGutterElev = cfg.sagGutter || 7.15;
+      
       let waterY;
       let effectiveStreetTwl = twl;
       
@@ -2678,8 +2707,8 @@
       const sillAlert = document.getElementById('svgSillAlert');
       const sillText = document.getElementById('svgSillAlertText');
 
-      if (twl <= sagGutterElev) {
-        // Road and gutters are 100% physically dry
+      if (twl <= frontGutterElev) {
+        // Front Parking and Front Street Gutters are 100% DRY!
         effectiveStreetTwl = twl;
         waterY = 225.0; // below pavement line
         if (waterLayer) waterLayer.style.display = 'none';
@@ -2690,19 +2719,21 @@
         if (waterText) {
           waterText.setAttribute('y', 235);
           waterText.setAttribute('fill', '#86efac');
-          waterText.textContent = `Water Level: ${twl.toFixed(2)}' NAVD88 • Pavement & Gutters 100% DRY`;
+          if (twl > sagCrownElev) {
+            const sagCrownDepth = (twl - sagCrownElev) * 12;
+            waterText.textContent = `Water Level: ${twl.toFixed(2)}' NAVD88 • Front Parking 100% DRY (+${sagCrownDepth.toFixed(1)}" in distant Sag Dip)`;
+          } else if (twl > sagGutterElev) {
+            const sagGutterDepth = (twl - sagGutterElev) * 12;
+            waterText.textContent = `Water Level: ${twl.toFixed(2)}' NAVD88 • Front Parking 100% DRY (+${sagGutterDepth.toFixed(1)}" in distant Sag Gutter)`;
+          } else {
+            waterText.textContent = `Water Level: ${twl.toFixed(2)}' NAVD88 • Front Parking & Gutters 100% DRY`;
+          }
         }
         return;
       }
 
-      // Water is present in gutters or overtopping crown
-      if (isRising && twl < (crownElev + 0.10)) {
-        // Rising tide: storm pipes filling, initial curb backflow
-        effectiveStreetTwl = twl;
-        waterY = Math.max(40, Math.min(223, gutterY - (twl - sagGutterElev) * pxPerFt));
-      } else {
-        waterY = Math.max(40, Math.min(223, gutterY - (twl - sagGutterElev) * pxPerFt));
-      }
+      // Water reaches Front Street Gutters (exceeds 7.55' NAVD88)
+      waterY = Math.max(40, Math.min(223, gutterY - (twl - frontGutterElev) * pxPerFt));
 
       const waterPath = `M 30,260 L 30,${waterY} Q 360,${waterY - 0.5} 600,${waterY} L 600,260 Z`;
       if (waterLayer) {
@@ -2710,7 +2741,7 @@
         waterLayer.setAttribute('d', waterPath);
       }
 
-      // Dynamically move the blue water line and marker arrow with real-world level
+      // Dynamically move the blue water line and marker arrow
       if (waterLine) {
         waterLine.style.display = 'block';
         waterLine.setAttribute('y1', waterY);
@@ -2721,15 +2752,15 @@
         waterMarker.setAttribute('points', `600,${waterY} 612,${waterY - 5} 612,${waterY + 5}`);
       }
 
-      const crownDepthIn = Math.max(0, (effectiveStreetTwl - crownElev) * 12);
-      const gutterDepthIn = Math.max(0, (effectiveStreetTwl - sagGutterElev) * 12);
+      const frontGutterDepthIn = (twl - frontGutterElev) * 12;
+      const stallDepthIn = Math.max(0, (twl - frontStallElev) * 12);
 
       let depthText = `Water Elevation: ${twl.toFixed(2)}' NAVD88`;
-      if (crownDepthIn > 0) {
-        depthText += ` (+${crownDepthIn.toFixed(1)}" OVER SAG CROWN | +${gutterDepthIn.toFixed(1)}" in gutters)`;
+      if (stallDepthIn > 0) {
+        depthText += ` (+${stallDepthIn.toFixed(1)}" in Front Parking Stalls | +${frontGutterDepthIn.toFixed(1)}" in Front Gutter)`;
         if (waterText) waterText.setAttribute('fill', '#f87171');
-      } else if (gutterDepthIn > 0) {
-        depthText += ` (+${gutterDepthIn.toFixed(1)}" in Sag Gutter • Travel Lane Dry)`;
+      } else {
+        depthText += ` (+${frontGutterDepthIn.toFixed(1)}" in Front Street Gutter • Parking Stall Dry)`;
         if (waterText) waterText.setAttribute('fill', '#38bdf8');
       }
 
@@ -2738,30 +2769,31 @@
         waterText.textContent = depthText;
       }
 
-      // Sill Alert
+      // Sill Alert calibrated to Front Parking
       const vInfo = VEHICLES[activeVehicleKey] || VEHICLES.prius;
-      const sillElev = crownElev + (vInfo.sill ? (vInfo.sill - 7.15) : 0.71); // Door sill elevation
-      const sillDeltaIn = (effectiveStreetTwl - (sagGutterElev + 0.71)) * 12;
+      const clrElev = frontGutterElev + (vInfo.clr / 12);
+      const sillElev = frontGutterElev + (8.5 / 12); // Door sill ~8.5" above gutter
+      const sillDeltaIn = (twl - sillElev) * 12;
 
-      if (effectiveStreetTwl >= (sagGutterElev + 0.71)) {
+      if (twl >= sillElev) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `🚨 WATER REACHING DOOR SILL (+${sillDeltaIn.toFixed(1)}") — VEHICLE RISK`;
+        if (sillText) sillText.textContent = `🚨 WATER OVER DOOR SILL (+${sillDeltaIn.toFixed(1)}") — MOVE TO SAFE PARKING`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#ef4444');
           rect.setAttribute('stroke', '#ffffff');
         }
-      } else if (crownDepthIn > 0) {
+      } else if (twl >= clrElev) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `⚠️ SAG CROWN SUBMERGED (+${crownDepthIn.toFixed(1)}") — SILL DRY`;
+        if (sillText) sillText.textContent = `⚠️ EXCEEDS ${vInfo.clr}" GROUND CLEARANCE — MOVE VEHICLE`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#f97316');
           rect.setAttribute('stroke', '#fb923c');
         }
-      } else if (gutterDepthIn > 0) {
+      } else if (frontGutterDepthIn > 0) {
         if (sillAlert) sillAlert.style.display = 'block';
-        if (sillText) sillText.textContent = `🟡 WATER IN SAG GUTTER (+${gutterDepthIn.toFixed(1)}") — TRAVEL LANE DRY`;
+        if (sillText) sillText.textContent = `🟡 WATER IN FRONT GUTTER (+${frontGutterDepthIn.toFixed(1)}") — STALL DRY`;
         const rect = sillAlert ? sillAlert.querySelector('rect') : null;
         if (rect) {
           rect.setAttribute('fill', '#f59e0b');

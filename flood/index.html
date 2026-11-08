@@ -1226,11 +1226,17 @@
           <rect x="286" y="12" width="68" height="17" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="1.2"/>
           <text x="320" y="24.5" fill="#ffffff" font-size="8.5" font-weight="bold" font-family="monospace" text-anchor="middle">LIVE NOW</text>
 
-          <!-- Dynamic Next High Tide Marker on Forecast Half -->
+          <!-- Dynamic Next High Tide Dual Markers (Creek Crest + Street Sag Peak) -->
           <g id="svgNextHighMarker" transform="translate(0, 0)">
-            <polygon points="0,-6 6,0 0,6 -6,0" fill="#f59e0b" stroke="#ffffff" stroke-width="1"/>
-            <rect id="svgNextHighBox" x="-50" y="-22" width="100" height="14" rx="3" fill="#78350f" stroke="#fbbf24" stroke-width="1"/>
-            <text id="svgNextHighLabel" x="0" y="-12" fill="#fef08a" font-size="7" font-weight="bold" font-family="monospace" text-anchor="middle">▲ Next Peak</text>
+            <!-- Creek Peak Diamond (Cyan) -->
+            <polygon points="0,-5 5,0 0,5 -5,0" fill="#38bdf8" stroke="#ffffff" stroke-width="1"/>
+            <!-- Connecting Lag Line to Street Sag Peak -->
+            <line id="svgPeakLagLine" x1="0" y1="0" x2="16" y2="0" stroke="#fbbf24" stroke-dasharray="2,2" stroke-width="1.5"/>
+            <!-- Street Peak Circle (Amber, +24m lag) -->
+            <circle id="svgStreetPeakDot" cx="16" cy="0" r="4" fill="#fbbf24" stroke="#ffffff" stroke-width="1"/>
+            <!-- Combined Dual Badge -->
+            <rect id="svgNextHighBox" x="-60" y="-22" width="170" height="15" rx="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+            <text id="svgNextHighLabel" x="25" y="-11" fill="#f8fafc" font-size="7" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">▲ Creek Peak ➔ Street (+24m)</text>
           </g>
 
           <!-- Background Elevation Reference Grid Lines (NOAA Live Calibration) -->
@@ -2011,12 +2017,33 @@
           const diffMins = Math.max(0, Math.round((timeline[i].timeMs - nowMs) / (60 * 1000)));
           const hRem = Math.floor(diffMins / 60);
           const mRem = diffMins % 60;
-          const hazard = cur >= 7.55 ? "Small Cars Impassable" : cur >= 6.95 ? "Sag Dip Submerged" : cur >= 6.70 ? "Gutters Wet" : "No Hazard";
+
+          // Calibrated Hydraulic Culvert Ingress Delay:
+          // Water continues pouring through storm culverts into the street basin for ~24 minutes
+          // after Corte Madera Creek crests, so Street Sag reaches peak depth ~24m later!
+          const streetLagMinutes = 24;
+          const streetPeakTimeMs = timeline[i].timeMs + (streetLagMinutes * 60 * 1000);
+          const streetDate = new Date(streetPeakTimeMs);
+          const sH = streetDate.getHours();
+          const sM = streetDate.getMinutes();
+          const sAmPm = sH >= 12 ? 'PM' : 'AM';
+          const sH12 = sH % 12 || 12;
+          const streetTimeLabel = `${timeline[i].dayLabel} ${sH12}:${sM < 10 ? '0' : ''}${sM} ${sAmPm}`;
+          
+          const streetDiffMins = diffMins + streetLagMinutes;
+          const sHRem = Math.floor(streetDiffMins / 60);
+          const sMRem = streetDiffMins % 60;
+
+          const hazard = cur >= 7.55 ? "Small Cars Impassable" : cur >= 7.42 ? "Sag Crown Breached" : cur >= 7.15 ? "Sag Gutters Wet" : "No Hazard";
           return {
             idx: i,
+            streetIdx: Math.min(timeline.length - 1, i + 2), // ~20 min step forward
             timeLabel: `${timeline[i].dayLabel} ${timeline[i].timeLabel}`,
+            streetTimeLabel: streetTimeLabel,
             twl: cur,
             timeRemaining: `${hRem}h ${mRem < 10 ? '0' : ''}${mRem}m`,
+            streetTimeRemaining: `${sHRem}h ${sMRem < 10 ? '0' : ''}${sMRem}m`,
+            streetLagMinutes: streetLagMinutes,
             hazard: hazard
           };
         }
@@ -2296,7 +2323,9 @@
 
     function getClearanceCountdown(currentTwl, isRising) {
       if (isRising && nextHighTideObj) {
-        return `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
+        const creekTime = nextHighTideObj.timeLabel.includes(' ') ? nextHighTideObj.timeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.timeLabel;
+        const streetTime = nextHighTideObj.streetTimeLabel.includes(' ') ? nextHighTideObj.streetTimeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.streetTimeLabel;
+        return `<span style="color:#38bdf8; font-weight:700;">🌊 Creek Crest: ${creekTime} (${nextHighTideObj.twl.toFixed(2)}')</span> &nbsp;•&nbsp; <span style="color:#fbbf24; font-weight:700;">🚗 Sag Peak: ~${streetTime} (+24m lag)</span> <span style="color:#94a3b8; font-weight:normal;">(in ${nextHighTideObj.timeRemaining})</span>`;
       }
       return getStreetClearanceCountdown('gutter');
     }
@@ -2332,18 +2361,30 @@
       document.getElementById('valTWLMLLW').textContent = `Station 9414874: ${(twl - 0.06).toFixed(2)}' MLLW`;
       document.getElementById('valSurge').innerHTML = `+${liveSurge.toFixed(2)} <span>ft</span>`;
 
-      // Compute Trend from Creek Tide
+      // Compute Smoothed Trend over 30-min window (eliminates 1-step sensor noise)
       const nextIdx = Math.min(tideTimeline.length - 1, currentScrubIdx + 1);
-      const diff = tideTimeline[nextIdx].twl - twl;
-      const isRising = (diff > 0.015);
-      const isFalling = (diff < -0.015);
+      const lookAhead = Math.min(tideTimeline.length - 1, currentScrubIdx + 2);
+      const lookBehind = Math.max(0, currentScrubIdx - 2);
+      const windowDiff = tideTimeline[lookAhead].twl - tideTimeline[lookBehind].twl;
+      const singleDiff = tideTimeline[nextIdx].twl - twl;
 
+      // Physical progression relative to upcoming peak
+      const isBeforePeak = nextHighTideObj && (currentScrubIdx < nextHighTideObj.idx);
+      const isNearPeak = nextHighTideObj && Math.abs(currentScrubIdx - nextHighTideObj.idx) <= 1;
+
+      let isRising = false;
+      let isFalling = false;
       const trendEl = document.getElementById('tideTrendIcon');
-      if (Math.abs(diff) < 0.015) {
-        trendEl.textContent = "⏸️ SLACK WATER";
-      } else if (isRising) {
+
+      if (isNearPeak || (Math.abs(windowDiff) < 0.02 && Math.abs(singleDiff) < 0.01)) {
+        trendEl.textContent = "⏸️ HIGH SLACK / CRESTING";
+        isRising = isBeforePeak;
+        isFalling = !isBeforePeak;
+      } else if (windowDiff > 0.01 || (isBeforePeak && (singleDiff >= -0.005 || windowDiff >= 0))) {
+        isRising = true;
         trendEl.textContent = "⬆️ RISING";
       } else {
+        isFalling = true;
         trendEl.textContent = "⬇️ FALLING";
       }
 
@@ -2564,39 +2605,39 @@
           heroTitle.textContent = "Water Approaching Carport Spot #86 (7.75')";
           heroDesc.textContent = "Tide in Corte Madera Creek is surging toward high peak. Water is rapidly filling low ground. Ensure all vehicles are positioned on highest blocks.";
           cdLabel.textContent = "CRESTING AT CARPORT IN:";
-          cdVal.textContent = countdownStr;
+          cdVal.innerHTML = countdownStr;
         } else if (twl >= vInfo.impassableTwl) {
           hero.classList.add('red');
           badge.classList.add('red');
           badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE IMMINENT`;
           heroTitle.textContent = `Crosswalk Sag Will Become Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
-          heroDesc.textContent = `Corte Madera Creek tide is rising rapidly toward peak (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Crosswalk sag dip will submerge as water backs up through storm drains. Do not drive through salt water.`;
-          cdLabel.textContent = "PEAK HIGH TIDE IN:";
-          cdVal.textContent = countdownStr;
+          heroDesc.textContent = `Corte Madera Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Street sag reaches peak depth ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}) due to culvert ingress delay. Do not drive through salt water.`;
+          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
+          cdVal.innerHTML = countdownStr;
         } else if (twl >= 7.38) {
           hero.classList.add('red');
           badge.classList.add('red');
-          badgeText.textContent = "⚠️ SAG DIP SUBMERGED • BACKFILLING ROAD";
-          heroTitle.textContent = `Crosswalk Sag Breached • High Tide Peaking at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}')`;
-          heroDesc.textContent = `Water reached the road crown at the sag dip and is actively filling both sides of the roadway, backfilling down the street toward carports. Do not drive through salt water.`;
-          cdLabel.textContent = "HIGH TIDE PEAK IN:";
-          cdVal.textContent = countdownStr;
+          badgeText.textContent = "⚠️ SAG DIP SUBMERGED • WATER ADVANCING";
+          heroTitle.textContent = `Crosswalk Sag Breached • Creek Crest & Sag Peak Imminent`;
+          heroDesc.textContent = `Water reached road crown at sag dip. Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}'), but culvert inflow will continue filling the street sag until ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m lag). Do not drive through salt water.`;
+          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
+          cdVal.innerHTML = countdownStr;
         } else if (twl >= cfg.crown) { // 6.95'
           hero.classList.add('yellow');
           badge.classList.add('yellow');
-          badgeText.textContent = "TIDE RISING • ROAD CROWN AT RISK";
-          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Dip Inundation Approaching`;
-          heroDesc.textContent = `High tide is rising in Corte Madera Creek toward peak (~${nextHighTideObj ? nextHighTideObj.timeLabel : ''}). Underground storm drain pipes are filling. Road crown and front parking stalls remain dry unless creek breaches 7.38'.`;
-          cdLabel.textContent = "PEAK HIGH TIDE IN:";
-          cdVal.textContent = countdownStr;
+          badgeText.textContent = "TIDE RISING • SAG DIPS AT RISK";
+          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Culvert Filling`;
+          heroDesc.textContent = `Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}'). Due to culvert inflow delay, street sag will reach maximum ponding at ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m delay). Front parking (#326) remains completely dry!`;
+          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
+          cdVal.innerHTML = countdownStr;
         } else {
           hero.classList.add('green');
           badge.classList.add('green');
           badgeText.textContent = "ROAD CLEAR • TIDE RISING";
           heroTitle.textContent = "Roadway & Parking Stalls Currently Clear";
-          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Next high tide is forecast at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL — ${nextHighTideObj ? nextHighTideObj.hazard : ''}).`;
+          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}). Front parking (#326) stays dry!`;
           cdLabel.textContent = "NEXT HIGH TIDE:";
-          cdVal.textContent = countdownStr;
+          cdVal.innerHTML = countdownStr;
         }
       } else {
         // TIDE IS FALLING OR AT SLACK WATER (Physically determined by streetLevel!)
@@ -2607,7 +2648,7 @@
           heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
           heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
           cdLabel.textContent = "FALLING BELOW CARPORT IN:";
-          cdVal.textContent = countdownStr;
+          cdVal.innerHTML = countdownStr;
         } else if (streetLevel >= cfg.crown) { // 6.95'
           hero.classList.add('red');
           badge.classList.add('red');
@@ -2853,17 +2894,38 @@
       if (elStreet) elStreet.setAttribute('d', streetPathD);
       if (elArea) elArea.setAttribute('d', twlAreaD);
 
-      // Render Next High Tide Marker on forecast side
+      // Render Next High Tide Dual Markers (Creek Crest + Street Sag Peak)
       if (nextHighTideObj) {
         const xPeak = getX(nextHighTideObj.idx);
         const yPeak = getY(nextHighTideObj.twl);
+        const xStreetPeak = getX(nextHighTideObj.streetIdx || Math.min(tideTimeline.length - 1, nextHighTideObj.idx + 2));
+        const deltaX = Math.max(12, xStreetPeak - xPeak);
+        
         const markerG = document.getElementById('svgNextHighMarker');
         if (markerG) {
           markerG.setAttribute('transform', `translate(${xPeak}, ${yPeak})`);
           markerG.style.display = 'inline';
+          
+          const lagLine = document.getElementById('svgPeakLagLine');
+          if (lagLine) lagLine.setAttribute('x2', deltaX);
+          
+          const streetDot = document.getElementById('svgStreetPeakDot');
+          if (streetDot) streetDot.setAttribute('cx', deltaX);
+          
           const label = document.getElementById('svgNextHighLabel');
           if (label) {
-            label.textContent = `▲ Next Peak: ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}')`;
+            const creekT = nextHighTideObj.timeLabel.slice(nextHighTideObj.timeLabel.lastIndexOf(' ') + 1);
+            const streetT = nextHighTideObj.streetTimeLabel.slice(nextHighTideObj.streetTimeLabel.lastIndexOf(' ') + 1);
+            label.textContent = `🌊 Creek ${creekT} (${nextHighTideObj.twl.toFixed(2)}') ➔ 🚗 Sag ~${streetT} (+24m)`;
+          }
+          
+          const box = document.getElementById('svgNextHighBox');
+          if (box) {
+            box.setAttribute('x', Math.round(deltaX / 2 - 95));
+            box.setAttribute('width', 190);
+          }
+          if (label) {
+            label.setAttribute('x', Math.round(deltaX / 2));
           }
         }
       }
@@ -2935,7 +2997,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=23').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=28').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

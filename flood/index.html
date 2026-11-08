@@ -1657,13 +1657,14 @@
     const THRESHOLDS = {
       larkspur: {
         name: "Larkspur Plaza Drive",
-        // Calibrated Ground Truth (from Andy's Places KML 3 & Nov 7 Field Sequences):
+        // Calibrated Ground Truth (from Nov 8 2026 Photos & KML Survey):
         sagGutter: 7.15, // Sag Area Gutters (Street Drains 2, 3, & 4 on complex side; fills first at 7.15')
         gutter: 7.15,    // Sag gutter benchmark
+        frontGutter: 7.28, // Front Street Gutters (KML 1.18m GPS: fills at 7.28', flooded in Nov 8 photos at 7.43')
+        houseGutter: 7.28, // Front Street Gutters in front of 326 Larkspur Plaza Dr (takes water at 7.28')
+        frontStall: 7.38,  // Front parking stall apron (submerged in Nov 8 photos at 7.43')
+        walkwayBase: 7.42, // Concrete walkway bottom slab at #326 (water touches walkway slab at 7.42')
         crown: 7.42,    // Crown (SAG in Road) crosswalk travel lane overtopping threshold
-        frontGutter: 7.55, // Front Street Gutters (General front-of-house parking near #326; 100% DRY at 7.47')
-        houseGutter: 7.55, // Front Street Gutters in front of 326 Larkspur Plaza Dr
-        frontStall: 7.75,  // Front parking stall apron grade
         higherPatch: 7.75, // Higher front parking patch
         highCrown: 7.75, // High road crown ridge in foreground
         priusSag: 7.91,  // Impassable for 5.9" clearance (7.42' crown + 0.49' / 5.9" = 7.91')
@@ -2618,8 +2619,8 @@
           hero.classList.add('red');
           badge.classList.add('red');
           badgeText.textContent = "⚠️ SAG DIP SUBMERGED • WATER ADVANCING";
-          heroTitle.textContent = `Crosswalk Sag Breached • Creek Crest & Sag Peak Imminent`;
-          heroDesc.textContent = `Water reached road crown at sag dip. Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}'), but culvert inflow will continue filling the street sag until ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m lag). Do not drive through salt water.`;
+          heroTitle.textContent = `Crosswalk Sag & Front Stalls Submerged • Water Reaching #326 Walkway`;
+          heroDesc.textContent = `Water breached road crown at sag dip and flooded front parking stalls outside #326 (+2 to 3" deep), reaching base of concrete walkway. Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}'), but culvert inflow will continue filling the street sag until ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m lag). Do not drive or park in front stalls.`;
           cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
           cdVal.innerHTML = countdownStr;
         } else if (twl >= cfg.crown) { // 6.95'
@@ -2627,7 +2628,7 @@
           badge.classList.add('yellow');
           badgeText.textContent = "TIDE RISING • SAG DIPS AT RISK";
           heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Culvert Filling`;
-          heroDesc.textContent = `Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}'). Due to culvert inflow delay, street sag will reach maximum ponding at ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m delay). Front parking (#326) remains completely dry!`;
+          heroDesc.textContent = `Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}'). Due to culvert lag, sag reaches maximum ponding at ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m delay). Front street gutters & stalls outside #326 take water above 7.28'!`;
           cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
           cdVal.innerHTML = countdownStr;
         } else {
@@ -2635,7 +2636,7 @@
           badge.classList.add('green');
           badgeText.textContent = "ROAD CLEAR • TIDE RISING";
           heroTitle.textContent = "Roadway & Parking Stalls Currently Clear";
-          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}). Front parking (#326) stays dry!`;
+          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}). Front parking stalls outside #326 take water if peak reaches 7.28'+.`;
           cdLabel.textContent = "NEXT HIGH TIDE:";
           cdVal.innerHTML = countdownStr;
         }
@@ -2997,7 +2998,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=28').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=29').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

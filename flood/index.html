@@ -1888,46 +1888,50 @@
       // 3. Receding Phase: Creek drops quickly, but flat storm pipes (0.23% grade) and salt marsh backwater
       //    limit gravity drainage to ~0.035 ft (0.42 inches) per 10 minutes (4.5 hr drainage lag).
       //    Street water stays retained on pavement and gutters until drained down to 6.70' (dry).
+      // Compute Calibrated Physical Street Drainage Lag across the timeline
+      // Larkspur Plaza Drive drainage physics:
+      // 1. Ingress Phase: Salt water enters curb gutters when Creek TWL >= 7.15'.
+      //    Big Drain #1 surcharges heavily onto street at >= 7.28'.
+      //    Sag travel lane crown overtopped at >= 7.42'.
+      // 2. Receding Phase:
+      //    Center road crown (camber cross-slope) sheds water rapidly (< 20 min).
+      //    Curb gutter pans have near-flat grade (0.15% longitudinal slope), retaining
+      //    residual puddle water (+1" to 2") that slowly drains/dissipates at ~0.010 ft/10min
+      //    over a 4.5-hour retention lag!
       let activePonding = 0.0;
-      let hasBreached = false;
+      let hasGutterWater = false;
       for (let i = 0; i < data.length; i++) {
         const cur = data[i];
         const next = (i < data.length - 1) ? data[i + 1] : cur;
         const isRising = (next.twl > cur.twl + 0.015);
 
         if (isRising) {
-          // Hydraulic Estuary Head Calibration:
-          // Water begins entering street gutters when Richmond TWL >= 7.15'.
-          // Crosswalk sag dip crown begins taking water when Richmond TWL >= 7.42'.
-          if (cur.twl >= 7.42) {
-            hasBreached = true;
-            activePonding = cur.twl;
-          } else if (cur.twl >= 7.15) {
+          if (cur.twl >= 7.15) {
+            hasGutterWater = true;
             activePonding = cur.twl;
           } else {
             activePonding = 0.0;
           }
         } else {
           // Receding / Crest phase
-          if (cur.twl >= 7.42) {
-            hasBreached = true;
-            activePonding = cur.twl;
-          } else if (hasBreached && activePonding > 7.15) {
-            // Water draining with calibrated 4.5-hour marsh lag
-            const drainRatePer10Min = 0.035; // 0.42 inches per 10 min
+          if (cur.twl >= 7.15) {
+            hasGutterWater = true;
+            activePonding = Math.max(cur.twl, activePonding);
+          } else if (hasGutterWater && activePonding > 7.15) {
+            // Water draining with calibrated 4.5-hour gutter retention lag
+            const drainRatePer10Min = 0.010; // ~0.12 inches per 10 min
             activePonding = Math.max(cur.twl, activePonding - drainRatePer10Min);
             if (activePonding <= 7.15 && cur.twl <= 7.15) {
               activePonding = 0.0; // Fully drained dry
-              hasBreached = false;
+              hasGutterWater = false;
             }
-          } else if (cur.twl >= 7.15) {
-            activePonding = cur.twl;
           } else {
             activePonding = 0.0;
+            hasGutterWater = false;
           }
         }
 
-        // streetTWL: If active water exists on pavement from a breach, track it. Otherwise baseline dry tracks Creek TWL.
+        // streetTWL: If active water exists on pavement/gutters, track it. Otherwise baseline dry tracks Creek TWL.
         cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : cur.twl).toFixed(2));
       }
 
@@ -2394,8 +2398,9 @@
         trendEl.textContent = "⬇️ FALLING";
       }
 
-      // Zone 1: Roadway Center Crown at Sag Dip (6.95')
-      const crownDeltaFt = streetLevel - cfg.crown;
+      // Zone 1: Roadway Center Crown at Sag Dip (7.42')
+      // Center crown has transverse camber slope, shedding water sideways into gutters as soon as water drops below 7.42'
+      const crownDeltaFt = (twl >= cfg.crown && streetLevel >= cfg.crown) ? (Math.min(streetLevel, twl) - cfg.crown) : (streetLevel >= cfg.crown ? streetLevel - cfg.crown : 0.0);
       const crownDepthIn = Math.max(0, crownDeltaFt * 12);
       const crownSubEl = document.getElementById('valCrownSub');
       const crownStatusEl = document.getElementById('crownStatusText');
@@ -2435,17 +2440,19 @@
           valFrontParkingDepthEl.style.color = "var(--red)";
           frontParkingStatusEl.textContent = "GUTTER FLOODED";
           frontParkingStatusEl.style.color = "var(--red)";
-          valFrontParkingSubEl.textContent = `Front gutters taking water (+${frontGutterDepthIn.toFixed(1)}")`;
+          valFrontParkingSubEl.textContent = `Front street gutters taking water (+${frontGutterDepthIn.toFixed(1)}")`;
+        } else if (sagGutterDepthIn > 0) {
+          valFrontParkingDepthEl.innerHTML = `+${sagGutterDepthIn.toFixed(1)} <span>in gutter</span>`;
+          valFrontParkingDepthEl.style.color = "var(--amber)";
+          frontParkingStatusEl.textContent = "RESIDUAL PUDDLE";
+          frontParkingStatusEl.style.color = "var(--amber)";
+          valFrontParkingSubEl.textContent = `Front stalls clear • Standing water trapped in curb gutter pan (+${sagGutterDepthIn.toFixed(1)}")`;
         } else {
           valFrontParkingDepthEl.innerHTML = `0.0 <span>in (DRY)</span>`;
           valFrontParkingDepthEl.style.color = "var(--green)";
           frontParkingStatusEl.textContent = "100% DRY";
           frontParkingStatusEl.style.color = "var(--green)";
-          if (sagGutterDepthIn > 0) {
-            valFrontParkingSubEl.textContent = `Front gutters dry • Water confined to sag drains (+${sagGutterDepthIn.toFixed(1)}")`;
-          } else {
-            valFrontParkingSubEl.textContent = `Front street gutters & parking stalls fully dry`;
-          }
+          valFrontParkingSubEl.textContent = `Front street gutters & parking stalls fully dry`;
         }
       }
 
@@ -2555,139 +2562,13 @@
             depthClrEl.textContent = `Travel lane clear • Watch curb gutters`;
             depthClrEl.style.color = "var(--text-muted)";
           }
-        } else if (streetLevel > cfg.gutter) {
-          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
-          crownStatusEl.textContent = "CROWN CLEAR";
-          crownStatusEl.style.color = "var(--green)";
-          if (crownSubEl) crownSubEl.textContent = `Street gutter clear | Low drain draining (+${gutterDepthIn.toFixed(1)}")`;
-
-          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = "var(--green)";
-          if (statusClrEl) {
-            statusClrEl.textContent = "CLEAR";
-            statusClrEl.style.color = "var(--green)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Travel lane completely dry`;
-            depthClrEl.style.color = "var(--text-muted)";
-          }
-        } else {
-          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
-          crownStatusEl.textContent = "DRY";
-          crownStatusEl.style.color = "var(--green)";
-          if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
-
-          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = "var(--green)";
-          if (statusClrEl) {
-            statusClrEl.textContent = "CLEAR";
-            statusClrEl.style.color = "var(--green)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Travel lane completely dry`;
-            depthClrEl.style.color = "var(--text-muted)";
-          }
-        }
-      }
-
-      // Dynamic Hero Status & Countdown
-      const hero = document.getElementById('heroBanner');
-      const badge = document.getElementById('statusBadge');
-      const badgeText = document.getElementById('statusBadgeText');
-      const heroTitle = document.getElementById('heroTitle');
-      const heroDesc = document.getElementById('heroDesc');
-      const cdLabel = document.getElementById('countdownLabel');
-      const cdVal = document.getElementById('countdownVal');
-
-      hero.className = 'status-hero';
-      badge.className = 'badge-pill';
-
-      const countdownStr = getClearanceCountdown(twl, isRising);
-
-      if (isRising) {
-        // TIDE IS RISING TOWARDS HIGH PEAK
-        if (twl >= cfg.stall) {
-          hero.classList.add('red');
-          badge.classList.add('red');
-          badgeText.textContent = "CRITICAL: CARPORT RISK • TIDE RISING";
-          heroTitle.textContent = "Water Approaching Carport Spot #86 (7.75')";
-          heroDesc.textContent = "Tide in Corte Madera Creek is surging toward high peak. Water is rapidly filling low ground. Ensure all vehicles are positioned on highest blocks.";
-          cdLabel.textContent = "CRESTING AT CARPORT IN:";
-          cdVal.innerHTML = countdownStr;
-        } else if (twl >= vInfo.impassableTwl) {
-          hero.classList.add('red');
-          badge.classList.add('red');
-          badgeText.textContent = `${vInfo.name.toUpperCase()} IMPASSABLE IMMINENT`;
-          heroTitle.textContent = `Crosswalk Sag Will Become Impassable for ${vInfo.name} (< ${activeVehicleClearance}")`;
-          heroDesc.textContent = `Corte Madera Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Street sag reaches peak depth ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}) due to culvert ingress delay. Do not drive through salt water.`;
-          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
-          cdVal.innerHTML = countdownStr;
-        } else if (twl >= cfg.crown) { // >= 7.42'
-          hero.classList.add('red');
-          badge.classList.add('red');
-          badgeText.textContent = "⚠️ SAG CROWN BREACHED • ROADWAY SUBMERGED";
-          heroTitle.textContent = `Crosswalk Sag & Front Stalls Submerged • Water Reaching #326 Walkway`;
-          heroDesc.textContent = `Water breached road crown at sag dip and flooded front parking stalls outside #326 (+2 to 3" deep), reaching base of concrete walkway. Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}'), but culvert inflow will continue filling the street sag until ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m lag). Do not drive or park in front stalls.`;
-          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
-          cdVal.innerHTML = countdownStr;
-        } else if (twl >= (cfg.drain1 || 7.28)) { // 7.28' to 7.41'
+        } else if (streetLevel > cfg.gutter) { // > 7.15'
           hero.classList.add('yellow');
           badge.classList.add('yellow');
-          badgeText.textContent = "⚠️ DRAIN #1 DISCHARGING • GUTTERS FILLING";
-          heroTitle.textContent = `Big Drain #1 Surcharging (${twl.toFixed(2)}' TWL) • Gutters Filling`;
-          heroDesc.textContent = `Creek tide has reached 7.28'+. Big Drain #1 (main roadway storm grate) is actively surcharging water onto the street. Curb gutters and front parking stalls outside #326 are beginning to take water. Center travel lane remains passable until 7.42'. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''}.`;
-          cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
-          cdVal.innerHTML = countdownStr;
-        } else if (twl >= (cfg.headwallSeep || 7.10)) { // 7.10' to 7.27'
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "ℹ️ INLET FULL • SEEPAGE AT HEADWALL";
-          heroTitle.textContent = `Inlet Full (${twl.toFixed(2)}' TWL) • Minor Seepage at Concrete Headwall`;
-          heroDesc.textContent = `Marsh ditch inlet is completely full. High water is beginning to seep over the sidewalk curb near the concrete headwall. Travel lanes and Big Drain #1 are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}').`;
-          cdLabel.textContent = "PEAK HIGH TIDE IN:";
-          cdVal.innerHTML = countdownStr;
-        } else {
-          hero.classList.add('green');
-          badge.classList.add('green');
-          badgeText.textContent = "ROAD CLEAR • TIDE RISING";
-          heroTitle.textContent = "Roadway & Parking Stalls Currently Clear";
-          heroDesc.textContent = `Road crown, front stalls, Big Drain #1, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}).`;
-          cdLabel.textContent = "NEXT HIGH TIDE:";
-          cdVal.innerHTML = countdownStr;
-        }
-      } else {
-        // TIDE IS FALLING OR AT SLACK WATER (Physically determined by streetLevel!)
-        if (twl >= cfg.stall) {
-          hero.classList.add('red');
-          badge.classList.add('red');
-          badgeText.textContent = "CRITICAL: CARPORT AT RISK";
-          heroTitle.textContent = "Water Reaching Carport Spot #86 (7.75')";
-          heroDesc.textContent = "Tide has reached stall slab. Ensure all vehicles are positioned on highest blocks.";
-          cdLabel.textContent = "FALLING BELOW CARPORT IN:";
-          cdVal.innerHTML = countdownStr;
-        } else if (streetLevel >= cfg.crown) { // 6.95'
-          hero.classList.add('red');
-          badge.classList.add('red');
-          badgeText.textContent = "⚠️ SAG DIP SUBMERGED • DRAINING WITH LAG";
-          heroTitle.textContent = `Crosswalk Sag & Gutters Submerged (+${crownDepthIn.toFixed(1)}" on crown | +${houseGutterDepthIn.toFixed(1)}" in street gutter)`;
-          heroDesc.textContent = `Creek tide has dropped, but salt water remains trapped across the sag dip and curb gutters (+${crownDepthIn.toFixed(1)} in deep) due to 4.5-hour marsh drainage lag. Do not drive through salt water.`;
-          cdLabel.textContent = "ESTIMATED TRAVEL LANE CLEARANCE:";
-          cdVal.textContent = getStreetClearanceCountdown('crown');
-        } else if (streetLevel >= (cfg.houseGutter || 6.85)) { // 6.85'
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "⚠️ TRAVEL LANE CLEAR • FRONT STALLS FLOODED";
-          heroTitle.textContent = `Travel Lanes Passable • Front Stalls & Street Gutter Flooded (+${houseGutterDepthIn.toFixed(1)}")`;
-          heroDesc.textContent = `Center road crown is dry and passable for driving. However, curb gutters and parking stalls remain flooded with standing salt water (+${houseGutterDepthIn.toFixed(1)} in in street gutter, +${gutterDepthIn.toFixed(1)} in low drain) due to severe drainage lag. Do not park in front stalls yet.`;
-          cdLabel.textContent = "ESTIMATED FRONT STALL CLEARANCE:";
-          cdVal.textContent = getStreetClearanceCountdown('houseGutter');
-        } else if (streetLevel > cfg.gutter) { // > 6.70' (strictly greater than dry baseline!)
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "FRONT STALLS CLEAR • LOW GUTTER DRAINING";
-          heroTitle.textContent = `Front Parking Stalls Clear • Low Gutters Draining (+${gutterDepthIn.toFixed(1)}")`;
-          heroDesc.textContent = `Front parking stalls and street gutter are clear. Minor standing water remains in the lowest crosswalk drain (~6.70'). Full street drainage nearly complete.`;
-          cdLabel.textContent = "ESTIMATED COMPLETE CLEARANCE:";
+          badgeText.textContent = "⚠️ TRAVEL LANES CLEAR • RESIDUAL GUTTER WATER";
+          heroTitle.textContent = `Travel Lanes Clear & Passable • Standing Water in Curb Gutters (+${gutterDepthIn.toFixed(1)}")`;
+          heroDesc.textContent = `Center roadway crown and front parking stalls are completely clear and passable for all vehicles. Residual standing water (+${gutterDepthIn.toFixed(1)} in deep) remains trapped in the curb gutter pan in front of #326 and near the sag dip due to flat gutter drainage lag. Avoid parking directly in gutter pans until dry.`;
+          cdLabel.textContent = "ESTIMATED GUTTER CLEARANCE:";
           cdVal.textContent = getStreetClearanceCountdown('gutter');
         } else {
           hero.classList.add('green');

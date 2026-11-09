@@ -1927,8 +1927,8 @@
           }
         }
 
-        // streetTWL: If active water exists on pavement from a breach, track it. Otherwise baseline dry (6.70').
-        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : 7.15).toFixed(2));
+        // streetTWL: If active water exists on pavement from a breach, track it. Otherwise baseline dry tracks Creek TWL.
+        cur.streetTWL = parseFloat((activePonding > 0 ? activePonding : cur.twl).toFixed(2));
       }
 
       return data;
@@ -2313,7 +2313,7 @@
       // Look forward from currentScrubIdx for when streetTWL drops below targetElev
       for (let i = currentScrubIdx; i < tideTimeline.length; i++) {
         const sTWL = (tideTimeline[i].streetTWL !== undefined) ? tideTimeline[i].streetTWL : tideTimeline[i].twl;
-        if (sTWL < targetElev) {
+        if (sTWL <= targetElev) {
           const diffMins = (i - currentScrubIdx) * 10;
           if (diffMins <= 0) return "CLEAR NOW";
           const h = Math.floor(diffMins / 60);
@@ -2359,6 +2359,7 @@
       // Metric calculations
       const twl = point.twl;
       const streetLevel = (point.streetTWL !== undefined) ? point.streetTWL : point.twl;
+      const effectiveTwl = streetLevel; // For fullscreen banner and clearance checks
 
       document.getElementById('valTWL').innerHTML = `${twl.toFixed(2)} <span>ft NAVD88</span>`;
       document.getElementById('valTWLMLLW').textContent = `Station 9414874: ${(twl - 0.06).toFixed(2)}' MLLW`;
@@ -2371,8 +2372,10 @@
       const windowDiff = tideTimeline[lookAhead].twl - tideTimeline[lookBehind].twl;
       const singleDiff = tideTimeline[nextIdx].twl - twl;
 
-      // Physical progression relative to upcoming peak
-      const isBeforePeak = nextHighTideObj && (currentScrubIdx < nextHighTideObj.idx);
+      // Physical progression relative to upcoming peak:
+      // Peak must be within imminent 6-hour tidal window (<= 36 steps) to prevent tomorrow's high peak from overriding today's falling trend
+      const isImminentPeak = nextHighTideObj && ((nextHighTideObj.idx - currentScrubIdx) <= 36) && ((nextHighTideObj.idx - currentScrubIdx) >= 0);
+      const isBeforePeak = isImminentPeak;
       const isNearPeak = nextHighTideObj && Math.abs(currentScrubIdx - nextHighTideObj.idx) <= 1;
 
       let isRising = false;
@@ -2383,7 +2386,7 @@
         trendEl.textContent = "⏸️ HIGH SLACK / CRESTING";
         isRising = isBeforePeak;
         isFalling = !isBeforePeak;
-      } else if (windowDiff > 0.01 || (isBeforePeak && (singleDiff >= -0.005 || windowDiff >= 0))) {
+      } else if (windowDiff > 0.01 || (singleDiff > 0.01 && windowDiff >= 0)) {
         isRising = true;
         trendEl.textContent = "⬆️ RISING";
       } else {
@@ -2402,14 +2405,16 @@
       const statusClrEl = document.getElementById('valPriusStatusText');
       const depthClrEl = document.getElementById('valPriusDepth');
 
-      // Zone 2: Front Street Gutters & Front Parking (Front of House #326, Breaches at 7.55' TWL)
-      const frontGutterThresh = cfg.frontGutter || 7.55;
+      // Zone 2: Front Street Gutters & Front Parking (Front of House #326, Breaches at 7.28' TWL)
+      const frontGutterThresh = cfg.frontGutter || 7.28;
       const frontGutterDeltaFt = streetLevel - frontGutterThresh;
       const frontGutterDepthIn = Math.max(0, frontGutterDeltaFt * 12);
+      const houseGutterDepthIn = frontGutterDepthIn; // Alias for front gutter in front of #326
       
       const sagGutterThresh = cfg.sagGutter || 7.15;
       const sagGutterDeltaFt = streetLevel - sagGutterThresh;
       const sagGutterDepthIn = Math.max(0, sagGutterDeltaFt * 12);
+      const gutterDepthIn = sagGutterDepthIn; // Alias for sag gutter / low crosswalk drain
 
       const frontParkingStatusEl = document.getElementById('frontParkingStatusText');
       const valFrontParkingDepthEl = document.getElementById('valFrontParkingDepth');
@@ -2550,7 +2555,7 @@
             depthClrEl.textContent = `Travel lane clear • Watch curb gutters`;
             depthClrEl.style.color = "var(--text-muted)";
           }
-        } else if (streetLevel >= cfg.gutter) {
+        } else if (streetLevel > cfg.gutter) {
           valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
           crownStatusEl.textContent = "CROWN CLEAR";
           crownStatusEl.style.color = "var(--green)";
@@ -2925,8 +2930,8 @@
           
           const label = document.getElementById('svgNextHighLabel');
           if (label) {
-            const creekT = nextHighTideObj.timeLabel.slice(nextHighTideObj.timeLabel.lastIndexOf(' ') + 1);
-            const streetT = nextHighTideObj.streetTimeLabel.slice(nextHighTideObj.streetTimeLabel.lastIndexOf(' ') + 1);
+            const creekT = nextHighTideObj.timeLabel.includes(' ') ? nextHighTideObj.timeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.timeLabel;
+            const streetT = nextHighTideObj.streetTimeLabel.includes(' ') ? nextHighTideObj.streetTimeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.streetTimeLabel;
             label.textContent = `🌊 Creek ${creekT} (${nextHighTideObj.twl.toFixed(2)}') ➔ 🚗 Sag ~${streetT} (+24m)`;
           }
           

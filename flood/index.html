@@ -1658,8 +1658,10 @@
       larkspur: {
         name: "Larkspur Plaza Drive",
         // Calibrated Ground Truth (from Nov 8 2026 Photos & KML Survey):
+        headwallSeep: 7.10, // Inlet full; water seeps over sidewalk near concrete headwall
         sagGutter: 7.15, // Sag Area Gutters (Street Drains 2, 3, & 4 on complex side; fills first at 7.15')
         gutter: 7.15,    // Sag gutter benchmark
+        drain1: 7.28,    // Big Drain #1 (Main roadway storm grate; surcharges heavily onto street at 7.28')
         frontGutter: 7.28, // Front Street Gutters (KML 1.18m GPS: fills at 7.28', flooded in Nov 8 photos at 7.43')
         houseGutter: 7.28, // Front Street Gutters in front of 326 Larkspur Plaza Dr (takes water at 7.28')
         frontStall: 7.38,  // Front parking stall apron (submerged in Nov 8 photos at 7.43')
@@ -2615,28 +2617,36 @@
           heroDesc.textContent = `Corte Madera Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : 7.44}'). Street sag reaches peak depth ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}) due to culvert ingress delay. Do not drive through salt water.`;
           cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
           cdVal.innerHTML = countdownStr;
-        } else if (twl >= 7.38) {
+        } else if (twl >= cfg.crown) { // >= 7.42'
           hero.classList.add('red');
           badge.classList.add('red');
-          badgeText.textContent = "⚠️ SAG DIP SUBMERGED • WATER ADVANCING";
+          badgeText.textContent = "⚠️ SAG CROWN BREACHED • ROADWAY SUBMERGED";
           heroTitle.textContent = `Crosswalk Sag & Front Stalls Submerged • Water Reaching #326 Walkway`;
           heroDesc.textContent = `Water breached road crown at sag dip and flooded front parking stalls outside #326 (+2 to 3" deep), reaching base of concrete walkway. Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : '7.48'}'), but culvert inflow will continue filling the street sag until ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m lag). Do not drive or park in front stalls.`;
           cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
           cdVal.innerHTML = countdownStr;
-        } else if (twl >= cfg.crown) { // 6.95'
+        } else if (twl >= (cfg.drain1 || 7.28)) { // 7.28' to 7.41'
           hero.classList.add('yellow');
           badge.classList.add('yellow');
-          badgeText.textContent = "TIDE RISING • SAG DIPS AT RISK";
-          heroTitle.textContent = `Tide Rising in Creek (${twl.toFixed(2)}' TWL) • Sag Culvert Filling`;
-          heroDesc.textContent = `Creek tide crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}'). Due to culvert lag, sag reaches maximum ponding at ~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''} (+24m delay). Front street gutters & stalls outside #326 take water above 7.28'!`;
+          badgeText.textContent = "⚠️ DRAIN #1 DISCHARGING • GUTTERS FILLING";
+          heroTitle.textContent = `Big Drain #1 Surcharging (${twl.toFixed(2)}' TWL) • Gutters Filling`;
+          heroDesc.textContent = `Creek tide has reached 7.28'+. Big Drain #1 (main roadway storm grate) is actively surcharging water onto the street. Curb gutters and front parking stalls outside #326 are beginning to take water. Center travel lane remains passable until 7.42'. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''}.`;
           cdLabel.textContent = "HIGH TIDE & SAG PEAK IN:";
+          cdVal.innerHTML = countdownStr;
+        } else if (twl >= (cfg.headwallSeep || 7.10)) { // 7.10' to 7.27'
+          hero.classList.add('yellow');
+          badge.classList.add('yellow');
+          badgeText.textContent = "ℹ️ INLET FULL • SEEPAGE AT HEADWALL";
+          heroTitle.textContent = `Inlet Full (${twl.toFixed(2)}' TWL) • Minor Seepage at Concrete Headwall`;
+          heroDesc.textContent = `Marsh ditch inlet is completely full. High water is beginning to seep over the sidewalk curb near the concrete headwall. Travel lanes and Big Drain #1 are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}').`;
+          cdLabel.textContent = "PEAK HIGH TIDE IN:";
           cdVal.innerHTML = countdownStr;
         } else {
           hero.classList.add('green');
           badge.classList.add('green');
           badgeText.textContent = "ROAD CLEAR • TIDE RISING";
           heroTitle.textContent = "Roadway & Parking Stalls Currently Clear";
-          heroDesc.textContent = `Road crown, front stalls, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}). Front parking stalls outside #326 take water if peak reaches 7.28'+.`;
+          heroDesc.textContent = `Road crown, front stalls, Big Drain #1, and curb gutters are completely dry. Creek crests at ${nextHighTideObj ? nextHighTideObj.timeLabel : ''} (${nextHighTideObj ? nextHighTideObj.twl.toFixed(2) : ''}' TWL); street sag reaches max ponding ~24m later (~${nextHighTideObj ? nextHighTideObj.streetTimeLabel : ''}).`;
           cdLabel.textContent = "NEXT HIGH TIDE:";
           cdVal.innerHTML = countdownStr;
         }
@@ -2998,7 +3008,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=29').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=30').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

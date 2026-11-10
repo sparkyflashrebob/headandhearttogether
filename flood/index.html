@@ -832,23 +832,23 @@
     </div>
 
     <!-- MAIN LIVE STATUS HERO BANNER -->
-    <section class="status-hero red" id="heroBanner">
+    <section class="status-hero green" id="heroBanner">
       <div class="status-header-row">
-        <div class="badge-pill red" id="statusBadge">
+        <div class="badge-pill green" id="statusBadge">
           <span class="pulse-dot"></span>
-          <span id="statusBadgeText">SMALL CAR IMPASSABLE</span>
+          <span id="statusBadgeText">SYNCING LIVE NOAA DATA...</span>
         </div>
         <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--mono);" id="currentLocationName">
           Larkspur Plaza Dr
         </div>
       </div>
-      <div class="hero-title" id="heroTitle">Crosswalk Sag Impassable for Small Cars</div>
+      <div class="hero-title" id="heroTitle">Connecting to Real-Time Water Level Sensors...</div>
       <div class="hero-desc" id="heroDesc">
-        Water over the crosswalk dip exceeds 5.9 inches ground clearance. Road impassable for small cars and low-clearance sedans.
+        Fetching live geodetic NAVD88 water levels from NOAA Station 9414863 &amp; Station 9414290 to compute street elevation clearance and drainage status...
       </div>
       <div class="countdown-bar">
-        <div class="countdown-label" id="countdownLabel">ESTIMATED SMALL CAR CLEARANCE:</div>
-        <div class="countdown-val" id="countdownVal">Calculating...</div>
+        <div class="countdown-label" id="countdownLabel">LIVE STATUS:</div>
+        <div class="countdown-val" id="countdownVal">Syncing...</div>
       </div>
     </section>
 
@@ -2429,9 +2429,9 @@
 
     // Dynamic Real-Time Countdown to Reopening or Next High Tide
     function getStreetClearanceCountdown(thresholdKey) {
-      if (!tideTimeline.length) return "CLEAR NOW";
+      if (!tideTimeline || !tideTimeline.length) return "Syncing...";
       const cfg = THRESHOLDS[activeLocKey];
-      const targetElev = cfg[thresholdKey] || 6.70;
+      const targetElev = cfg[thresholdKey] || 7.15;
       
       // Look forward from currentScrubIdx for when streetTWL drops below targetElev
       for (let i = currentScrubIdx; i < tideTimeline.length; i++) {
@@ -2450,10 +2450,10 @@
     function getClearanceCountdown(currentTwl, isRising) {
       if (isRising && nextHighTideObj) {
         const creekTime = nextHighTideObj.timeLabel.includes(' ') ? nextHighTideObj.timeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.timeLabel;
-        const streetTime = nextHighTideObj.streetTimeLabel.includes(' ') ? nextHighTideObj.streetTimeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.streetTimeLabel;
-        return `<span style="color:#38bdf8; font-weight:700;">🌊 Creek Crest: ${creekTime} (${nextHighTideObj.twl.toFixed(2)}')</span> &nbsp;•&nbsp; <span style="color:#fbbf24; font-weight:700;">🚗 Sag Peak: ~${streetTime} (+24m lag)</span> <span style="color:#94a3b8; font-weight:normal;">(in ${nextHighTideObj.timeRemaining})</span>`;
+        const streetTime = nextHighTideObj.streetTimeLabel ? (nextHighTideObj.streetTimeLabel.includes(' ') ? nextHighTideObj.streetTimeLabel.split(' ').slice(1).join(' ') : nextHighTideObj.streetTimeLabel) : creekTime;
+        return `<span style="color:#38bdf8; font-weight:700;">🌊 Creek Crest: ${creekTime} (${nextHighTideObj.twl.toFixed(2)}')</span> &nbsp;•&nbsp; <span style="color:#fbbf24; font-weight:700;">🚗 Sag Peak: ~${streetTime}</span> <span style="color:#94a3b8; font-weight:normal;">(in ${nextHighTideObj.timeRemaining})</span>`;
       }
-      return getStreetClearanceCountdown('gutter');
+      return getStreetClearanceCountdown('crown');
     }
 
     // Core Dynamic UI State Update
@@ -2593,117 +2593,140 @@
       }
 
       // Roadway Crown & Vehicle Clearance Updates
-      if (isRising) {
-        // RISING PHASE:
-        if (twl >= 7.38) {
-          const dipDepthIn = Math.max(0.5, (twl - 7.38) * 12 + 1.0);
-          valCrownEl.innerHTML = `+${dipDepthIn.toFixed(1)} <span>in water</span>`;
-          crownStatusEl.textContent = "SUBMERGED";
-          crownStatusEl.style.color = "var(--red)";
-          if (crownSubEl) crownSubEl.textContent = `Breached at ~3:58 PM • Actively backfilling both lanes`;
+      const effectiveCrownDepthIn = isRising ? ((twl >= 7.38) ? Math.max(0.5, (twl - 7.38) * 12) : 0.0) : Math.max(0, (streetLevel - cfg.crown) * 12);
+      const effectiveSagGutterDepthIn = isRising ? ((twl >= cfg.sagGutter) ? Math.max(0.2, (twl - cfg.sagGutter) * 12) : 0.0) : Math.max(0, (streetLevel - cfg.sagGutter) * 12);
+      const effectiveFrontGutterDepthIn = isRising ? ((twl >= cfg.frontGutter) ? Math.max(0.2, (twl - cfg.frontGutter) * 12) : 0.0) : Math.max(0, (streetLevel - cfg.frontGutter) * 12);
+      const maxGutterDepthIn = Math.max(effectiveSagGutterDepthIn, effectiveFrontGutterDepthIn);
 
-          const remClr = Math.max(0, activeVehicleClearance - dipDepthIn);
-          valClrEl.innerHTML = `${remClr.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = remClr < 2.0 ? "var(--red)" : "var(--amber)";
-          if (statusClrEl) {
-            statusClrEl.textContent = remClr < 1.5 ? "IMPASSABLE" : "REDUCED";
-            statusClrEl.style.color = remClr < 1.5 ? "var(--red)" : "var(--amber)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Sag dip water: ${dipDepthIn.toFixed(1)}" deep • Backfilling road`;
-            depthClrEl.style.color = "#fca5a5";
-          }
-        } else if (twl >= cfg.gutter) {
-          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
-          crownStatusEl.textContent = "DRY";
-          crownStatusEl.style.color = "var(--green)";
-          if (crownSubEl) crownSubEl.textContent = `Crown dry • Water filling storm pipes & curb gutters`;
+      // 1. Update Card in Zone 1 (Roadway Crown & Prius Clearance Card)
+      if (effectiveCrownDepthIn >= Math.min(activeVehicleClearance, 4.8)) {
+        valCrownEl.innerHTML = `+${effectiveCrownDepthIn.toFixed(1)} <span>in water</span>`;
+        crownStatusEl.textContent = "SUBMERGED";
+        crownStatusEl.style.color = "var(--red)";
+        if (crownSubEl) crownSubEl.textContent = `Sag dip overtopped • Both travel lanes flooded`;
 
-          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = "var(--green)";
-          if (statusClrEl) {
-            statusClrEl.textContent = "PASSABLE";
-            statusClrEl.style.color = "var(--green)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Road crown dry • Breach expected at 7.38'`;
-            depthClrEl.style.color = "var(--text-muted)";
-          }
-        } else {
-          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
-          crownStatusEl.textContent = "DRY";
-          crownStatusEl.style.color = "var(--green)";
-          if (crownSubEl) crownSubEl.textContent = `Roadway & curb gutters fully dry`;
+        const remClr = Math.max(0, activeVehicleClearance - effectiveCrownDepthIn);
+        valClrEl.innerHTML = `${remClr.toFixed(1)} <span>in clr</span>`;
+        valClrEl.style.color = "var(--red)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "IMPASSABLE";
+          statusClrEl.style.color = "var(--red)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = `Sag dip water: ${effectiveCrownDepthIn.toFixed(1)}" deep (Impassable for small cars)`;
+          depthClrEl.style.color = "#fca5a5";
+        }
+      } else if (effectiveCrownDepthIn > 0.1) {
+        valCrownEl.innerHTML = `+${effectiveCrownDepthIn.toFixed(1)} <span>in water</span>`;
+        crownStatusEl.textContent = "SHALLOW COVER";
+        crownStatusEl.style.color = "var(--amber)";
+        if (crownSubEl) crownSubEl.textContent = `Shallow water over sag dip • Drive center divide`;
 
-          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = "var(--green)";
-          if (statusClrEl) {
-            statusClrEl.textContent = "CLEAR";
-            statusClrEl.style.color = "var(--green)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Travel lane completely dry`;
-            depthClrEl.style.color = "var(--text-muted)";
-          }
+        const remClr = Math.max(0, activeVehicleClearance - effectiveCrownDepthIn);
+        valClrEl.innerHTML = `${remClr.toFixed(1)} <span>in clr</span>`;
+        valClrEl.style.color = "var(--amber)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "PASSABLE";
+          statusClrEl.style.color = "var(--amber)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = `Center divide passable with caution`;
+          depthClrEl.style.color = "var(--amber)";
         }
       } else {
-        // RECEDING / PEAK CREST PHASE (Driven by physical streetLevel!)
-        if (streetLevel >= cfg.crown) {
-          valCrownEl.innerHTML = `+${crownDepthIn.toFixed(1)} <span>in water</span>`;
-          crownStatusEl.textContent = "SUBMERGED";
-          crownStatusEl.style.color = "var(--red)";
-          if (crownSubEl) crownSubEl.textContent = `Sag Dip: +${crownDepthIn.toFixed(1)}" | Street Gutter: +${houseGutterDepthIn.toFixed(1)}"`;
-
-          const remClr = Math.max(0, activeVehicleClearance - crownDepthIn);
-          valClrEl.innerHTML = `${remClr.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = remClr < 2.0 ? "var(--red)" : "var(--amber)";
-          if (statusClrEl) {
-            statusClrEl.textContent = remClr < 1.5 ? "IMPASSABLE" : "REDUCED";
-            statusClrEl.style.color = remClr < 1.5 ? "var(--red)" : "var(--amber)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Sag dip water: ${crownDepthIn.toFixed(1)}" deep (Receding with lag)`;
-            depthClrEl.style.color = "#fca5a5";
-          }
-        } else if (streetLevel >= (cfg.houseGutter || 6.85)) {
-          valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
-          crownStatusEl.textContent = "CROWN CLEAR";
-          crownStatusEl.style.color = "var(--green)";
-          if (crownSubEl) crownSubEl.textContent = `Crown dry | Front stalls flooded (+${houseGutterDepthIn.toFixed(1)}")`;
-
-          valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
-          valClrEl.style.color = "var(--green)";
-          if (statusClrEl) {
-            statusClrEl.textContent = "PASSABLE";
-            statusClrEl.style.color = "var(--green)";
-          }
-          if (depthClrEl) {
-            depthClrEl.textContent = `Travel lane clear • Watch curb gutters`;
-            depthClrEl.style.color = "var(--text-muted)";
-          }
-        } else if (streetLevel > cfg.gutter) { // > 7.15'
-          hero.classList.add('yellow');
-          badge.classList.add('yellow');
-          badgeText.textContent = "⚠️ TRAVEL LANES CLEAR • RESIDUAL GUTTER WATER";
-          heroTitle.textContent = `Travel Lanes Clear & Passable • Standing Water in Curb Gutters (+${gutterDepthIn.toFixed(1)}")`;
-          heroDesc.textContent = `Center roadway crown and front parking stalls are completely clear and passable for all vehicles. Residual standing water (+${gutterDepthIn.toFixed(1)} in deep) remains trapped in the curb gutter pan in front of #326 and near the sag dip due to flat gutter drainage lag. Avoid parking directly in gutter pans until dry.`;
-          cdLabel.textContent = "ESTIMATED GUTTER CLEARANCE:";
-          cdVal.textContent = getStreetClearanceCountdown('gutter');
-        } else {
-          hero.classList.add('green');
-          badge.classList.add('green');
-          badgeText.textContent = "ROAD & PARKING 100% CLEAR";
-          heroTitle.textContent = "Roadway, Front Stalls & Curb Gutters 100% Clear";
-          if (nextHighTideObj) {
-            heroDesc.textContent = `Road crown, front parking stalls, and curb gutters completely dry. Next high tide is forecast at ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}' TWL — ${nextHighTideObj.hazard}).`;
-            cdLabel.textContent = "NEXT HIGH TIDE:";
-            cdVal.textContent = `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`;
-          } else {
-            heroDesc.textContent = "All salt water has receded. Road crown, front stalls, and curb gutters completely dry all the way down the street.";
-            cdLabel.textContent = "STATUS:";
-            cdVal.textContent = "100% Clear";
-          }
+        valCrownEl.innerHTML = `0.0 <span>in dry</span>`;
+        crownStatusEl.textContent = "CROWN DRY";
+        crownStatusEl.style.color = "var(--green)";
+        if (crownSubEl) {
+          crownSubEl.textContent = (maxGutterDepthIn > 0.1)
+            ? `Center travel lanes clear • Puddle in crosswalk ramp (+${maxGutterDepthIn.toFixed(1)}")`
+            : `Roadway & curb gutters fully dry`;
         }
+
+        valClrEl.innerHTML = `${activeVehicleClearance.toFixed(1)} <span>in clr</span>`;
+        valClrEl.style.color = "var(--green)";
+        if (statusClrEl) {
+          statusClrEl.textContent = "CLEAR";
+          statusClrEl.style.color = "var(--green)";
+        }
+        if (depthClrEl) {
+          depthClrEl.textContent = (maxGutterDepthIn > 0.1)
+            ? `Main street open • Pedestrian crosswalk flooded`
+            : `Travel lanes completely dry`;
+          depthClrEl.style.color = (maxGutterDepthIn > 0.1) ? "var(--amber)" : "var(--text-muted)";
+        }
+      }
+
+      // 2. Update Main Live Hero Status Banner (Safely referencing DOM elements)
+      const heroBanner = document.getElementById('heroBanner');
+      const statusBadge = document.getElementById('statusBadge');
+      const statusBadgeText = document.getElementById('statusBadgeText');
+      const heroTitle = document.getElementById('heroTitle');
+      const heroDesc = document.getElementById('heroDesc');
+      const countdownLabel = document.getElementById('countdownLabel');
+      const countdownVal = document.getElementById('countdownVal');
+
+      function applyHeroState(theme, badgeStr, titleStr, descStr, countLabelStr, countValHtml) {
+        if (heroBanner) {
+          heroBanner.className = `status-hero ${theme}`;
+        }
+        if (statusBadge) {
+          statusBadge.className = `badge-pill ${theme}`;
+        }
+        if (statusBadgeText) statusBadgeText.textContent = badgeStr;
+        if (heroTitle) heroTitle.textContent = titleStr;
+        if (heroDesc) heroDesc.textContent = descStr;
+        if (countdownLabel) countdownLabel.textContent = countLabelStr;
+        if (countdownVal) countdownVal.innerHTML = countValHtml;
+      }
+
+      if (effectiveCrownDepthIn >= Math.min(activeVehicleClearance, 4.8)) {
+        // Condition 1: Roadway Submerged & Impassable for Small Cars
+        applyHeroState(
+          'red',
+          '🔴 SMALL CAR IMPASSABLE',
+          `Roadway Submerged at Crosswalk Sag (+${effectiveCrownDepthIn.toFixed(1)}")`,
+          `Water over the center road crown is +${effectiveCrownDepthIn.toFixed(1)}" deep, exceeding safe ground clearance for ${vInfo.name} (${activeVehicleClearance}" clearance). The crosswalk sag dip travel lane is impassable for small cars and low-clearance sedans. High-clearance vehicles only; avoid driving through saltwater.`,
+          'ESTIMATED SMALL CAR CLEARANCE:',
+          getClearanceCountdown(twl, isRising)
+        );
+      } else if (effectiveCrownDepthIn > 0.1) {
+        // Condition 2: Shallow Water Over Road Crown (Drive Center Divide)
+        applyHeroState(
+          'yellow',
+          `⚠️ ROAD CROWN COVERED (+${effectiveCrownDepthIn.toFixed(1)}") • DRIVE CENTER DIVIDE`,
+          `Shallow Water Over Road Crown • Drive Center Divide`,
+          `Water covers the crosswalk sag dip (+${effectiveCrownDepthIn.toFixed(1)}" deep). All cars can navigate through the center divide crown with caution. Pedestrian crosswalk and sidewalk curb ramps are completely impassable on foot.`,
+          'ESTIMATED ROAD CROWN CLEAR:',
+          getStreetClearanceCountdown('crown')
+        );
+      } else if (maxGutterDepthIn > 0.1 || streetLevel >= cfg.sagGutter) {
+        // Condition 3: Travel Lanes Open & Passable • Pedestrian Crosswalk & Gutters Wet
+        applyHeroState(
+          'yellow',
+          '🚗 TRAVEL LANES OPEN • PEDESTRIAN CROSSWALK WET',
+          `Main Street Open & Passable • Pedestrian Crosswalk Flooded`,
+          `Center roadway travel lanes and front parking stalls are completely clear and passable for all vehicles (drive through center divide in sag area). The pedestrian crosswalk at the sag dip and curb gutters hold standing water (+${maxGutterDepthIn.toFixed(1)}") and are impassable on foot.`,
+          'ESTIMATED GUTTER & CROSSWALK CLEARANCE:',
+          getStreetClearanceCountdown('sagGutter')
+        );
+      } else {
+        // Condition 4: 100% Clear Everywhere
+        const nextTideHtml = nextHighTideObj
+          ? `${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}') in ${nextHighTideObj.timeRemaining}`
+          : "100% Clear";
+        const nextTideDesc = nextHighTideObj
+          ? `Center road crown, travel lanes, pedestrian crosswalks, front parking stalls, and curb gutters are completely dry all the way down the street. Next high tide is forecast at ${nextHighTideObj.timeLabel} (${nextHighTideObj.twl.toFixed(2)}' TWL — ${nextHighTideObj.hazard}).`
+          : "All salt water has receded. Center road crown, travel lanes, pedestrian crosswalks, front parking stalls, and curb gutters are completely dry all the way down the street.";
+
+        applyHeroState(
+          'green',
+          '🟢 ROAD & PARKING 100% CLEAR',
+          'Roadway, Front Stalls & Curb Gutters 100% Clear',
+          nextTideDesc,
+          nextHighTideObj ? 'NEXT HIGH TIDE:' : 'STATUS:',
+          nextTideHtml
+        );
       }
 
       // Update Fullscreen Status Banner if present
@@ -3013,7 +3036,7 @@
     // Startup Initialization
     document.addEventListener('DOMContentLoaded', () => {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js?v=30').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=37').catch(() => {});
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();

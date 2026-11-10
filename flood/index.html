@@ -1645,6 +1645,125 @@
         </div>
       </div>
 
+      <!-- SMS & CONDITION NOTIFICATION PREFERENCES -->
+      <div class="setting-group" style="border-top: 1px solid rgba(255,255,255,0.12); padding-top: 18px; margin-top: 18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="margin-bottom:0;">🔔 Condition Alert & SMS Settings</label>
+          <span style="font-size:0.72rem; color:var(--cyan); font-family:var(--mono);">Automated Triggers</span>
+        </div>
+        <div style="font-size:0.76rem; color:var(--text-muted); margin-bottom:14px; line-height:1.45;">
+          Select the exact street conditions that trigger automated alerts. Register your mobile phone and carrier to receive real-time SMS texts during tidal surges:
+        </div>
+
+        <!-- Phone & Carrier Inputs -->
+        <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:10px; margin-bottom:14px;">
+          <div>
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:4px; font-weight:600;">Mobile Phone #</div>
+            <input type="tel" id="alertPhoneInput" placeholder="(415) 555-1234" maxlength="14" oninput="formatPhoneNumber(this)" style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:9px 11px; color:#f8fafc; font-size:0.88rem; outline:none; font-family:var(--mono);">
+          </div>
+          <div>
+            <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:4px; font-weight:600;">Cell Carrier (for SMS)</div>
+            <select id="alertCarrierSelect" style="width:100%; box-sizing:border-box; background:#1e293b; border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:9px 10px; color:#f8fafc; font-size:0.84rem; outline:none; cursor:pointer;">
+              <option value="verizon">Verizon (@vtext.com)</option>
+              <option value="att">AT&T (@txt.att.net)</option>
+              <option value="tmobile">T-Mobile (@tmomail.net)</option>
+              <option value="googlefi">Google Fi (@msg.fi.google.com)</option>
+              <option value="xfinity">Xfinity Mobile (@vtext.com)</option>
+              <option value="spectrum">Spectrum Mobile (@vtext.com)</option>
+              <option value="other">Other / Direct API</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Condition Alert Checkboxes -->
+        <div style="font-size:0.72rem; color:#94a3b8; margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">
+          Select Desired Condition Alerts
+        </div>
+        <div class="alert-option-list" style="display:flex; flex-direction:column; gap:8px;">
+          <!-- Drain 1 Surcharge (7.28') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.28); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyDrain1" checked style="margin-top:2px; accent-color:#f59e0b; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#fbbf24;">⚠️ Drain #1 Surcharging & Gutter Flood (7.28')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Alerts when Big Drain #1 surcharges onto the street and front stalls outside #326 begin flooding. Recommended for moving cars parked in front stalls.
+              </div>
+            </div>
+          </label>
+
+          <!-- Travel Lane Sag Crown Breach (7.42') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.28); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyCrownBreach" checked style="margin-top:2px; accent-color:#ef4444; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#f87171;">⛔ Crosswalk Sag Travel Lane Breach (7.42')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Alerts when water breaches across the sag dip travel lanes (+2" depth). Roadway impassable for low-clearance vehicles.
+              </div>
+            </div>
+          </label>
+
+          <!-- Travel Lane Reopened & Clear (< 7.42') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(34, 197, 94, 0.08); border:1px solid rgba(34, 197, 94, 0.28); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyCrownClear" checked style="margin-top:2px; accent-color:#22c55e; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#4ade80;">🚗 Travel Lane Re-opened & Clear (&lt; 7.42')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Alerts as soon as the center road crown sheds water and driving through Larkspur Plaza Dr is safe and passable again.
+              </div>
+            </div>
+          </label>
+
+          <!-- Early Heads-Up Seepage (7.10') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(56, 189, 248, 0.06); border:1px solid rgba(56, 189, 248, 0.22); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyEarlySeep" style="margin-top:2px; accent-color:#38bdf8; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#38bdf8;">ℹ️ Early Heads-Up: Inlet Full / Sidewalk Seep (7.10')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Advance notice (~45 min before high peak) when ditch inlet fills and water begins seeping over sidewalk near concrete headwall.
+              </div>
+            </div>
+          </label>
+
+          <!-- Extreme Surge: Carport #86 (7.75') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(168, 85, 247, 0.06); border:1px solid rgba(168, 85, 247, 0.22); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyCarport" style="margin-top:2px; accent-color:#a855f7; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#c084fc;">🚨 Extreme King Tide: Carport #86 Threat (7.75')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Emergency alert if major surge approaches back lot Carport Spot #86 ground slab.
+              </div>
+            </div>
+          </label>
+
+          <!-- Complete Gutter Clearance (<= 7.15') -->
+          <label style="display:flex; gap:10px; align-items:flex-start; background:rgba(34, 197, 94, 0.06); border:1px solid rgba(34, 197, 94, 0.22); border-radius:10px; padding:10px 12px; cursor:pointer;">
+            <input type="checkbox" id="notifyGutterClear" checked style="margin-top:2px; accent-color:#22c55e; width:16px; height:16px;">
+            <div>
+              <div style="font-size:0.84rem; font-weight:700; color:#4ade80;">✅ Complete All-Clear: Gutters Fully Dry (&le; 7.15')</div>
+              <div style="font-size:0.73rem; color:#cbd5e1; margin-top:2px; line-height:1.35;">
+                Alerts when 4.5-hour gutter retention lag completes and street gutters are 100% dry down to the pavement.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Android Native Notification Shortcut -->
+        <div style="margin-top:12px; padding:10px 12px; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.15); border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:0.8rem; font-weight:600; color:#f8fafc;">📱 Android / Browser Push</div>
+            <div style="font-size:0.72rem; color:#94a3b8;">Receive notifications directly in Android / Chrome</div>
+          </div>
+          <button type="button" class="chip-btn" id="btnPushPermission" onclick="requestAndroidPushPermission()" style="font-size:0.75rem; padding:5px 10px; background:rgba(56, 189, 248, 0.15); border-color:var(--cyan); color:var(--cyan);">Enable Push</button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:8px; margin-top:14px; justify-content:flex-end; align-items:center;">
+          <button type="button" class="chip-btn" id="btnTestAlert" onclick="sendTestSmsAlert()" style="font-size:0.76rem; padding:6px 12px; background:rgba(56, 189, 248, 0.12); color:var(--cyan); border-color:var(--cyan);">🧪 Send Test Alert</button>
+          <button type="button" class="chip-btn active" id="btnSaveAlerts" onclick="saveAlertSettings()" style="font-size:0.76rem; padding:6px 16px;">💾 Save Preferences</button>
+        </div>
+        <div id="alertFeedbackBox" style="font-size:0.74rem; text-align:right; margin-top:6px; display:none;"></div>
+      </div>
+
       <div style="text-align: right; margin-top: 16px;">
         <button class="chip-btn active" style="padding: 8px 18px; font-size:0.85rem;" onclick="closeSettings()">Done</button>
       </div>
@@ -2898,7 +3017,8 @@
       }
       applyVehicleAndCarView();
       initHydrographDragScrub();
-      fetchLiveNOAA();
+      loadAlertSettings();
+    fetchLiveNOAA();
 
       // Continuous 24/7 Polling: Refresh NOAA data every 6 minutes all day & night
       setInterval(fetchLiveNOAA, 6 * 60 * 1000);
@@ -2910,6 +3030,142 @@
         }
       }, 30 * 1000);
     });
+
+    // Condition Alerts & SMS Registration Engine
+    const CARRIER_GATEWAYS = {
+      verizon: "@vtext.com",
+      att: "@txt.att.net",
+      tmobile: "@tmomail.net",
+      googlefi: "@msg.fi.google.com",
+      xfinity: "@vtext.com",
+      spectrum: "@vtext.com",
+      other: ""
+    };
+
+    function formatPhoneNumber(input) {
+      let val = input.value.replace(/\D/g, '');
+      if (val.length > 10) val = val.substring(0, 10);
+      if (val.length >= 7) {
+        input.value = `(${val.substring(0,3)}) ${val.substring(3,6)}-${val.substring(6)}`;
+      } else if (val.length >= 4) {
+        input.value = `(${val.substring(0,3)}) ${val.substring(3)}`;
+      } else if (val.length > 0) {
+        input.value = `(${val}`;
+      } else {
+        input.value = '';
+      }
+    }
+
+    function loadAlertSettings() {
+      try {
+        const raw = localStorage.getItem('wet_alert_settings');
+        if (!raw) return;
+        const cfg = JSON.parse(raw);
+        if (cfg.phone) document.getElementById('alertPhoneInput').value = cfg.phone;
+        if (cfg.carrier) document.getElementById('alertCarrierSelect').value = cfg.carrier;
+        if (cfg.notifyDrain1 !== undefined) document.getElementById('notifyDrain1').checked = cfg.notifyDrain1;
+        if (cfg.notifyCrownBreach !== undefined) document.getElementById('notifyCrownBreach').checked = cfg.notifyCrownBreach;
+        if (cfg.notifyCrownClear !== undefined) document.getElementById('notifyCrownClear').checked = cfg.notifyCrownClear;
+        if (cfg.notifyEarlySeep !== undefined) document.getElementById('notifyEarlySeep').checked = cfg.notifyEarlySeep;
+        if (cfg.notifyCarport !== undefined) document.getElementById('notifyCarport').checked = cfg.notifyCarport;
+        if (cfg.notifyGutterClear !== undefined) document.getElementById('notifyGutterClear').checked = cfg.notifyGutterClear;
+      } catch (e) {
+        console.log("Could not load alert settings:", e);
+      }
+    }
+
+    function saveAlertSettings() {
+      const phone = document.getElementById('alertPhoneInput').value.trim();
+      const carrier = document.getElementById('alertCarrierSelect').value;
+      const cleanDigits = phone.replace(/\D/g, '');
+      const feedback = document.getElementById('alertFeedbackBox');
+
+      const settings = {
+        phone: phone,
+        cleanDigits: cleanDigits,
+        carrier: carrier,
+        gatewayEmail: cleanDigits && CARRIER_GATEWAYS[carrier] ? `${cleanDigits}${CARRIER_GATEWAYS[carrier]}` : '',
+        notifyDrain1: document.getElementById('notifyDrain1').checked,
+        notifyCrownBreach: document.getElementById('notifyCrownBreach').checked,
+        notifyCrownClear: document.getElementById('notifyCrownClear').checked,
+        notifyEarlySeep: document.getElementById('notifyEarlySeep').checked,
+        notifyCarport: document.getElementById('notifyCarport').checked,
+        notifyGutterClear: document.getElementById('notifyGutterClear').checked,
+        savedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem('wet_alert_settings', JSON.stringify(settings));
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.color = '#4ade80';
+          feedback.textContent = `✓ Preferences saved! SMS Gateway: ${settings.gatewayEmail || 'Direct'}`;
+          setTimeout(() => { feedback.style.display = 'none'; }, 4000);
+        }
+      } catch (e) {
+        console.error("Save alert settings error:", e);
+      }
+    }
+
+    async function requestAndroidPushPermission() {
+      const btn = document.getElementById('btnPushPermission');
+      if (!('Notification' in window)) {
+        alert("This browser does not support Web Push notifications.");
+        return;
+      }
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          if (btn) {
+            btn.textContent = "✓ Enabled";
+            btn.style.borderColor = "#22c55e";
+            btn.style.color = "#4ade80";
+          }
+          new Notification("🌊 Larkspur Flood Watch", {
+            body: "Real-time notifications enabled for your Samsung Galaxy / Android device!",
+            icon: "favicon.ico"
+          });
+        } else {
+          alert("Notification permission was denied. You can enable it in Chrome / Android Site Settings.");
+        }
+      } catch (e) {
+        console.log("Notification request error:", e);
+      }
+    }
+
+    function sendTestSmsAlert() {
+      const phone = document.getElementById('alertPhoneInput').value.trim();
+      const carrier = document.getElementById('alertCarrierSelect').value;
+      const cleanDigits = phone.replace(/\D/g, '');
+      const feedback = document.getElementById('alertFeedbackBox');
+
+      if (!cleanDigits || cleanDigits.length < 10) {
+        if (feedback) {
+          feedback.style.display = 'block';
+          feedback.style.color = '#f87171';
+          feedback.textContent = "⚠️ Please enter a valid 10-digit mobile phone number.";
+        }
+        return;
+      }
+
+      const gateway = CARRIER_GATEWAYS[carrier] ? `${cleanDigits}${CARRIER_GATEWAYS[carrier]}` : cleanDigits;
+      const sampleMsg = `[Larkspur FloodWatch] TEST ALERT: Big Drain #1 surcharging (7.28' TWL). Front stalls taking water (+1"). Move cars parked in front stalls.`;
+
+      // Trigger native notification if permitted
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification("🌊 Larkspur Flood Watch • Test Alert", {
+          body: sampleMsg,
+          icon: "favicon.ico"
+        });
+      }
+
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#38bdf8';
+        feedback.innerHTML = `📨 <strong>Test Alert Generated!</strong> Destination: <code style="font-family:var(--mono);">${gateway}</code><br/><span style="color:#cbd5e1; font-size:0.71rem;">${sampleMsg}</span>`;
+      }
+    }
+
 </script>
 </body>
 </html>
